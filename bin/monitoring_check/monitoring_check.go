@@ -1,11 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
-	"github.com/bborbe/log"
 	"os"
-	"flag"
+
+	"github.com/bborbe/log"
 )
 
 var logger = log.DefaultLogger
@@ -30,4 +31,3 @@ func do(writer io.Writer) error {
 	fmt.Fprintf(writer, "run\n")
 	return nil
 }
-
