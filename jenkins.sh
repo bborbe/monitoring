@@ -8,8 +8,8 @@ export DEB_SERVER=misc.rn.benjamin-borbe.de
 export TARGET_DIR=opt/monitoring/bin
 
 export NAME=monitoring
-export BINS="monitoring_server"
-export INSTALLS="github.com/bborbe/monitoring/bin/monitoring_server"
+export BINS="monitoring_check"
+export INSTALLS="github.com/bborbe/monitoring/bin/monitoring_check"
 export SOURCEDIRECTORY="github.com/bborbe/monitoring"
 
 export MAJOR=0

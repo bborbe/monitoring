@@ -1,0 +1,33 @@
+package main
+
+import (
+	"fmt"
+	"io"
+	"github.com/bborbe/log"
+	"os"
+	"flag"
+)
+
+var logger = log.DefaultLogger
+
+func main() {
+	defer logger.Close()
+	logLevelPtr := flag.Int("loglevel", log.OFF, "int")
+	flag.Parse()
+	logger.SetLevelThreshold(*logLevelPtr)
+	logger.Debugf("set log level to %s", log.LogLevelToString(*logLevelPtr))
+
+	writer := os.Stdout
+	err := do(writer)
+	if err != nil {
+		logger.Fatal(err)
+		os.Exit(1)
+	}
+	logger.Debug("done")
+}
+
+func do(writer io.Writer) error {
+	fmt.Fprintf(writer, "run\n")
+	return nil
+}
+
