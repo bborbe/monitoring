@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/bborbe/log"
+	"github.com/bborbe/monitoring/configuration"
 )
 
 var logger = log.DefaultLogger
@@ -28,6 +29,17 @@ func main() {
 }
 
 func do(writer io.Writer) error {
-	fmt.Fprintf(writer, "run\n")
+	fmt.Fprintf(writer, "check started\n")
+
+	c := configuration.New()
+	for _, check := range c.Checks() {
+		result := check.Check()
+		if result.Success() {
+			fmt.Fprintf(writer, "[OK]   %s\n", result.Message())
+		} else {
+			fmt.Fprintf(writer, "[FAIL] %s\n", result.Message())
+		}
+	}
+	fmt.Fprintf(writer, "check finished\n")
 	return nil
 }
