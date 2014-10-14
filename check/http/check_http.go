@@ -12,8 +12,9 @@ import (
 )
 
 type httpCheck struct {
-	url   string
-	title string
+	url             string
+	expectedTitle   string
+	expectedContent string
 }
 
 var logger = log.DefaultLogger
@@ -37,31 +38,56 @@ func (h *httpCheck) Check() check.CheckResult {
 	if err != nil {
 		return check.NewCheckResult(h, err)
 	}
+	err = h.checkContent(content)
+	if err != nil {
+		return check.NewCheckResult(h, err)
+	}
 	return check.NewCheckResult(h, err)
 }
 
-func (h *httpCheck) checkTitle(content []byte) error {
-	return checkTitle(h.title, content)
+func (h *httpCheck) ExpectTitle(expectedTitle string) *httpCheck {
+	h.expectedTitle = expectedTitle
+	return h
 }
-
-func (h *httpCheck) ExpectTitle(title string) *httpCheck {
-	h.title = title
+func (h *httpCheck) ExpectContent(expectedContent string) *httpCheck {
+	h.expectedContent = expectedContent
 	return h
 }
 
-func checkTitle(title string, content []byte) error {
-	if len(title) == 0 {
+func (h *httpCheck) checkContent(content []byte) error {
+	return checkContent(h.expectedContent, content)
+}
+
+func checkContent(expectedContent string, content []byte) error {
+	if len(expectedContent) == 0 {
 		return nil
 	}
 	logger.Debugf("content: %s", string(content))
-	expression := fmt.Sprintf(`(?is)<html[^>]*>.*?<head[^>]*>.*?<title[^>]*>%s</title>.*?</head>.*?</html>`, regexp.QuoteMeta(title))
+	expression := fmt.Sprintf(`(?is)<html[^>]*>.*?<body[^>]*>.*?%s.*?</body>.*?</html>`, regexp.QuoteMeta(expectedContent))
 	logger.Debugf("regexp: %s", expression)
 	re := regexp.MustCompile(expression)
 	if len(re.FindSubmatch(content)) > 0 {
 		return nil
 	}
+	return fmt.Errorf("content %s not found", expectedContent)
+}
 
-	return fmt.Errorf("title %s not found", title)
+func (h *httpCheck) checkTitle(content []byte) error {
+	return checkTitle(h.expectedTitle, content)
+}
+
+func checkTitle(expectedTitle string, content []byte) error {
+	if len(expectedTitle) == 0 {
+		return nil
+	}
+	logger.Debugf("content: %s", string(content))
+	expression := fmt.Sprintf(`(?is)<html[^>]*>.*?<head[^>]*>.*?<title[^>]*>%s</title>.*?</head>.*?</html>`, regexp.QuoteMeta(expectedTitle))
+	logger.Debugf("regexp: %s", expression)
+	re := regexp.MustCompile(expression)
+	if len(re.FindSubmatch(content)) > 0 {
+		return nil
+	}
+	return fmt.Errorf("title %s not found", expectedTitle)
 }
 
 func get(url string) ([]byte, error) {
