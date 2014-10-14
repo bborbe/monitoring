@@ -5,9 +5,10 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/bborbe/monitoring/check"
 	"regexp"
+
 	"github.com/bborbe/log"
+	"github.com/bborbe/monitoring/check"
 )
 
 type httpCheck struct {
