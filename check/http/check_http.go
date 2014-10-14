@@ -6,13 +6,18 @@ import (
 	"net/http"
 
 	"github.com/bborbe/monitoring/check"
+	"regexp"
+	"github.com/bborbe/log"
 )
 
 type httpCheck struct {
-	url string
+	url   string
+	title string
 }
 
-func New(url string) check.Check {
+var logger = log.DefaultLogger
+
+func New(url string) *httpCheck {
 	h := new(httpCheck)
 	h.url = url
 	return h
@@ -23,19 +28,46 @@ func (h *httpCheck) Description() string {
 }
 
 func (h *httpCheck) Check() check.CheckResult {
-	err := do(h.url)
+	content, err := get(h.url)
+	if err != nil {
+		return check.NewCheckResult(h, err)
+	}
+	err = h.checkTitle(content)
+	if err != nil {
+		return check.NewCheckResult(h, err)
+	}
 	return check.NewCheckResult(h, err)
 }
 
-func do(url string) error {
+func (h *httpCheck) checkTitle(content []byte) error {
+	return checkTitle(h.title, content)
+}
+
+func (h *httpCheck) ExpectTitle(title string) *httpCheck {
+	h.title = title
+	return h
+}
+
+func checkTitle(title string, content []byte) error {
+	if len(title) == 0 {
+		return nil
+	}
+	logger.Debugf("content: %s", string(content))
+	expression := fmt.Sprintf(`(?is)<html[^>]*>.*?<head[^>]*>.*?<title[^>]*>%s</title>.*?</head>.*?</html>`, regexp.QuoteMeta(title))
+	logger.Debugf("regexp: %s", expression)
+	re := regexp.MustCompile(expression)
+	if len(re.FindSubmatch(content)) > 0 {
+		return nil
+	}
+
+	return fmt.Errorf("title %s not found", title)
+}
+
+func get(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
-	_, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	return nil
+	return ioutil.ReadAll(resp.Body)
 }

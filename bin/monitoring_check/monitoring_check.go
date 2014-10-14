@@ -37,7 +37,7 @@ func do(writer io.Writer) error {
 		if result.Success() {
 			fmt.Fprintf(writer, "[OK]   %s\n", result.Message())
 		} else {
-			fmt.Fprintf(writer, "[FAIL] %s\n", result.Message())
+			fmt.Fprintf(writer, "[FAIL] %s - %v\n", result.Message(), result.Error())
 		}
 	}
 	fmt.Fprintf(writer, "check finished\n")
