@@ -62,9 +62,9 @@ func checkContent(expectedContent string, content []byte) error {
 	if len(expectedContent) == 0 {
 		return nil
 	}
-	logger.Debugf("content: %s", string(content))
+	logger.Tracef("content: %s", string(content))
 	expression := fmt.Sprintf(`(?is)<html[^>]*>.*?<body[^>]*>.*?%s.*?</body>.*?</html>`, regexp.QuoteMeta(expectedContent))
-	logger.Debugf("regexp: %s", expression)
+	logger.Tracef("regexp: %s", expression)
 	re := regexp.MustCompile(expression)
 	if len(re.FindSubmatch(content)) > 0 {
 		return nil
@@ -80,9 +80,9 @@ func checkTitle(expectedTitle string, content []byte) error {
 	if len(expectedTitle) == 0 {
 		return nil
 	}
-	logger.Debugf("content: %s", string(content))
+	logger.Tracef("content: %s", string(content))
 	expression := fmt.Sprintf(`(?is)<html[^>]*>.*?<head[^>]*>.*?<title[^>]*>%s</title>.*?</head>.*?</html>`, regexp.QuoteMeta(expectedTitle))
-	logger.Debugf("regexp: %s", expression)
+	logger.Tracef("regexp: %s", expression)
 	re := regexp.MustCompile(expression)
 	if len(re.FindSubmatch(content)) > 0 {
 		return nil

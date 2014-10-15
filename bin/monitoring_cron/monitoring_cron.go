@@ -18,37 +18,52 @@ var logger = log.DefaultLogger
 func main() {
 	defer logger.Close()
 	logLevelPtr := flag.Int("loglevel", log.OFF, "int")
+	smtpUserPtr := flag.String("smtp-user", "smtp@benjamin-borbe.de", "string")
+	smtpPasswordPtr := flag.String("smtp-password", "-", "string")
+	smtpHostPtr := flag.String("smtp-host", "iredmail.mailfolder.org", "string")
+	smtpPortPtr := flag.Int("smtp-port", 465, "int")
+	senderPtr := flag.String("sender", "smtp@benjamin-borbe.de", "string")
+	recipientPtr := flag.String("recipient", "bborbe@rocketnews.de", "string")
 	flag.Parse()
 	logger.SetLevelThreshold(*logLevelPtr)
 	logger.Debugf("set log level to %s", log.LogLevelToString(*logLevelPtr))
-
+	mailConfig := new(mailConfig)
+	mailConfig.smtpUser = *smtpUserPtr
+	mailConfig.smtpPassword = *smtpPasswordPtr
+	mailConfig.smtpHost = *smtpHostPtr
+	mailConfig.smtpPort = *smtpPortPtr
+	mailConfig.sender = *senderPtr
+	mailConfig.recipient = *recipientPtr
 	writer := os.Stdout
-	err := do(writer)
+	c := configuration.New()
+	err := do(writer, c, mailConfig)
 	if err != nil {
 		logger.Fatal(err)
+		logger.Close()
 		os.Exit(1)
 	}
 	logger.Debug("done")
 }
 
-func do(writer io.Writer) error {
+func do(writer io.Writer, cfg configuration.Configuration, mailConfig notifier.MailConfig) error {
 	var err error
 	fmt.Fprintf(writer, "check started\n")
-	c := configuration.New()
-	resultChannel := runner.Run(c.Checks())
+	resultChannel := runner.Run(cfg.Checks())
 	results := make([]check.CheckResult, 0)
-	hasError := false
+	checkFailed := false
 	for result := range resultChannel {
 		if result.Success() {
 			fmt.Fprintf(writer, "[OK]   %s\n", result.Message())
 		} else {
 			fmt.Fprintf(writer, "[FAIL] %s - %v\n", result.Message(), result.Error())
-			hasError = true
+			checkFailed = true
 		}
 		results = append(results, result)
 	}
-	if hasError {
-		err = notifier.Notify(results)
+	logger.Debugf("all checks executed")
+	if checkFailed {
+		logger.Debug("found failed checks")
+		err = notifier.Notify(mailConfig, results)
 		if err != nil {
 			return err
 		}
@@ -56,3 +71,19 @@ func do(writer io.Writer) error {
 	fmt.Fprintf(writer, "check finished\n")
 	return err
 }
+
+type mailConfig struct {
+	smtpUser     string
+	smtpPassword string
+	smtpHost     string
+	smtpPort     int
+	sender       string
+	recipient    string
+}
+
+func (c *mailConfig) SmtpUser() string     { return c.smtpUser }
+func (c *mailConfig) SmtpPassword() string { return c.smtpPassword }
+func (c *mailConfig) SmtpHost() string     { return c.smtpHost }
+func (c *mailConfig) SmtpPort() int        { return c.smtpPort }
+func (c *mailConfig) Sender() string       { return c.sender }
+func (c *mailConfig) Recipient() string    { return c.recipient }

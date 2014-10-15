@@ -4,8 +4,11 @@ import (
 	"runtime"
 	"sync"
 
+	"github.com/bborbe/log"
 	"github.com/bborbe/monitoring/check"
 )
+
+var logger = log.DefaultLogger
 
 func Run(checks []check.Check) <-chan check.CheckResult {
 	var wg sync.WaitGroup
@@ -29,6 +32,7 @@ func Run(checks []check.Check) <-chan check.CheckResult {
 	go func() {
 		wg.Wait()
 		close(result)
+		logger.Debug("all checks finished")
 	}()
 
 	return result
