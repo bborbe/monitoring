@@ -102,14 +102,6 @@ func sendMail(mailconfig MailConfig, content string) error {
 	}
 
 	return smtpClient.Quit()
-
-	//	return smtp.SendMail(
-	//		fmt.Sprintf("%s:%d", mailconfig.SmtpHost(), mailconfig.SmtpPort()),
-	//		auth,
-	//		mailconfig.Sender(),
-	//		[]string{mailconfig.Recipient()},
-	//		[]byte(content),
-	//	)
 }
 
 func buildMailContent(results []check.CheckResult) string {
