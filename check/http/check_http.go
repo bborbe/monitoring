@@ -15,6 +15,7 @@ type httpCheck struct {
 	url             string
 	expectedTitle   string
 	expectedContent string
+	expectedBody    string
 }
 
 var logger = log.DefaultLogger
@@ -32,14 +33,17 @@ func (h *httpCheck) Description() string {
 func (h *httpCheck) Check() check.CheckResult {
 	content, err := get(h.url)
 	if err != nil {
+		logger.Debugf("fetch url failed %s: %v", h.url, err)
 		return check.NewCheckResult(h, err)
 	}
 	err = h.checkTitle(content)
 	if err != nil {
+		logger.Debugf("check title failed: %v", err)
 		return check.NewCheckResult(h, err)
 	}
 	err = h.checkContent(content)
 	if err != nil {
+		logger.Debugf("check content failed: %v", err)
 		return check.NewCheckResult(h, err)
 	}
 	return check.NewCheckResult(h, err)
@@ -54,6 +58,11 @@ func (h *httpCheck) ExpectContent(expectedContent string) *httpCheck {
 	return h
 }
 
+func (h *httpCheck) ExpectBody(expectedBody string) *httpCheck {
+	h.expectedBody = expectedBody
+	return h
+}
+
 func (h *httpCheck) checkContent(content []byte) error {
 	return checkContent(h.expectedContent, content)
 }
@@ -63,13 +72,31 @@ func checkContent(expectedContent string, content []byte) error {
 		return nil
 	}
 	logger.Tracef("content: %s", string(content))
-	expression := fmt.Sprintf(`(?is)<html[^>]*>.*?<body[^>]*>.*?%s.*?</body>.*?</html>`, regexp.QuoteMeta(expectedContent))
-	logger.Tracef("regexp: %s", expression)
+	expression := fmt.Sprintf(`(?is).*?%s.*?`, regexp.QuoteMeta(expectedContent))
+	logger.Tracef("content regexp: %s", expression)
 	re := regexp.MustCompile(expression)
 	if len(re.FindSubmatch(content)) > 0 {
 		return nil
 	}
 	return fmt.Errorf("content %s not found", expectedContent)
+}
+
+func (h *httpCheck) checkBody(content []byte) error {
+	return checkBody(h.expectedBody, content)
+}
+
+func checkBody(expectedBody string, content []byte) error {
+	if len(expectedBody) == 0 {
+		return nil
+	}
+	logger.Tracef("content: %s", string(content))
+	expression := fmt.Sprintf(`(?is)<html[^>]*>.*?<body[^>]*>.*?%s.*?</body>.*?</html>`, regexp.QuoteMeta(expectedBody))
+	logger.Tracef("body regexp: %s", expression)
+	re := regexp.MustCompile(expression)
+	if len(re.FindSubmatch(content)) > 0 {
+		return nil
+	}
+	return fmt.Errorf("content %s not found", expectedBody)
 }
 
 func (h *httpCheck) checkTitle(content []byte) error {
@@ -82,7 +109,7 @@ func checkTitle(expectedTitle string, content []byte) error {
 	}
 	logger.Tracef("content: %s", string(content))
 	expression := fmt.Sprintf(`(?is)<html[^>]*>.*?<head[^>]*>.*?<title[^>]*>%s</title>.*?</head>.*?</html>`, regexp.QuoteMeta(expectedTitle))
-	logger.Tracef("regexp: %s", expression)
+	logger.Tracef("title regexp: %s", expression)
 	re := regexp.MustCompile(expression)
 	if len(re.FindSubmatch(content)) > 0 {
 		return nil
