@@ -42,3 +42,11 @@ func TestCheckTitle(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestDescription(t *testing.T) {
+	c := New("http://www.example.com")
+	err := AssertThat(c.Description(), Is("http check on url http://www.example.com"))
+	if err != nil {
+		t.Fatal(err)
+	}
+}

@@ -3,6 +3,7 @@ package configuration
 import (
 	"github.com/bborbe/monitoring/check"
 	"github.com/bborbe/monitoring/check/http"
+	"github.com/bborbe/monitoring/check/tcp"
 )
 
 type Configuration interface {
@@ -18,6 +19,12 @@ func New() Configuration {
 
 func (c *configuration) Checks() []check.Check {
 	list := make([]check.Check, 0)
+	list = append(list, tcp.New("144.76.187.199", 22))
+	list = append(list, tcp.New("144.76.187.200", 22))
+	list = append(list, tcp.New("144.76.187.199", 80))
+	list = append(list, tcp.New("144.76.187.200", 80))
+	list = append(list, tcp.New("144.76.187.199", 443))
+	list = append(list, tcp.New("144.76.187.200", 443))
 	list = append(list, http.New("http://www.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie"))
 	list = append(list, http.New("https://www.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie"))
 	list = append(list, http.New("http://www.benjaminborbe.de").ExpectTitle("Benjamin Borbe Fotografie"))
