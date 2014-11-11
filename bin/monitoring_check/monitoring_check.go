@@ -8,7 +8,7 @@ import (
 
 	"github.com/bborbe/log"
 	"github.com/bborbe/monitoring/configuration"
-	"github.com/bborbe/monitoring/runner"
+	"github.com/bborbe/monitoring/runner/all"
 )
 
 var logger = log.DefaultLogger
@@ -33,7 +33,8 @@ func do(writer io.Writer) error {
 	var err error
 	fmt.Fprintf(writer, "check started\n")
 	c := configuration.New()
-	results := runner.Run(c.Checks())
+	runner := all.New()
+	results := runner.Run(c)
 	for result := range results {
 		if result.Success() {
 			fmt.Fprintf(writer, "[OK]   %s\n", result.Message())

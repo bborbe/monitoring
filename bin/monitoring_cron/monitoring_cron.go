@@ -10,7 +10,7 @@ import (
 	"github.com/bborbe/monitoring/check"
 	"github.com/bborbe/monitoring/configuration"
 	"github.com/bborbe/monitoring/notifier"
-	"github.com/bborbe/monitoring/runner"
+	"github.com/bborbe/monitoring/runner/all"
 )
 
 var logger = log.DefaultLogger
@@ -48,7 +48,8 @@ func main() {
 func do(writer io.Writer, cfg configuration.Configuration, mailConfig notifier.MailConfig) error {
 	var err error
 	fmt.Fprintf(writer, "check started\n")
-	resultChannel := runner.Run(cfg.Checks())
+	runner := all.New()
+	resultChannel := runner.Run(cfg)
 	results := make([]check.CheckResult, 0)
 	checkFailed := false
 	for result := range resultChannel {
