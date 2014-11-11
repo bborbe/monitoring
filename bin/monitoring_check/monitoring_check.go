@@ -8,20 +8,32 @@ import (
 
 	"github.com/bborbe/log"
 	"github.com/bborbe/monitoring/configuration"
+	"github.com/bborbe/monitoring/runner"
 	"github.com/bborbe/monitoring/runner/all"
+	"github.com/bborbe/monitoring/runner/hierarchy"
 )
 
 var logger = log.DefaultLogger
 
 func main() {
 	defer logger.Close()
-	logLevelPtr := flag.Int("loglevel", log.OFF, "int")
+	logLevelPtr := flag.Int("loglevel", log.OFF, "logLevel 0=TRACE ... 7=OFf")
+	modePtr := flag.String("mode", "", "mode (all|hierachy)")
 	flag.Parse()
 	logger.SetLevelThreshold(*logLevelPtr)
 	logger.Debugf("set log level to %s", log.LogLevelToString(*logLevelPtr))
 
+	var r runner.Runner
+	if "all" == *modePtr {
+		logger.Debug("runner = all")
+		r = all.New()
+	} else {
+		logger.Debug("runner = hierarchy")
+		r = hierarchy.New()
+	}
+
 	writer := os.Stdout
-	err := do(writer)
+	err := do(writer, r)
 	if err != nil {
 		logger.Fatal(err)
 		os.Exit(1)
@@ -29,12 +41,11 @@ func main() {
 	logger.Debug("done")
 }
 
-func do(writer io.Writer) error {
+func do(writer io.Writer, r runner.Runner) error {
 	var err error
 	fmt.Fprintf(writer, "check started\n")
 	c := configuration.New()
-	runner := all.New()
-	results := runner.Run(c)
+	results := r.Run(c)
 	for result := range results {
 		if result.Success() {
 			fmt.Fprintf(writer, "[OK]   %s\n", result.Message())

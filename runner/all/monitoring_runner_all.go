@@ -19,6 +19,7 @@ func New() *runnerAll {
 }
 
 func (r *runnerAll) Run(c configuration.Configuration) <-chan check.CheckResult {
+	logger.Debug("run all checks")
 	return Run(c.Checks())
 }
 
@@ -28,14 +29,14 @@ func Run(checks []check.Check) <-chan check.CheckResult {
 	maxConcurrency := runtime.NumCPU() * 2
 	throttle := make(chan bool, maxConcurrency)
 
-	result := make(chan check.CheckResult)
+	resultChan := make(chan check.CheckResult)
 
 	for _, check := range checks {
 		c := check
 		wg.Add(1)
 		go func() {
 			throttle <- true
-			result <- c.Check()
+			resultChan <- c.Check()
 			<-throttle
 			wg.Done()
 		}()
@@ -43,9 +44,9 @@ func Run(checks []check.Check) <-chan check.CheckResult {
 
 	go func() {
 		wg.Wait()
-		close(result)
+		close(resultChan)
 		logger.Debug("all checks finished")
 	}()
 
-	return result
+	return resultChan
 }
