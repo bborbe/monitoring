@@ -44,6 +44,19 @@ func addChecksToList(nodes []node.Node, checks []check.Check) []check.Check {
 
 func (c *configuration) Nodes() []node.Node {
 	list := make([]node.Node, 0)
+	list = append(list, createNodeInternetAvaiable())
+	return list
+}
+
+func createNodeInternetAvaiable() node.Node {
+	list := make([]node.Node, 0)
+	list = append(list, createNodeRocketsourceAvaiable())
+	return node.New(tcp.New("www.google.com", 80), list)
+}
+
+func createNodeRocketsourceAvaiable() node.Node {
+	list := make([]node.Node, 0)
+
 	list = append(list, node.New(tcp.New("144.76.187.199", 22), nil))
 	list = append(list, node.New(tcp.New("144.76.187.200", 22), nil))
 	list = append(list, node.New(tcp.New("144.76.187.199", 80), nil))
@@ -67,5 +80,5 @@ func (c *configuration) Nodes() []node.Node {
 	list = append(list, node.New(http.New("http://apt.benjamin-borbe.de/bborbe-unstable/Sources").ExpectContent("bborbe-unstable"), nil))
 	list = append(list, node.New(http.New("http://blog.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie"), nil))
 
-	return list
+	return node.New(tcp.New("host.rocketsource.de", 22), list)
 }

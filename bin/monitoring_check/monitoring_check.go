@@ -31,9 +31,9 @@ func main() {
 		logger.Debug("runner = hierarchy")
 		r = hierarchy.New()
 	}
-
+	c := configuration.New()
 	writer := os.Stdout
-	err := do(writer, r)
+	err := do(writer, r, c)
 	if err != nil {
 		logger.Fatal(err)
 		os.Exit(1)
@@ -41,10 +41,9 @@ func main() {
 	logger.Debug("done")
 }
 
-func do(writer io.Writer, r runner.Runner) error {
+func do(writer io.Writer, r runner.Runner, c configuration.Configuration) error {
 	var err error
 	fmt.Fprintf(writer, "check started\n")
-	c := configuration.New()
 	results := r.Run(c)
 	for result := range results {
 		if result.Success() {
