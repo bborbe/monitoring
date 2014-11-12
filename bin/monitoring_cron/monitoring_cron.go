@@ -17,7 +17,7 @@ var logger = log.DefaultLogger
 
 func main() {
 	defer logger.Close()
-	logLevelPtr := flag.Int("loglevel", log.OFF, "int")
+	logLevelPtr := flag.String("loglevel", log.LogLevelToString(log.ERROR), "one of OFF,TRACE,DEBUG,INFO,WARN,ERROR")
 	smtpUserPtr := flag.String("smtp-user", "smtp@benjamin-borbe.de", "string")
 	smtpPasswordPtr := flag.String("smtp-password", "-", "string")
 	smtpHostPtr := flag.String("smtp-host", "iredmail.mailfolder.org", "string")
@@ -25,8 +25,8 @@ func main() {
 	senderPtr := flag.String("sender", "smtp@benjamin-borbe.de", "string")
 	recipientPtr := flag.String("recipient", "bborbe@rocketnews.de", "string")
 	flag.Parse()
-	logger.SetLevelThreshold(*logLevelPtr)
-	logger.Debugf("set log level to %s", log.LogLevelToString(*logLevelPtr))
+	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
+	logger.Debugf("set log level to %s", *logLevelPtr)
 	mailConfig := new(mailConfig)
 	mailConfig.smtpUser = *smtpUserPtr
 	mailConfig.smtpPassword = *smtpPasswordPtr

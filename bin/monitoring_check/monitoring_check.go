@@ -17,11 +17,11 @@ var logger = log.DefaultLogger
 
 func main() {
 	defer logger.Close()
-	logLevelPtr := flag.Int("loglevel", log.OFF, "logLevel 0=TRACE ... 7=OFf")
+	logLevelPtr := flag.String("loglevel", log.LogLevelToString(log.ERROR), "one of OFF,TRACE,DEBUG,INFO,WARN,ERROR")
 	modePtr := flag.String("mode", "", "mode (all|hierachy)")
 	flag.Parse()
-	logger.SetLevelThreshold(*logLevelPtr)
-	logger.Debugf("set log level to %s", log.LogLevelToString(*logLevelPtr))
+	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
+	logger.Debugf("set log level to %s", *logLevelPtr)
 
 	var r runner.Runner
 	if "all" == *modePtr {
