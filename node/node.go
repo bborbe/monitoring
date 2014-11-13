@@ -14,7 +14,7 @@ type node struct {
 	nodes []Node
 }
 
-func New(c check.Check, nodes []Node) *node {
+func New(c check.Check, nodes ...Node) *node {
 	n := new(node)
 	n.check = c
 	n.nodes = nodes

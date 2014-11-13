@@ -22,7 +22,7 @@ func TestRun(t *testing.T) {
 	var err error
 	c := NewCheck(check.NewCheckResultSuccess("success"))
 	nodes := make([]node.Node, 0)
-	nodes = append(nodes, node.New(c, nil))
+	nodes = append(nodes, node.New(c))
 
 	err = AssertThat(c.counter, Is(0))
 	if err != nil {
@@ -56,11 +56,11 @@ func TestRunRecursive(t *testing.T) {
 	c := NewCheck(check.NewCheckResultSuccess("success"))
 
 	subnodes := make([]node.Node, 0)
-	subnodes = append(subnodes, node.New(c, nil))
-	subnodes = append(subnodes, node.New(c, nil))
+	subnodes = append(subnodes, node.New(c))
+	subnodes = append(subnodes, node.New(c))
 
 	nodes := make([]node.Node, 0)
-	nodes = append(nodes, node.New(c, subnodes))
+	nodes = append(nodes, node.New(c, subnodes...))
 
 	err = AssertThat(c.counter, Is(0))
 	if err != nil {
@@ -84,10 +84,10 @@ func TestRunRecursiveOnlyIfParentSuccess(t *testing.T) {
 	checkFail := NewCheck(check.NewCheckResultFail("fail", fmt.Errorf("foo")))
 
 	subnodes := make([]node.Node, 0)
-	subnodes = append(subnodes, node.New(checkSuccess, nil))
+	subnodes = append(subnodes, node.New(checkSuccess))
 
 	nodes := make([]node.Node, 0)
-	nodes = append(nodes, node.New(checkFail, subnodes))
+	nodes = append(nodes, node.New(checkFail, subnodes...))
 
 	err = AssertThat(checkFail.counter, Is(0))
 	if err != nil {

@@ -49,36 +49,42 @@ func (c *configuration) Nodes() []node.Node {
 }
 
 func createNodeInternetAvaiable() node.Node {
-	list := make([]node.Node, 0)
-	list = append(list, createNodeRocketsourceAvaiable())
-	return node.New(tcp.New("www.google.com", 80), list)
+	return node.New(tcp.New("www.google.com", 80), createNodeRocketsourceAvaiable())
 }
 
 func createNodeRocketsourceAvaiable() node.Node {
 	list := make([]node.Node, 0)
 
-	list = append(list, node.New(tcp.New("144.76.187.199", 22), nil))
-	list = append(list, node.New(tcp.New("144.76.187.200", 22), nil))
-	list = append(list, node.New(tcp.New("144.76.187.199", 80), nil))
-	list = append(list, node.New(tcp.New("144.76.187.200", 80), nil))
-	list = append(list, node.New(tcp.New("144.76.187.199", 443), nil))
-	list = append(list, node.New(tcp.New("144.76.187.200", 443), nil))
+	list = append(list, node.New(tcp.New("144.76.187.199", 22)))
+	list = append(list, node.New(tcp.New("144.76.187.200", 22)))
+	list = append(list, node.New(tcp.New("144.76.187.199", 80)))
+	list = append(list, node.New(tcp.New("144.76.187.200", 80)))
+	list = append(list, node.New(tcp.New("144.76.187.199", 443)))
+	list = append(list, node.New(tcp.New("144.76.187.200", 443)))
 
-	list = append(list, node.New(http.New("http://www.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie"), nil))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie"), nil))
-	list = append(list, node.New(http.New("http://www.benjaminborbe.de").ExpectTitle("Benjamin Borbe Fotografie"), nil))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/confluence/").ExpectTitle("Dashboard - Confluence"), nil))
+	list = append(list, node.New(http.New("http://www.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("http://www.benjaminborbe.de").ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/confluence/").ExpectTitle("Dashboard - Confluence")))
 
-	list = append(list, node.New(http.New("http://www.harteslicht.de").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht."), nil))
-	list = append(list, node.New(http.New("http://www.harteslicht.com").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht."), nil))
+	list = append(list, node.New(http.New("http://www.harteslicht.de").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
+	list = append(list, node.New(http.New("http://www.harteslicht.com").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
 
-	list = append(list, node.New(http.New("http://jenkins.benjamin-borbe.de").ExpectTitle("Dashboard [Jenkins]"), nil))
-	list = append(list, node.New(http.New("http://kickstart.benjamin-borbe.de").ExpectBody("ks.cfg"), nil))
+	list = append(list, node.New(http.New("http://jenkins.benjamin-borbe.de").ExpectTitle("Dashboard [Jenkins]")))
+	list = append(list, node.New(http.New("http://kickstart.benjamin-borbe.de").ExpectBody("ks.cfg")))
 
-	list = append(list, node.New(http.New("http://ip.benjamin-borbe.de"), nil))
-	list = append(list, node.New(http.New("http://slideshow.benjamin-borbe.de").ExpectBody("go.html"), nil))
-	list = append(list, node.New(http.New("http://apt.benjamin-borbe.de/bborbe-unstable/Sources").ExpectContent("bborbe-unstable"), nil))
-	list = append(list, node.New(http.New("http://blog.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie"), nil))
+	list = append(list, node.New(http.New("http://ip.benjamin-borbe.de")))
+	list = append(list, node.New(http.New("http://slideshow.benjamin-borbe.de").ExpectBody("go.html")))
+	list = append(list, node.New(http.New("http://apt.benjamin-borbe.de/bborbe-unstable/Sources").ExpectContent("bborbe-unstable")))
+	list = append(list, node.New(http.New("http://blog.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie")))
 
-	return node.New(tcp.New("host.rocketsource.de", 22), list)
+	list = append(list, createBackupStatusNode())
+
+	return node.New(tcp.New("host.rocketsource.de", 22), list...)
+}
+
+func createBackupStatusNode() node.Node {
+	list := make([]node.Node, 0)
+	list = append(list, node.New(http.New("http://backup.pn.benjamin-borbe.de:7777?status=false")))
+	return node.New(tcp.New("backup.pn.benjamin-borbe.de", 7777), list...)
 }
