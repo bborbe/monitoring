@@ -11,11 +11,11 @@ import (
 	"github.com/bborbe/monitoring/check"
 )
 
+type ContentExpectation func(content []byte) error
+
 type httpCheck struct {
-	url             string
-	expectedTitle   string
-	expectedContent string
-	expectedBody    string
+	url                 string
+	contentExpectations []ContentExpectation
 }
 
 var logger = log.DefaultLogger
@@ -36,35 +36,37 @@ func (h *httpCheck) Check() check.CheckResult {
 		logger.Debugf("fetch url failed %s: %v", h.url, err)
 		return check.NewCheckResult(h, err)
 	}
-	err = h.checkTitle(content)
-	if err != nil {
-		logger.Debugf("check title failed: %v", err)
-		return check.NewCheckResult(h, err)
-	}
-	err = h.checkContent(content)
-	if err != nil {
-		logger.Debugf("check content failed: %v", err)
-		return check.NewCheckResult(h, err)
+	for _, contentExpectation := range h.contentExpectations {
+		err = contentExpectation(content)
+		if err != nil {
+			return check.NewCheckResult(h, err)
+		}
 	}
 	return check.NewCheckResult(h, err)
 }
 
+func (h *httpCheck) AddExpectation(contentExpectation ContentExpectation) {
+	h.contentExpectations = append(h.contentExpectations, contentExpectation)
+}
+
 func (h *httpCheck) ExpectTitle(expectedTitle string) *httpCheck {
-	h.expectedTitle = expectedTitle
+	h.AddExpectation(func(content []byte) error {
+		return checkTitle(expectedTitle, content)
+	})
 	return h
 }
 func (h *httpCheck) ExpectContent(expectedContent string) *httpCheck {
-	h.expectedContent = expectedContent
+	h.AddExpectation(func(content []byte) error {
+		return checkContent(expectedContent, content)
+	})
 	return h
 }
 
 func (h *httpCheck) ExpectBody(expectedBody string) *httpCheck {
-	h.expectedBody = expectedBody
+	h.AddExpectation(func(content []byte) error {
+		return checkBody(expectedBody, content)
+	})
 	return h
-}
-
-func (h *httpCheck) checkContent(content []byte) error {
-	return checkContent(h.expectedContent, content)
 }
 
 func checkContent(expectedContent string, content []byte) error {
@@ -81,10 +83,6 @@ func checkContent(expectedContent string, content []byte) error {
 	return fmt.Errorf("content %s not found", expectedContent)
 }
 
-func (h *httpCheck) checkBody(content []byte) error {
-	return checkBody(h.expectedBody, content)
-}
-
 func checkBody(expectedBody string, content []byte) error {
 	if len(expectedBody) == 0 {
 		return nil
@@ -97,10 +95,6 @@ func checkBody(expectedBody string, content []byte) error {
 		return nil
 	}
 	return fmt.Errorf("content %s not found", expectedBody)
-}
-
-func (h *httpCheck) checkTitle(content []byte) error {
-	return checkTitle(h.expectedTitle, content)
 }
 
 func checkTitle(expectedTitle string, content []byte) error {
