@@ -1,6 +1,9 @@
 package configuration
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/bborbe/monitoring/check"
 	"github.com/bborbe/monitoring/check/http"
 	"github.com/bborbe/monitoring/check/tcp"
@@ -85,6 +88,18 @@ func createNodeRocketsourceAvaiable() node.Node {
 
 func createBackupStatusNode() node.Node {
 	list := make([]node.Node, 0)
-	list = append(list, node.New(http.New("http://backup.pn.benjamin-borbe.de:7777?status=false")))
+	list = append(list, node.New(http.New("http://backup.pn.benjamin-borbe.de:7777?status=false").AddExpectation(checkBackupJson)))
 	return node.New(tcp.New("backup.pn.benjamin-borbe.de", 7777), list...)
+}
+
+func checkBackupJson(content []byte) error {
+	var data []interface{}
+	err := json.Unmarshal(content, &data)
+	if err != nil {
+		return fmt.Errorf("parse json failed")
+	}
+	if len(data) > 0 {
+		return fmt.Errorf("found false backups")
+	}
+	return nil
 }

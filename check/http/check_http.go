@@ -45,8 +45,9 @@ func (h *httpCheck) Check() check.CheckResult {
 	return check.NewCheckResult(h, err)
 }
 
-func (h *httpCheck) AddExpectation(contentExpectation ContentExpectation) {
+func (h *httpCheck) AddExpectation(contentExpectation ContentExpectation) *httpCheck {
 	h.contentExpectations = append(h.contentExpectations, contentExpectation)
+	return h
 }
 
 func (h *httpCheck) ExpectTitle(expectedTitle string) *httpCheck {

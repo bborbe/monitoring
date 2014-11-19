@@ -39,3 +39,24 @@ func TestNodesFound(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestCheckBackupJsonParseFailed(t *testing.T) {
+	err := AssertThat(checkBackupJson([]byte("")), NotNilValue())
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCheckBackupJsonSuccessParseAndNoMissingBackupFound(t *testing.T) {
+	err := AssertThat(checkBackupJson([]byte("[]")), NilValue())
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCheckBackupJsonSuccessParseButMissingBackupFound(t *testing.T) {
+	err := AssertThat(checkBackupJson([]byte("[{'a' : 'b'},{'b' : 'c'}]")), NotNilValue())
+	if err != nil {
+		t.Fatal(err)
+	}
+}
