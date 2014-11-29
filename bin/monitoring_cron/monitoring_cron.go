@@ -51,19 +51,19 @@ func do(writer io.Writer, cfg configuration.Configuration, mailConfig notifier.M
 	runner := all.New()
 	resultChannel := runner.Run(cfg)
 	results := make([]check.CheckResult, 0)
-	checkFailed := false
+	failedChecks := 0
 	for result := range resultChannel {
 		if result.Success() {
 			fmt.Fprintf(writer, "[OK]   %s\n", result.Message())
 		} else {
 			fmt.Fprintf(writer, "[FAIL] %s - %v\n", result.Message(), result.Error())
-			checkFailed = true
+			failedChecks++
 		}
 		results = append(results, result)
 	}
 	logger.Debugf("all checks executed")
-	if checkFailed {
-		logger.Debug("found failed checks")
+	if failedChecks > 0 {
+		fmt.Fprintf(writer, "found %d failed checks => send mail\n", failedChecks)
 		err = notifier.Notify(mailConfig, results)
 		if err != nil {
 			return err

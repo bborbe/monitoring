@@ -63,6 +63,7 @@ func sendMail(mailconfig MailConfig, content string) error {
 		ServerName:         servername,
 	}
 
+	logger.Tracef("connect to %s", servername)
 	conn, err := tls.Dial("tcp", servername, tlsconfig)
 	if err != nil {
 		return err
@@ -72,6 +73,11 @@ func sendMail(mailconfig MailConfig, content string) error {
 	smtpClient, err := smtp.NewClient(conn, mailconfig.SmtpHost())
 	if err != nil {
 		return nil
+	}
+
+	err = smtpClient.Hello("localhost")
+	if err != nil {
+		return err
 	}
 
 	err = smtpClient.Auth(auth)
@@ -94,6 +100,7 @@ func sendMail(mailconfig MailConfig, content string) error {
 		return err
 	}
 
+	logger.Tracef("write message %s", message)
 	data.Write([]byte(message))
 
 	err = data.Close()
