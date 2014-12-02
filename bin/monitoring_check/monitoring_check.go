@@ -36,6 +36,7 @@ func main() {
 	err := do(writer, r, c)
 	if err != nil {
 		logger.Fatal(err)
+		logger.Close()
 		os.Exit(1)
 	}
 	logger.Debug("done")
