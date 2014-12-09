@@ -24,6 +24,10 @@ func TestDescription(t *testing.T) {
 }
 
 func TestCheckSuccess(t *testing.T) {
+	if testing.Short() {
+		return
+	}
+
 	var err error
 	c := New("www.benjamin-borbe.de", 80)
 	result := c.Check()
@@ -46,6 +50,10 @@ func TestCheckSuccess(t *testing.T) {
 }
 
 func TestCheckFailure(t *testing.T) {
+	if testing.Short() {
+		return
+	}
+
 	var err error
 	c := New("www.benjamin-borbe.de", 81)
 	result := c.Check()
