@@ -83,7 +83,17 @@ func createRnNode() node.Node {
 	list = append(list, node.New(http.New("http://apt.benjamin-borbe.de/bborbe-unstable/Sources").ExpectContent("bborbe-unstable")))
 	list = append(list, node.New(http.New("http://blog.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie")))
 
+	list = append(list, createRnMailNode())
+
 	return node.New(tcp.New("host.rocketsource.de", 22), list...)
+}
+
+func createRnMailNode() node.Node {
+	list := make([]node.Node, 0)
+	list = append(list, node.New(tcp.New("iredmail.mailfolder.org", 143)))
+	list = append(list, node.New(tcp.New("iredmail.mailfolder.org", 993)))
+	list = append(list, node.New(tcp.New("iredmail.mailfolder.org", 465)))
+	return node.New(tcp.New("iredmail.mailfolder.org", 22), list...)
 }
 
 func createPnNode() node.Node {
