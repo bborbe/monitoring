@@ -52,10 +52,10 @@ func (c *configuration) Nodes() []node.Node {
 }
 
 func createNodeInternetAvaiable() node.Node {
-	return node.New(tcp.New("www.google.com", 80), createNodeRocketsourceAvaiable())
+	return node.New(tcp.New("www.google.com", 80), createHmNode(), createRnNode(), createPnNode())
 }
 
-func createNodeRocketsourceAvaiable() node.Node {
+func createRnNode() node.Node {
 	list := make([]node.Node, 0)
 
 	list = append(list, node.New(tcp.New("144.76.187.199", 22)))
@@ -72,6 +72,8 @@ func createNodeRocketsourceAvaiable() node.Node {
 
 	list = append(list, node.New(http.New("http://www.harteslicht.de").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
 	list = append(list, node.New(http.New("http://www.harteslicht.com").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
+	list = append(list, node.New(http.New("http://nexus.benjamin-borbe.de").ExpectTitle("Sonatype Nexus")))
+	list = append(list, node.New(http.New("http://nexus.benjamin-borbe.de/nexus/content/groups/public").ExpectTitle("Index of /groups/public")))
 
 	list = append(list, node.New(http.New("http://jenkins.benjamin-borbe.de").ExpectTitle("Dashboard [Jenkins]")))
 	list = append(list, node.New(http.New("http://kickstart.benjamin-borbe.de").ExpectBody("ks.cfg")))
@@ -81,15 +83,18 @@ func createNodeRocketsourceAvaiable() node.Node {
 	list = append(list, node.New(http.New("http://apt.benjamin-borbe.de/bborbe-unstable/Sources").ExpectContent("bborbe-unstable")))
 	list = append(list, node.New(http.New("http://blog.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie")))
 
-	list = append(list, createBackupStatusNode())
-
 	return node.New(tcp.New("host.rocketsource.de", 22), list...)
 }
 
-func createBackupStatusNode() node.Node {
+func createPnNode() node.Node {
 	list := make([]node.Node, 0)
 	list = append(list, node.New(http.New("http://backup.pn.benjamin-borbe.de:7777?status=false").AddExpectation(checkBackupJson)))
 	return node.New(tcp.New("backup.pn.benjamin-borbe.de", 7777), list...)
+}
+
+func createHmNode() node.Node {
+	list := make([]node.Node, 0)
+	return node.New(tcp.New("home.benjamin-borbe.de", 443), list...)
 }
 
 func checkBackupJson(content []byte) error {
