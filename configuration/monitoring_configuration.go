@@ -27,7 +27,11 @@ func (c *configuration) Nodes() []node.Node {
 }
 
 func createNodeInternetAvaiable() node.Node {
-	return node.New(tcp.New("www.google.com", 80), createHmNode(), createRnNode(), createRaspVPN(), createRocketnewsVPN()).Silent(true)
+	return node.New(tcp.New("www.google.com", 80), createExternalNode(), createHmNode(), createRnNode(), createRaspVPN(), createRocketnewsVPN()).Silent(true)
+}
+
+func createExternalNode() node.Node {
+	return node.New(http.New("http://benjaminborbe.zenfolio.com/").ExpectTitle("Zenfolio | Benjamin Borbe Fotografie"))
 }
 
 func createRnNode() node.Node {

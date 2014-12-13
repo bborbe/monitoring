@@ -15,29 +15,49 @@ func TestImplementsCheck(t *testing.T) {
 	}
 }
 
-func TestCheckTitle(t *testing.T) {
-	var err error
-	err = AssertThat(checkTitle("test", []byte("<html><head><title>test</title></head></html>")), NilValue())
+func TestCheckTitleMatch(t *testing.T) {
+	err := AssertThat(checkTitle("test", []byte("<html><head><title>test</title></head></html>")), NilValue())
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = AssertThat(checkTitle("test", []byte("<html><head><title>foobar</title></head></html>")), NotNilValue())
+}
+func TestCheckTitleTrim(t *testing.T) {
+	err := AssertThat(checkTitle("test", []byte("<html><head><title> \n   \n   test    \n    \n   \n </title></head></html>")), NilValue())
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = AssertThat(checkTitle("test", []byte("<html>asdf<head>asdf<title>test</title>asdf</head>asdf</html>")), NilValue())
+}
+
+func TestCheckTitleMissmatch(t *testing.T) {
+	err := AssertThat(checkTitle("test", []byte("<html><head><title>foobar</title></head></html>")), NotNilValue())
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = AssertThat(checkTitle("test", []byte("<html id=\"a\"><head id=\"b\"><title id=\"c\">test</title></head></html>")), NilValue())
+}
+
+func TestCheckTitleOtherHeader(t *testing.T) {
+	err := AssertThat(checkTitle("test", []byte("<html>asdf<head>asdf<title>test</title>asdf</head>asdf</html>")), NilValue())
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = AssertThat(checkTitle("test", []byte("<html>\n<head><title>test</title></head></html>")), NilValue())
+}
+
+func TestCheckTitleAttributeInTitle(t *testing.T) {
+	err := AssertThat(checkTitle("test", []byte("<html id=\"a\"><head id=\"b\"><title id=\"c\">test</title></head></html>")), NilValue())
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = AssertThat(checkTitle("test", []byte("<html><head><TiTle>test</title></head></html>")), NilValue())
+}
+
+func TestCheckTitleNewline(t *testing.T) {
+	err := AssertThat(checkTitle("test", []byte("<html>\n<head><title>test</title></head></html>")), NilValue())
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestCheckTitleCase(t *testing.T) {
+	err := AssertThat(checkTitle("test", []byte("<html><head><TiTle>test</title></head></html>")), NilValue())
 	if err != nil {
 		t.Fatal(err)
 	}
