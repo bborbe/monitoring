@@ -47,13 +47,20 @@ func Run(nodes []node.Node) <-chan check.CheckResult {
 
 func exec(nodes []node.Node, resultChan chan<- check.CheckResult, wg *sync.WaitGroup, throttle chan bool) {
 	for _, n := range nodes {
+		if n.IsDisabled() {
+			logger.Debugf("node %s disabled => skip", n.Check().Description())
+			continue
+		}
 		c := n.Check()
 		ns := n.Nodes()
+		isSilenet := n.IsSilent()
 		wg.Add(1)
 		go func() {
 			throttle <- true
 			result := c.Check()
-			resultChan <- result
+			if !isSilenet {
+				resultChan <- result
+			}
 			<-throttle
 			if result.Success() && ns != nil {
 				wg.Add(1)

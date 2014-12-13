@@ -14,19 +14,6 @@ func TestImplementsConfiguration(t *testing.T) {
 	}
 }
 
-func TestChecksFound(t *testing.T) {
-	c := New()
-	checks := c.Checks()
-	err := AssertThat(checks, NotNilValue())
-	if err != nil {
-		t.Fatal(err)
-	}
-	err = AssertThat(len(checks) > 0, Is(true))
-	if err != nil {
-		t.Fatal(err)
-	}
-}
-
 func TestNodesFound(t *testing.T) {
 	c := New()
 	nodes := c.Nodes()

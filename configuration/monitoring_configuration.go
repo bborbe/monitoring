@@ -4,19 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/bborbe/monitoring/check"
 	"github.com/bborbe/monitoring/check/http"
 	"github.com/bborbe/monitoring/check/tcp"
 	"github.com/bborbe/monitoring/node"
 )
 
-type Node interface {
-	Check() check.Check
-	Nodes() []Node
-}
-
 type Configuration interface {
-	Checks() []check.Check
 	Nodes() []node.Node
 }
 
@@ -27,24 +20,6 @@ func New() Configuration {
 	return new(configuration)
 }
 
-func (c *configuration) Checks() []check.Check {
-	list := make([]check.Check, 0)
-	list = addChecksToList(c.Nodes(), list)
-	return list
-}
-
-func addChecksToList(nodes []node.Node, checks []check.Check) []check.Check {
-	if nodes != nil {
-		for _, n := range nodes {
-			if n.Check() != nil {
-				checks = append(checks, n.Check())
-			}
-			checks = addChecksToList(n.Nodes(), checks)
-		}
-	}
-	return checks
-}
-
 func (c *configuration) Nodes() []node.Node {
 	list := make([]node.Node, 0)
 	list = append(list, createNodeInternetAvaiable())
@@ -52,7 +27,7 @@ func (c *configuration) Nodes() []node.Node {
 }
 
 func createNodeInternetAvaiable() node.Node {
-	return node.New(tcp.New("www.google.com", 80), createHmNode(), createRnNode(), createPnNode())
+	return node.New(tcp.New("www.google.com", 80), createHmNode(), createRnNode(), createRaspVPN(), createRocketnewsVPN()).Silent(true)
 }
 
 func createRnNode() node.Node {
@@ -100,6 +75,14 @@ func createPnNode() node.Node {
 	list := make([]node.Node, 0)
 	list = append(list, node.New(http.New("http://backup.pn.benjamin-borbe.de:7777?status=false").AddExpectation(checkBackupJson)))
 	return node.New(tcp.New("backup.pn.benjamin-borbe.de", 7777), list...)
+}
+
+func createRaspVPN() node.Node {
+	return node.New(tcp.New("10.30.0.1", 22), createPnNode()).Silent(true)
+}
+
+func createRocketnewsVPN() node.Node {
+	return node.New(tcp.New("10.20.0.1", 22)).Silent(true)
 }
 
 func createHmNode() node.Node {
