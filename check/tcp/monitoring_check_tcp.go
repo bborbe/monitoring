@@ -17,18 +17,28 @@ type tcpCheck struct {
 
 var logger = log.DefaultLogger
 
+const (
+	timeout = time.Duration(2 * time.Second)
+	tries   = 3
+)
+
 func New(host string, port int) *tcpCheck {
 	h := new(tcpCheck)
 	h.host = host
 	h.port = port
-	h.timeout = time.Duration(5 * time.Second)
 	return h
 }
 
 func (c *tcpCheck) Check() check.CheckResult {
 	address := fmt.Sprintf("%s:%d", c.host, c.port)
-	_, err := net.DialTimeout("tcp", address, c.timeout)
-	logger.Debugf("tcp check on %s: %v", address, err)
+	var err error
+	for i := 0; i < tries; i++ {
+		_, err = net.DialTimeout("tcp", address, timeout)
+		logger.Debugf("tcp check on %s: %v", address, err)
+		if err == nil {
+			return check.NewCheckResult(c, err)
+		}
+	}
 	return check.NewCheckResult(c, err)
 }
 
