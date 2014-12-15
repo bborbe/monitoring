@@ -18,7 +18,7 @@ type tcpCheck struct {
 var logger = log.DefaultLogger
 
 const (
-	timeout = time.Duration(2 * time.Second)
+	timeout = time.Duration(5 * time.Second)
 	tries   = 3
 )
 
