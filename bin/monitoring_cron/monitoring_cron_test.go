@@ -7,11 +7,13 @@ import (
 	"github.com/bborbe/monitoring/check"
 	"github.com/bborbe/monitoring/configuration"
 	"github.com/bborbe/monitoring/node"
+	"github.com/bborbe/monitoring/runner/all"
 )
 
 func TestDoEmpty(t *testing.T) {
 	writer := io.NewWriter()
-	err := do(writer, NewConfigurationDummy(make([]check.Check, 0), make([]node.Node, 0)), new(mailConfig))
+	r := all.New()
+	err := do(writer, r, NewConfigurationDummy(make([]check.Check, 0), make([]node.Node, 0)), new(mailConfig))
 	if err != nil {
 		t.Fatal(err)
 	}

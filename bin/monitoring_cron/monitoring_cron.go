@@ -10,7 +10,8 @@ import (
 	"github.com/bborbe/monitoring/check"
 	"github.com/bborbe/monitoring/configuration"
 	"github.com/bborbe/monitoring/notifier"
-	"github.com/bborbe/monitoring/runner/all"
+	"github.com/bborbe/monitoring/runner"
+	"github.com/bborbe/monitoring/runner/hierarchy"
 )
 
 var logger = log.DefaultLogger
@@ -36,7 +37,8 @@ func main() {
 	mailConfig.recipient = *recipientPtr
 	writer := os.Stdout
 	c := configuration.New()
-	err := do(writer, c, mailConfig)
+	r := hierarchy.New()
+	err := do(writer, r, c, mailConfig)
 	if err != nil {
 		logger.Fatal(err)
 		logger.Close()
@@ -45,11 +47,10 @@ func main() {
 	logger.Debug("done")
 }
 
-func do(writer io.Writer, cfg configuration.Configuration, mailConfig notifier.MailConfig) error {
+func do(writer io.Writer, r runner.Runner, cfg configuration.Configuration, mailConfig notifier.MailConfig) error {
 	var err error
 	fmt.Fprintf(writer, "check started\n")
-	runner := all.New()
-	resultChannel := runner.Run(cfg)
+	resultChannel := r.Run(cfg)
 	results := make([]check.CheckResult, 0)
 	failedChecks := 0
 	for result := range resultChannel {
