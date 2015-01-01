@@ -2,6 +2,7 @@ package http
 
 import (
 	"testing"
+
 	. "github.com/bborbe/assert"
 	"github.com/bborbe/monitoring/check"
 )

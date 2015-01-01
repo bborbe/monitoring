@@ -3,6 +3,7 @@ package hierarchy
 import (
 	"fmt"
 	"testing"
+
 	. "github.com/bborbe/assert"
 	"github.com/bborbe/monitoring/check"
 	"github.com/bborbe/monitoring/node"

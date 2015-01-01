@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+
 	. "github.com/bborbe/assert"
 	"github.com/bborbe/io"
 	"github.com/bborbe/monitoring/check"

@@ -2,6 +2,7 @@ package configuration
 
 import (
 	"testing"
+
 	. "github.com/bborbe/assert"
 )
 
