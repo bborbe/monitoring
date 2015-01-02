@@ -4,14 +4,14 @@ import (
 	"testing"
 
 	. "github.com/bborbe/assert"
-	io "github.com/bborbe/io/mock"
+	io_mock "github.com/bborbe/io/mock"
 	"github.com/bborbe/monitoring/check"
 	"github.com/bborbe/monitoring/node"
 	"github.com/bborbe/monitoring/runner/all"
 )
 
 func TestDoEmpty(t *testing.T) {
-	writer := io.NewWriter()
+	writer := io_mock.NewWriter()
 	err := do(writer, all.New(), NewConfiguration())
 	if err != nil {
 		t.Fatal(err)

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	. "github.com/bborbe/assert"
-	io "github.com/bborbe/io/mock"
+	io_mock "github.com/bborbe/io/mock"
 	"github.com/bborbe/monitoring/check"
 	"github.com/bborbe/monitoring/configuration"
 	"github.com/bborbe/monitoring/node"
@@ -12,7 +12,7 @@ import (
 )
 
 func TestDoEmpty(t *testing.T) {
-	writer := io.NewWriter()
+	writer := io_mock.NewWriter()
 	r := all.New()
 	err := do(writer, r, NewConfigurationDummy(make([]check.Check, 0), make([]node.Node, 0)), new(mailConfig))
 	if err != nil {
