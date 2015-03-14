@@ -77,7 +77,9 @@ func createRnMailNode() node.Node {
 
 func createPnNode() node.Node {
 	list := make([]node.Node, 0)
-	list = append(list, node.New(http.New("http://backup.pn.benjamin-borbe.de:7777?status=false").AddExpectation(checkBackupJson)))
+	var contentExpectation http.ContentExpectation
+	contentExpectation = checkBackupJson
+	list = append(list, node.New(http.New("http://backup.pn.benjamin-borbe.de:7777?status=false").AddExpectation(contentExpectation)))
 	return node.New(tcp.New("backup.pn.benjamin-borbe.de", 7777), list...)
 }
 

@@ -11,7 +11,7 @@ import (
 	"github.com/bborbe/monitoring/check"
 )
 
-type ContentExpectation func(content []byte) error
+type ContentExpectation func([]byte) error
 
 type httpCheck struct {
 	url                 string
@@ -51,22 +51,28 @@ func (h *httpCheck) AddExpectation(contentExpectation ContentExpectation) *httpC
 }
 
 func (h *httpCheck) ExpectTitle(expectedTitle string) *httpCheck {
-	h.AddExpectation(func(content []byte) error {
+	var contentExpectation ContentExpectation
+	contentExpectation = func(content []byte) error {
 		return checkTitle(expectedTitle, content)
-	})
+	}
+	h.AddExpectation(contentExpectation)
 	return h
 }
 func (h *httpCheck) ExpectContent(expectedContent string) *httpCheck {
-	h.AddExpectation(func(content []byte) error {
+	var contentExpectation ContentExpectation
+	contentExpectation = func(content []byte) error {
 		return checkContent(expectedContent, content)
-	})
+	}
+	h.AddExpectation(contentExpectation)
 	return h
 }
 
 func (h *httpCheck) ExpectBody(expectedBody string) *httpCheck {
-	h.AddExpectation(func(content []byte) error {
+	var contentExpectation ContentExpectation
+	contentExpectation = func(content []byte) error {
 		return checkBody(expectedBody, content)
-	})
+	}
+	h.AddExpectation(contentExpectation)
 	return h
 }
 
