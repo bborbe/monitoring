@@ -7,14 +7,13 @@ import (
 	"os"
 
 	"github.com/bborbe/log"
+	"github.com/bborbe/mail"
 	mail_config "github.com/bborbe/mail/config"
 	"github.com/bborbe/monitoring/check"
 	monitoring_configuration "github.com/bborbe/monitoring/configuration"
 	monitoring_notifier "github.com/bborbe/monitoring/notifier"
 	monitoring_runner "github.com/bborbe/monitoring/runner"
 	monitoring_runner_hierarchy "github.com/bborbe/monitoring/runner/hierarchy"
-
-	"github.com/bborbe/mail"
 )
 
 var logger = log.DefaultLogger

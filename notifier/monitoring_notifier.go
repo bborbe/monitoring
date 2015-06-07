@@ -44,6 +44,7 @@ func buildMessage(sender string, recipient string, content string) mail.Message 
 	m.SetContent(content)
 	m.SetSender(sender)
 	m.SetRecipient(recipient)
+	m.SetSubject("Monitoring Result")
 	return m
 }
 
