@@ -7,11 +7,14 @@ import (
 	"os"
 
 	"github.com/bborbe/log"
+	mail_config "github.com/bborbe/mail/config"
 	"github.com/bborbe/monitoring/check"
-	"github.com/bborbe/monitoring/configuration"
-	"github.com/bborbe/monitoring/notifier"
-	"github.com/bborbe/monitoring/runner"
-	"github.com/bborbe/monitoring/runner/hierarchy"
+	monitoring_configuration "github.com/bborbe/monitoring/configuration"
+	monitoring_notifier "github.com/bborbe/monitoring/notifier"
+	monitoring_runner "github.com/bborbe/monitoring/runner"
+	monitoring_runner_hierarchy "github.com/bborbe/monitoring/runner/hierarchy"
+
+	"github.com/bborbe/mail"
 )
 
 var logger = log.DefaultLogger
@@ -28,17 +31,17 @@ func main() {
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
 	logger.Debugf("set log level to %s", *logLevelPtr)
-	mailConfig := new(mailConfig)
-	mailConfig.smtpUser = *smtpUserPtr
-	mailConfig.smtpPassword = *smtpPasswordPtr
-	mailConfig.smtpHost = *smtpHostPtr
-	mailConfig.smtpPort = *smtpPortPtr
-	mailConfig.sender = *senderPtr
-	mailConfig.recipient = *recipientPtr
+	mailConfig := mail_config.New()
+	mailConfig.SetSmtpUser(*smtpUserPtr)
+	mailConfig.SetSmtpPassword(*smtpPasswordPtr)
+	mailConfig.SetSmtpHost(*smtpHostPtr)
+	mailConfig.SetSmtpPort(*smtpPortPtr)
 	writer := os.Stdout
-	c := configuration.New()
-	r := hierarchy.New()
-	err := do(writer, r, c, mailConfig)
+	configuration := monitoring_configuration.New()
+	runner := monitoring_runner_hierarchy.New()
+	mailer := mail.New(mailConfig)
+	notifier := monitoring_notifier.New(mailer, *senderPtr, *recipientPtr)
+	err := do(writer, runner, configuration, notifier)
 	if err != nil {
 		logger.Fatal(err)
 		logger.Close()
@@ -47,10 +50,10 @@ func main() {
 	logger.Debug("done")
 }
 
-func do(writer io.Writer, r runner.Runner, cfg configuration.Configuration, mailConfig notifier.MailConfig) error {
+func do(writer io.Writer, runner monitoring_runner.Runner, configuration monitoring_configuration.Configuration, notifier monitoring_notifier.Notifier) error {
 	var err error
 	fmt.Fprintf(writer, "check started\n")
-	resultChannel := r.Run(cfg)
+	resultChannel := runner.Run(configuration)
 	results := make([]check.CheckResult, 0)
 	failedChecks := 0
 	for result := range resultChannel {
@@ -65,7 +68,7 @@ func do(writer io.Writer, r runner.Runner, cfg configuration.Configuration, mail
 	logger.Debugf("all checks executed")
 	if failedChecks > 0 {
 		fmt.Fprintf(writer, "found %d failed checks => send mail\n", failedChecks)
-		err = notifier.Notify(mailConfig, results)
+		err = notifier.Notify(results)
 		if err != nil {
 			return err
 		}
@@ -73,19 +76,3 @@ func do(writer io.Writer, r runner.Runner, cfg configuration.Configuration, mail
 	fmt.Fprintf(writer, "check finished\n")
 	return err
 }
-
-type mailConfig struct {
-	smtpUser     string
-	smtpPassword string
-	smtpHost     string
-	smtpPort     int
-	sender       string
-	recipient    string
-}
-
-func (c *mailConfig) SmtpUser() string     { return c.smtpUser }
-func (c *mailConfig) SmtpPassword() string { return c.smtpPassword }
-func (c *mailConfig) SmtpHost() string     { return c.smtpHost }
-func (c *mailConfig) SmtpPort() int        { return c.smtpPort }
-func (c *mailConfig) Sender() string       { return c.sender }
-func (c *mailConfig) Recipient() string    { return c.recipient }

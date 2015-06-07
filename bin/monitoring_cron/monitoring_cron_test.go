@@ -14,7 +14,7 @@ import (
 func TestDoEmpty(t *testing.T) {
 	writer := io_mock.NewWriter()
 	r := all.New()
-	err := do(writer, r, NewConfigurationDummy(make([]check.Check, 0), make([]node.Node, 0)), new(mailConfig))
+	err := do(writer, r, NewConfigurationDummy(make([]check.Check, 0), make([]node.Node, 0)), nil)
 	if err != nil {
 		t.Fatal(err)
 	}

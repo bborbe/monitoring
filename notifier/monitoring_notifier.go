@@ -4,111 +4,47 @@ import (
 	"bytes"
 	"fmt"
 
-	"net/smtp"
-
-	"crypto/tls"
-	"net/mail"
-
 	"github.com/bborbe/log"
+	"github.com/bborbe/mail"
+	"github.com/bborbe/mail/message"
 	"github.com/bborbe/monitoring/check"
 )
 
 var logger = log.DefaultLogger
 
-type MailConfig interface {
-	SmtpUser() string
-	SmtpPassword() string
-	SmtpHost() string
-	SmtpPort() int
-	Sender() string
-	Recipient() string
+type notifier struct {
+	mailer    mail.Mailer
+	sender    string
+	recipient string
 }
 
-func Notify(mailconfig MailConfig, results []check.CheckResult) error {
+type Notifier interface {
+	Notify(results []check.CheckResult) error
+}
+
+func New(mailer mail.Mailer, sender string, recipient string) *notifier {
+	n := new(notifier)
+	n.mailer = mailer
+	n.sender = sender
+	n.recipient = recipient
+	return n
+}
+
+func (n *notifier) Notify(results []check.CheckResult) error {
 	logger.Debug("notify results")
 	mailContent := buildMailContent(results)
-	err := sendMail(mailconfig, mailContent)
+	message := buildMessage(n.sender, n.recipient, mailContent)
+	err := n.mailer.Send(message)
 	logger.Debug("mail sent")
 	return err
 }
 
-func sendMail(mailconfig MailConfig, content string) error {
-	logger.Debugf("sendMail to %s", mailconfig.Recipient())
-	auth := smtp.PlainAuth(
-		"",
-		mailconfig.SmtpUser(),
-		mailconfig.SmtpPassword(),
-		mailconfig.SmtpHost(),
-	)
-	servername := fmt.Sprintf("%s:%d", mailconfig.SmtpHost(), mailconfig.SmtpPort())
-	logger.Debugf("connect to smtp-server to %s", servername)
-
-	from := mail.Address{"", mailconfig.Sender()}
-	to := mail.Address{"", mailconfig.Recipient()}
-	subj := "Monitoring Result"
-
-	headers := make(map[string]string)
-	headers["From"] = from.String()
-	headers["To"] = to.String()
-	headers["Subject"] = subj
-
-	message := ""
-	for k, v := range headers {
-		message += fmt.Sprintf("%s: %s\r\n", k, v)
-	}
-	message += "\r\n" + content
-
-	tlsconfig := &tls.Config{
-		InsecureSkipVerify: true,
-		ServerName:         servername,
-	}
-
-	logger.Tracef("connect to %s", servername)
-	conn, err := tls.Dial("tcp", servername, tlsconfig)
-	if err != nil {
-		return err
-	}
-	defer conn.Close()
-
-	smtpClient, err := smtp.NewClient(conn, mailconfig.SmtpHost())
-	if err != nil {
-		return nil
-	}
-
-	err = smtpClient.Hello("localhost")
-	if err != nil {
-		return err
-	}
-
-	err = smtpClient.Auth(auth)
-	if err != nil {
-		return err
-	}
-
-	err = smtpClient.Mail(mailconfig.Sender())
-	if err != nil {
-		return err
-	}
-
-	err = smtpClient.Rcpt(mailconfig.Recipient())
-	if err != nil {
-		return err
-	}
-
-	data, err := smtpClient.Data()
-	if err != nil {
-		return err
-	}
-
-	logger.Tracef("write message %s", message)
-	data.Write([]byte(message))
-
-	err = data.Close()
-	if err != nil {
-		return err
-	}
-
-	return smtpClient.Quit()
+func buildMessage(sender string, recipient string, content string) mail.Message {
+	m := message.New()
+	m.SetContent(content)
+	m.SetSender(sender)
+	m.SetRecipient(recipient)
+	return m
 }
 
 func buildMailContent(results []check.CheckResult) string {
