@@ -63,6 +63,9 @@ func createRnNode() node.Node {
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/apt/bborbe-unstable/public.key").ExpectContent("----BEGIN PGP PUBLIC KEY BLOCK-----")))
 	list = append(list, node.New(http.New("http://blog.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie")))
 
+	list = append(list, node.New(http.New("http://booking.benjamin-borbe.de/status").ExpectContent("OK")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/booking/status").ExpectContent("OK")))
+
 	list = append(list, createRnMailNode())
 
 	return node.New(tcp.New("host.rocketsource.de", 22), list...)
