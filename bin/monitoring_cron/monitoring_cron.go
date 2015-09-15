@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/bborbe/log"
-	"github.com/bborbe/mail"
-	mail_config "github.com/bborbe/mail/config"
+	"github.com/bborbe/mailer"
+	mail_config "github.com/bborbe/mailer/config"
 	"github.com/bborbe/monitoring/check"
 	monitoring_configuration "github.com/bborbe/monitoring/configuration"
 	monitoring_notifier "github.com/bborbe/monitoring/notifier"
@@ -38,7 +38,7 @@ func main() {
 	writer := os.Stdout
 	configuration := monitoring_configuration.New()
 	runner := monitoring_runner_hierarchy.New()
-	mailer := mail.New(mailConfig)
+	mailer := mailer.New(mailConfig)
 	notifier := monitoring_notifier.New(mailer, *senderPtr, *recipientPtr)
 	err := do(writer, runner, configuration, notifier)
 	if err != nil {

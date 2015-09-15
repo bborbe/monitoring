@@ -5,15 +5,15 @@ import (
 	"fmt"
 
 	"github.com/bborbe/log"
-	"github.com/bborbe/mail"
-	"github.com/bborbe/mail/message"
+	"github.com/bborbe/mailer"
+	"github.com/bborbe/mailer/message"
 	"github.com/bborbe/monitoring/check"
 )
 
 var logger = log.DefaultLogger
 
 type notifier struct {
-	mailer    mail.Mailer
+	mailer    mailer.Mailer
 	sender    string
 	recipient string
 }
@@ -22,7 +22,7 @@ type Notifier interface {
 	Notify(results []check.CheckResult) error
 }
 
-func New(mailer mail.Mailer, sender string, recipient string) *notifier {
+func New(mailer mailer.Mailer, sender string, recipient string) *notifier {
 	n := new(notifier)
 	n.mailer = mailer
 	n.sender = sender
@@ -39,7 +39,7 @@ func (n *notifier) Notify(results []check.CheckResult) error {
 	return err
 }
 
-func buildMessage(sender string, recipient string, content string) mail.Message {
+func buildMessage(sender string, recipient string, content string) mailer.Message {
 	m := message.New()
 	m.SetContent(content)
 	m.SetSender(sender)
