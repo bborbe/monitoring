@@ -109,7 +109,7 @@ func checkTitle(expectedTitle string, content []byte) error {
 		return nil
 	}
 	logger.Tracef("content: %s", string(content))
-	expression := fmt.Sprintf(`(?is)<html[^>]*>.*?<head[^>]*>.*?<title[^>]*>\s*%s\s*</title>.*?</head>.*?</html>`, regexp.QuoteMeta(expectedTitle))
+	expression := fmt.Sprintf(`(?is)<html[^>]*>.*?<head[^>]*>.*?<title[^>]*>[^<>]*%s[^<>]*</title>.*?</head>.*?</html>`, regexp.QuoteMeta(expectedTitle))
 	logger.Tracef("title regexp: %s", expression)
 	re := regexp.MustCompile(expression)
 	if len(re.FindSubmatch(content)) > 0 {
