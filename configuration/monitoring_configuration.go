@@ -51,8 +51,6 @@ func createRnNode() node.Node {
 
 	list = append(list, node.New(http.New("http://www.harteslicht.de").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
 	list = append(list, node.New(http.New("http://www.harteslicht.com").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
-	list = append(list, node.New(http.New("http://nexus.benjamin-borbe.de").ExpectTitle("Sonatype Nexus")))
-	list = append(list, node.New(http.New("http://nexus.benjamin-borbe.de/nexus/content/groups/public").ExpectTitle("Index of /groups/public")))
 
 	list = append(list, node.New(http.New("http://jenkins.benjamin-borbe.de").ExpectTitle("Dashboard [Jenkins]")))
 	list = append(list, node.New(http.New("http://kickstart.benjamin-borbe.de").ExpectBody("ks.cfg")))
