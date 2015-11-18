@@ -7,11 +7,10 @@ import (
 
 	"regexp"
 
+	http_client "github.com/bborbe/http/client"
 	"github.com/bborbe/log"
 	"github.com/bborbe/monitoring/check"
-	http_client    "github.com/bborbe/http/client"
 )
-
 
 type ContentExpectation func([]byte) error
 
@@ -131,7 +130,7 @@ func checkTitle(expectedTitle string, content []byte) error {
 
 func get(url string, username string, password string) ([]byte, error) {
 	req, err := http.NewRequest("GET", url, nil)
-	if (len(username) > 0 || len(password) > 0) {
+	if len(username) > 0 || len(password) > 0 {
 		req.SetBasicAuth(username, password)
 	}
 	client := http_client.GetClientWithoutProxy()
