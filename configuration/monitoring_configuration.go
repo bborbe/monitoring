@@ -64,6 +64,9 @@ func createRnNode() node.Node {
 	list = append(list, node.New(http.New("http://booking.benjamin-borbe.de/status").ExpectContent("OK")))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/booking/status").ExpectContent("OK")))
 
+	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de").ExpectTitle(`Index of /`)))
+	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/api/version").Auth("api", "KYkobxZ6uvaGnYBG").ExpectContent(`{"Version":"0.9.5"}`)))
+
 	list = append(list, createRnMailNode())
 
 	return node.New(tcp.New("host.rocketsource.de", 22), list...)

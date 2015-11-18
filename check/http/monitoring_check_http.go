@@ -9,12 +9,16 @@ import (
 
 	"github.com/bborbe/log"
 	"github.com/bborbe/monitoring/check"
+	http_client    "github.com/bborbe/http/client"
 )
+
 
 type ContentExpectation func([]byte) error
 
 type httpCheck struct {
 	url                 string
+	username            string
+	password            string
 	contentExpectations []ContentExpectation
 }
 
@@ -31,7 +35,7 @@ func (h *httpCheck) Description() string {
 }
 
 func (h *httpCheck) Check() check.CheckResult {
-	content, err := get(h.url)
+	content, err := get(h.url, h.username, h.password)
 	if err != nil {
 		logger.Debugf("fetch url failed %s: %v", h.url, err)
 		return check.NewCheckResult(h, err)
@@ -58,6 +62,7 @@ func (h *httpCheck) ExpectTitle(expectedTitle string) *httpCheck {
 	h.AddExpectation(contentExpectation)
 	return h
 }
+
 func (h *httpCheck) ExpectContent(expectedContent string) *httpCheck {
 	var contentExpectation ContentExpectation
 	contentExpectation = func(content []byte) error {
@@ -73,6 +78,12 @@ func (h *httpCheck) ExpectBody(expectedBody string) *httpCheck {
 		return checkBody(expectedBody, content)
 	}
 	h.AddExpectation(contentExpectation)
+	return h
+}
+
+func (h *httpCheck) Auth(username string, password string) *httpCheck {
+	h.username = username
+	h.password = password
 	return h
 }
 
@@ -118,8 +129,13 @@ func checkTitle(expectedTitle string, content []byte) error {
 	return fmt.Errorf("title %s not found", expectedTitle)
 }
 
-func get(url string) ([]byte, error) {
-	resp, err := http.Get(url)
+func get(url string, username string, password string) ([]byte, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if (len(username) > 0 || len(password) > 0) {
+		req.SetBasicAuth(username, password)
+	}
+	client := http_client.GetClientWithoutProxy()
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
