@@ -130,6 +130,9 @@ func checkTitle(expectedTitle string, content []byte) error {
 
 func get(url string, username string, password string) ([]byte, error) {
 	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
 	if len(username) > 0 || len(password) > 0 {
 		req.SetBasicAuth(username, password)
 	}
