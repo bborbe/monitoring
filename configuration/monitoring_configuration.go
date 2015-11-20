@@ -57,8 +57,6 @@ func createRnNode() node.Node {
 
 	list = append(list, node.New(http.New("http://ip.benjamin-borbe.de")))
 	list = append(list, node.New(http.New("http://slideshow.benjamin-borbe.de").ExpectBody("go.html")))
-	list = append(list, node.New(http.New("http://apt.benjamin-borbe.de/bborbe-unstable/Sources").ExpectContent("bborbe-unstable")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/apt/bborbe-unstable/public.key").ExpectContent("----BEGIN PGP PUBLIC KEY BLOCK-----")))
 	list = append(list, node.New(http.New("http://blog.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie")))
 
 	list = append(list, node.New(http.New("http://booking.benjamin-borbe.de/status").ExpectContent("OK")))
