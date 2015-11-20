@@ -1,20 +1,36 @@
 #!/bin/sh
 
+SOURCEDIRECTORY="github.com/bborbe/monitoring"
 
-export DEBFULLNAME="Benjamin Borbe"
-export EMAIL=bborbe@rocketnews.de
+export GOROOT=/opt/go1.5.1
+export PATH=$GOROOT/bin:$PATH
+export GOPATH=${WORKSPACE}
+export REPORT_DIR=${WORKSPACE}/test-reports
+DEB="${NAME}_${VERSION}.deb"
+rm -rf $REPORT_DIR ${WORKSPACE}/*.deb
+mkdir -p $REPORT_DIR
+PACKAGES=`cd src && find $SOURCEDIRECTORY -name "*_test.go" | /usr/lib/go/bin/dirof | /usr/lib/go/bin/unique`
+FAILED=false
+for PACKAGE in $PACKAGES
+do
+    XML=$REPORT_DIR/`/usr/lib/go/bin/pkg2xmlname $PACKAGE`
+    OUT=$XML.out
+    go test -i $PACKAGE
+    go test -v $PACKAGE | tee $OUT
+    cat $OUT
+	/usr/lib/go/bin/go2xunit -fail=true -input $OUT -output $XML
+	rc=$?
+	if [ $rc != 0 ]
+	then
+	    echo "Tests failed for package $PACKAGE"
+    	FAILED=true
+	fi
+done
 
-export DEB_SERVER=misc.rn.benjamin-borbe.de
-export TARGET_DIR=opt/monitoring/bin
-
-export NAME=monitoring
-export BINS="monitoring_check"
-export INSTALLS="github.com/bborbe/monitoring/bin/monitoring_check"
-export SOURCEDIRECTORY="github.com/bborbe/monitoring"
-
-export MAJOR=0
-export MINOR=1
-export BUGFIX=0
-
-# exec
-sh src/github.com/bborbe/jenkins/jenkins.sh
+if $FAILED
+then
+  echo "Tests failed => skip install"
+  exit 1
+else
+  echo "Tests success"
+fi
