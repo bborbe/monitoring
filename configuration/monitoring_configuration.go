@@ -44,22 +44,35 @@ func createRnNode() node.Node {
 	list = append(list, node.New(tcp.New("144.76.187.199", 443)))
 	list = append(list, node.New(tcp.New("144.76.187.200", 443)))
 
+
+	list = append(list, node.New(http.New("http://www.benjamin-borbe.de/").ExpectTitle("Portfolio")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/").ExpectTitle("Portfolio")))
+	list = append(list, node.New(http.New("http://www.benjaminborbe.de/").ExpectTitle("Portfolio")))
+	list = append(list, node.New(http.New("https://www.benjaminborbe.de/").ExpectTitle("Portfolio")))
+
 	list = append(list, node.New(http.New("http://www.benjamin-borbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
 	list = append(list, node.New(http.New("http://www.benjaminborbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
 	list = append(list, node.New(http.New("https://www.benjaminborbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("http://blog.benjamin-borbe.de/").ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
+
+	list = append(list, node.New(http.New("http://www.harteslicht.com/").ExpectTitle("Portfolio")))
+	list = append(list, node.New(http.New("http://www.harteslicht.de/").ExpectTitle("Portfolio")))
+
+	list = append(list, node.New(http.New("http://www.harteslicht.com/blog/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
+	list = append(list, node.New(http.New("http://www.harteslicht.de/blog/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
+	list = append(list, node.New(http.New("http://blog.harteslicht.com/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
+//	list = append(list, node.New(http.New("http://blog.harteslicht.de/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
 
 	list = append(list, node.New(http.New("http://portfolio.benjamin-borbe.de/")))
-	list = append(list, node.New(http.New("http://jana-und-ben.benjamin-borbe.de/")))
-	list = append(list, node.New(http.New("http://jbf.benjamin-borbe.de/")))
+	list = append(list, node.New(http.New("http://jana-und-ben.benjamin-borbe.de/").ExpectTitle("Portfolio")))
+	list = append(list, node.New(http.New("http://jbf.benjamin-borbe.de/").ExpectTitle("Portfolio")))
 
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/confluence/").ExpectTitle("Dashboard - Confluence")))
 	list = append(list, node.New(http.New("http://confluence.benjamin-borbe.de/").ExpectTitle("Dashboard - Confluence")))
 
-	list = append(list, node.New(http.New("http://www.harteslicht.de/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
-	list = append(list, node.New(http.New("http://www.harteslicht.com/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
-
-// uncomment after dns update
+	// uncomment after dns update
 //	list = append(list, node.New(http.New("http://portfolio.harteslicht.com/")))
 //	list = append(list, node.New(http.New("http://portfolio.harteslicht.de/")))
 
@@ -77,9 +90,6 @@ func createRnNode() node.Node {
 
 	list = append(list, node.New(http.New("http://backup.benjamin-borbe.de/").ExpectBody("Backup-Status")))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/backup/").ExpectBody("Backup-Status")))
-
-	list = append(list, node.New(http.New("http://blog.benjamin-borbe.de/").ExpectTitle("Benjamin Borbe Fotografie")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
 
 	list = append(list, node.New(http.New("http://booking.benjamin-borbe.de/status").ExpectContent("OK")))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/booking/status").ExpectContent("OK")))
