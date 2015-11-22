@@ -44,26 +44,42 @@ func createRnNode() node.Node {
 	list = append(list, node.New(tcp.New("144.76.187.199", 443)))
 	list = append(list, node.New(tcp.New("144.76.187.200", 443)))
 
-	list = append(list, node.New(http.New("http://www.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie")))
-	list = append(list, node.New(http.New("http://www.benjaminborbe.de").ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("http://www.benjamin-borbe.de/").ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/").ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("http://www.benjaminborbe.de/").ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("https://www.benjaminborbe.de/").ExpectTitle("Benjamin Borbe Fotografie")))
+
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/confluence/").ExpectTitle("Dashboard - Confluence")))
+	list = append(list, node.New(http.New("http://confluence.benjamin-borbe.de/").ExpectTitle("Dashboard - Confluence")))
 
-	list = append(list, node.New(http.New("http://www.harteslicht.de").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
-	list = append(list, node.New(http.New("http://www.harteslicht.com").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
+	list = append(list, node.New(http.New("http://www.harteslicht.de/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
+	list = append(list, node.New(http.New("http://www.harteslicht.com/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
 
-	list = append(list, node.New(http.New("http://jenkins.benjamin-borbe.de").ExpectTitle("Dashboard [Jenkins]")))
-	list = append(list, node.New(http.New("http://kickstart.benjamin-borbe.de").ExpectBody("ks.cfg")))
+	list = append(list, node.New(http.New("http://kickstart.benjamin-borbe.de/").ExpectBody("ks.cfg")))
+	list = append(list, node.New(http.New("http://ks.benjamin-borbe.de/").ExpectBody("ks.cfg")))
 
-	list = append(list, node.New(http.New("http://ip.benjamin-borbe.de")))
-	list = append(list, node.New(http.New("http://slideshow.benjamin-borbe.de").ExpectBody("go.html")))
-	list = append(list, node.New(http.New("http://blog.benjamin-borbe.de").ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("http://slideshow.benjamin-borbe.de/").ExpectBody("go.html")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/slideshow/").ExpectBody("go.html")))
+
+	list = append(list, node.New(http.New("http://jenkins.benjamin-borbe.de/").ExpectTitle("Dashboard [Jenkins]")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/jenkins/").ExpectTitle("Dashboard [Jenkins]")))
+
+	list = append(list, node.New(http.New("http://ip.benjamin-borbe.de/")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/ip/")))
+
+	list = append(list, node.New(http.New("http://backup.benjamin-borbe.de/").ExpectBody("Backup-Status")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/backup/").ExpectBody("Backup-Status")))
+
+	list = append(list, node.New(http.New("http://blog.benjamin-borbe.de/").ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
 
 	list = append(list, node.New(http.New("http://booking.benjamin-borbe.de/status").ExpectContent("OK")))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/booking/status").ExpectContent("OK")))
 
-	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de").ExpectTitle(`Index of /`)))
+	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/").ExpectTitle(`Index of /`)))
 	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/api/version").Auth("api", "KYkobxZ6uvaGnYBG").ExpectContent(`{"Version":"0.9.5"}`)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/").ExpectTitle(`Index of /`)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/api/version").Auth("api", "KYkobxZ6uvaGnYBG").ExpectContent(`{"Version":"0.9.5"}`)))
 
 	list = append(list, createRnMailNode())
 
