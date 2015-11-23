@@ -63,7 +63,7 @@ func createRnNode() node.Node {
 	list = append(list, node.New(http.New("http://www.harteslicht.com/blog/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
 	list = append(list, node.New(http.New("http://www.harteslicht.de/blog/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
 	list = append(list, node.New(http.New("http://blog.harteslicht.com/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
-//	list = append(list, node.New(http.New("http://blog.harteslicht.de/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
+	list = append(list, node.New(http.New("http://blog.harteslicht.de/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
 
 	list = append(list, node.New(http.New("http://portfolio.benjamin-borbe.de/")))
 	list = append(list, node.New(http.New("http://jana-und-ben.benjamin-borbe.de/").ExpectTitle("Portfolio")))
@@ -72,9 +72,8 @@ func createRnNode() node.Node {
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/confluence/").ExpectTitle("Dashboard - Confluence")))
 	list = append(list, node.New(http.New("http://confluence.benjamin-borbe.de/").ExpectTitle("Dashboard - Confluence")))
 
-	// uncomment after dns update
-//	list = append(list, node.New(http.New("http://portfolio.harteslicht.com/")))
-//	list = append(list, node.New(http.New("http://portfolio.harteslicht.de/")))
+	list = append(list, node.New(http.New("http://portfolio.harteslicht.com/")))
+	list = append(list, node.New(http.New("http://portfolio.harteslicht.de/")))
 
 	list = append(list, node.New(http.New("http://kickstart.benjamin-borbe.de/").ExpectBody("ks.cfg")))
 	list = append(list, node.New(http.New("http://ks.benjamin-borbe.de/").ExpectBody("ks.cfg")))
