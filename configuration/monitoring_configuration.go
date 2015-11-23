@@ -44,7 +44,6 @@ func createRnNode() node.Node {
 	list = append(list, node.New(tcp.New("144.76.187.199", 443)))
 	list = append(list, node.New(tcp.New("144.76.187.200", 443)))
 
-
 	list = append(list, node.New(http.New("http://www.benjamin-borbe.de/").ExpectTitle("Portfolio")))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/").ExpectTitle("Portfolio")))
 	list = append(list, node.New(http.New("http://www.benjaminborbe.de/").ExpectTitle("Portfolio")))
