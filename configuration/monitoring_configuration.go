@@ -49,12 +49,15 @@ func createRnNode() node.Node {
 	list = append(list, node.New(http.New("http://www.benjaminborbe.de/").ExpectTitle("Portfolio")))
 	list = append(list, node.New(http.New("https://www.benjaminborbe.de/").ExpectTitle("Portfolio")))
 
+	list = append(list, node.New(http.New("http://www.benjamin-borbe.de/blog").ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/blog").ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("http://www.benjaminborbe.de/blog").ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("https://www.benjaminborbe.de/blog").ExpectTitle("Benjamin Borbe Fotografie")))
 	list = append(list, node.New(http.New("http://www.benjamin-borbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
 	list = append(list, node.New(http.New("http://www.benjaminborbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
 	list = append(list, node.New(http.New("https://www.benjaminborbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
 	list = append(list, node.New(http.New("http://blog.benjamin-borbe.de/").ExpectTitle("Benjamin Borbe Fotografie")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
 
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/googlebd5f3e34a3e508a2.html").ExpectContent("google-site-verification: googlebd5f3e34a3e508a2.html")))
 	list = append(list, node.New(http.New("https://www.harteslicht.de/googlebd5f3e34a3e508a2.html").ExpectContent("google-site-verification: googlebd5f3e34a3e508a2.html")))
@@ -72,8 +75,9 @@ func createRnNode() node.Node {
 	list = append(list, node.New(http.New("http://jana-und-ben.benjamin-borbe.de/").ExpectTitle("Portfolio")))
 	list = append(list, node.New(http.New("http://jbf.benjamin-borbe.de/").ExpectTitle("Portfolio")))
 
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/confluence/").ExpectTitle("Dashboard - Confluence")))
 	list = append(list, node.New(http.New("http://confluence.benjamin-borbe.de/").ExpectTitle("Dashboard - Confluence")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/confluence").ExpectTitle("Dashboard - Confluence")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/confluence/").ExpectTitle("Dashboard - Confluence")))
 
 	list = append(list, node.New(http.New("http://portfolio.harteslicht.com/")))
 	list = append(list, node.New(http.New("http://portfolio.harteslicht.de/")))
@@ -85,9 +89,11 @@ func createRnNode() node.Node {
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/slideshow/").ExpectBody("go.html")))
 
 	list = append(list, node.New(http.New("http://jenkins.benjamin-borbe.de/").ExpectTitle("Dashboard [Jenkins]")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/jenkins").ExpectTitle("Dashboard [Jenkins]")))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/jenkins/").ExpectTitle("Dashboard [Jenkins]")))
 
 	list = append(list, node.New(http.New("http://ip.benjamin-borbe.de/")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/ip")))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/ip/")))
 
 	list = append(list, node.New(http.New("http://rocketnews.de.de/")))
@@ -96,6 +102,7 @@ func createRnNode() node.Node {
 	list = append(list, node.New(http.New("http://www.rocketsource.de/")))
 
 	list = append(list, node.New(http.New("http://backup.benjamin-borbe.de/").ExpectBody("Backup-Status")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/backup").ExpectBody("Backup-Status")))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/backup/").ExpectBody("Backup-Status")))
 
 	list = append(list, node.New(http.New("http://booking.benjamin-borbe.de/status").ExpectContent("OK")))
@@ -103,6 +110,7 @@ func createRnNode() node.Node {
 
 	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/").ExpectTitle(`Index of /`)))
 	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/api/version").Auth("api", "KYkobxZ6uvaGnYBG").ExpectContent(`{"Version":"0.9.5"}`)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly").ExpectTitle(`Index of /`)))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/").ExpectTitle(`Index of /`)))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/api/version").Auth("api", "KYkobxZ6uvaGnYBG").ExpectContent(`{"Version":"0.9.5"}`)))
 
