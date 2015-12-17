@@ -20,7 +20,7 @@ var logger = log.DefaultLogger
 
 func main() {
 	defer logger.Close()
-	logLevelPtr := flag.String("loglevel", log.LogLevelToString(log.ERROR), "one of OFF,TRACE,DEBUG,INFO,WARN,ERROR")
+	logLevelPtr := flag.String("loglevel", log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
 	smtpUserPtr := flag.String("smtp-user", "smtp@benjamin-borbe.de", "string")
 	smtpPasswordPtr := flag.String("smtp-password", "-", "string")
 	smtpHostPtr := flag.String("smtp-host", "iredmail.mailfolder.org", "string")

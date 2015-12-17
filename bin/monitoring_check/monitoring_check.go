@@ -17,7 +17,7 @@ var logger = log.DefaultLogger
 
 func main() {
 	defer logger.Close()
-	logLevelPtr := flag.String("loglevel", log.LogLevelToString(log.ERROR), "one of OFF,TRACE,DEBUG,INFO,WARN,ERROR")
+	logLevelPtr := flag.String("loglevel", log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
 	modePtr := flag.String("mode", "", "mode (all|hierachy)")
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
