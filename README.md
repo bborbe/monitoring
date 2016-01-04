@@ -1,28 +1,24 @@
-Monitoring
-============
+# Monitoring
 
     monitoring_server
 
-Documentation
--------------
+## Documentation
 
 http://godoc.org/github.com/bborbe/monitoring
 
-Continuous integration
-----------------------
+## Continuous integration
 
 http://jenkins.benjamin-borbe.de/job/Go-Monitoring/
 
-Copyright and license
----------------------
+## Copyright and license
 
-    Copyright (c) 2015, Benjamin Borbe <bborbe@rocketnews.de>
+    Copyright (c) 2016, Benjamin Borbe <bborbe@rocketnews.de>
     All rights reserved.
-
+    
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are
     met:
-
+    
        * Redistributions of source code must retain the above copyright
          notice, this list of conditions and the following disclaimer.
        * Redistributions in binary form must reproduce the above
