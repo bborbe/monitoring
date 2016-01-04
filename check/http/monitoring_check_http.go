@@ -18,6 +18,7 @@ type httpCheck struct {
 	url                 string
 	username            string
 	password            string
+	passwordFile        string
 	contentExpectations []ContentExpectation
 }
 
@@ -34,6 +35,14 @@ func (h *httpCheck) Description() string {
 }
 
 func (h *httpCheck) Check() check.CheckResult {
+	if len(h.password) == 0 && len(h.passwordFile) > 0 {
+		password, err := ioutil.ReadFile(h.passwordFile)
+		if err != nil {
+			logger.Debugf("read password file failed %s: %v", h.passwordFile, err)
+			return check.NewCheckResult(h, err)
+		}
+		h.password = string(password)
+	}
 	content, err := get(h.url, h.username, h.password)
 	if err != nil {
 		logger.Debugf("fetch url failed %s: %v", h.url, err)
@@ -83,6 +92,12 @@ func (h *httpCheck) ExpectBody(expectedBody string) *httpCheck {
 func (h *httpCheck) Auth(username string, password string) *httpCheck {
 	h.username = username
 	h.password = password
+	return h
+}
+
+func (h *httpCheck) AuthFile(username string, passwordFile string) *httpCheck {
+	h.username = username
+	h.passwordFile = passwordFile
 	return h
 }
 

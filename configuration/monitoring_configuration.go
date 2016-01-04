@@ -109,10 +109,10 @@ func createRnNode() node.Node {
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/booking/status").ExpectContent("OK")))
 
 	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/").ExpectTitle(`Index of /`)))
-	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/api/version").Auth("api", "KYkobxZ6uvaGnYBG").ExpectContent(`{"Version":"0.9.5"}`)))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly").ExpectTitle(`Index of /`)))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/").ExpectTitle(`Index of /`)))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/api/version").Auth("api", "KYkobxZ6uvaGnYBG").ExpectContent(`{"Version":"0.9.5"}`)))
+	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/api/version").AuthFile("api", "/etc/aptly_api_password").ExpectContent(`{"Version":"0.9.5"}`)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/api/version").AuthFile("api", "/etc/aptly_api_password").ExpectContent(`{"Version":"0.9.5"}`)))
 
 	list = append(list, createRnMailNode())
 
