@@ -10,6 +10,7 @@ import (
 	http_client "github.com/bborbe/http/client"
 	"github.com/bborbe/log"
 	"github.com/bborbe/monitoring/check"
+	"strings"
 )
 
 type ContentExpectation func([]byte) error
@@ -36,12 +37,13 @@ func (h *httpCheck) Description() string {
 
 func (h *httpCheck) Check() check.CheckResult {
 	if len(h.password) == 0 && len(h.passwordFile) > 0 {
+		logger.Debugf("read password from file %s", h.passwordFile)
 		password, err := ioutil.ReadFile(h.passwordFile)
 		if err != nil {
 			logger.Debugf("read password file failed %s: %v", h.passwordFile, err)
 			return check.NewCheckResult(h, err)
 		}
-		h.password = string(password)
+		h.password = strings.TrimSpace(string(password))
 	}
 	content, err := get(h.url, h.username, h.password)
 	if err != nil {
