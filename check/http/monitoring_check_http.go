@@ -7,10 +7,11 @@ import (
 
 	"regexp"
 
+	"strings"
+
 	http_client "github.com/bborbe/http/client"
 	"github.com/bborbe/log"
 	"github.com/bborbe/monitoring/check"
-	"strings"
 )
 
 type ContentExpectation func([]byte) error
