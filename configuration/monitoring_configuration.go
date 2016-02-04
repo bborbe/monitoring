@@ -96,7 +96,7 @@ func createRnNode() node.Node {
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/ip")))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/ip/")))
 
-	list = append(list, node.New(http.New("http://rocketnews.de.de/")))
+	list = append(list, node.New(http.New("http://rocketnews.de/")))
 	list = append(list, node.New(http.New("http://www.rocketnews.de/")))
 	list = append(list, node.New(http.New("http://rocketsource.de/")))
 	list = append(list, node.New(http.New("http://www.rocketsource.de/")))
