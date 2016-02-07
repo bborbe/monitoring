@@ -17,15 +17,20 @@ import (
 
 type ExecuteRequest func(req *http.Request) (resp *http.Response, err error)
 
-type ContentExpectation func([]byte) error
+type Expectation func(httpResponse *HttpResponse) error
 
 type httpCheck struct {
-	url                 string
-	username            string
-	password            string
-	passwordFile        string
-	contentExpectations []ContentExpectation
-	executeRequest      ExecuteRequest
+	url            string
+	username       string
+	password       string
+	passwordFile   string
+	expectations   []Expectation
+	executeRequest ExecuteRequest
+}
+
+type HttpResponse struct {
+	Content    []byte
+	StatusCode int
 }
 
 var logger = log.DefaultLogger
@@ -52,49 +57,57 @@ func (h *httpCheck) Check() check.CheckResult {
 		}
 		h.password = strings.TrimSpace(string(password))
 	}
-	content, err := get(h.executeRequest, h.url, h.username, h.password)
+	httpResponse, err := get(h.executeRequest, h.url, h.username, h.password)
 	if err != nil {
 		logger.Debugf("fetch url failed %s: %v", h.url, err)
 		return check.NewCheckResult(h, err)
 	}
-	for _, contentExpectation := range h.contentExpectations {
-		err = contentExpectation(content)
-		if err != nil {
+	for _, expectation := range h.expectations {
+		if err = expectation(httpResponse); err != nil {
 			return check.NewCheckResult(h, err)
 		}
 	}
 	return check.NewCheckResult(h, err)
 }
 
-func (h *httpCheck) AddExpectation(contentExpectation ContentExpectation) *httpCheck {
-	h.contentExpectations = append(h.contentExpectations, contentExpectation)
+func (h *httpCheck) AddExpectation(expectation Expectation) *httpCheck {
+	h.expectations = append(h.expectations, expectation)
 	return h
 }
 
 func (h *httpCheck) ExpectTitle(expectedTitle string) *httpCheck {
-	var contentExpectation ContentExpectation
-	contentExpectation = func(content []byte) error {
-		return checkTitle(expectedTitle, content)
+	var expectation Expectation
+	expectation = func(resp *HttpResponse) error {
+		return checkTitle(expectedTitle, resp.Content)
 	}
-	h.AddExpectation(contentExpectation)
+	h.AddExpectation(expectation)
+	return h
+}
+
+func (h *httpCheck) ExpectStatusCode(expectedStatusCode int) *httpCheck {
+	var expectation Expectation
+	expectation = func(resp *HttpResponse) error {
+		return checkStatusCode(expectedStatusCode, resp.StatusCode)
+	}
+	h.AddExpectation(expectation)
 	return h
 }
 
 func (h *httpCheck) ExpectContent(expectedContent string) *httpCheck {
-	var contentExpectation ContentExpectation
-	contentExpectation = func(content []byte) error {
-		return checkContent(expectedContent, content)
+	var expectation Expectation
+	expectation = func(resp *HttpResponse) error {
+		return checkContent(expectedContent, resp.Content)
 	}
-	h.AddExpectation(contentExpectation)
+	h.AddExpectation(expectation)
 	return h
 }
 
 func (h *httpCheck) ExpectBody(expectedBody string) *httpCheck {
-	var contentExpectation ContentExpectation
-	contentExpectation = func(content []byte) error {
-		return checkBody(expectedBody, content)
+	var expectation Expectation
+	expectation = func(resp *HttpResponse) error {
+		return checkBody(expectedBody, resp.Content)
 	}
-	h.AddExpectation(contentExpectation)
+	h.AddExpectation(expectation)
 	return h
 }
 
@@ -152,7 +165,18 @@ func checkTitle(expectedTitle string, content []byte) error {
 	return fmt.Errorf("title %s not found", expectedTitle)
 }
 
-func get(executeRequest ExecuteRequest, url string, username string, password string) ([]byte, error) {
+func checkStatusCode(expectedStatusCode int, statusCode int) error {
+	if expectedStatusCode <= 0 {
+		return nil
+	}
+	logger.Tracef("expectedStatusCode %d == statusCode %d", expectedStatusCode, statusCode)
+	if expectedStatusCode != statusCode {
+		return fmt.Errorf("wrong statuscode, expected %d got %d", expectedStatusCode, statusCode)
+	}
+	return nil
+}
+
+func get(executeRequest ExecuteRequest, url string, username string, password string) (*HttpResponse, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -164,6 +188,13 @@ func get(executeRequest ExecuteRequest, url string, username string, password st
 	if err != nil {
 		return nil, err
 	}
+	content, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
-	return ioutil.ReadAll(resp.Body)
+	return &HttpResponse{
+		Content:    content,
+		StatusCode: resp.StatusCode,
+	}, nil
 }
