@@ -31,7 +31,7 @@ func createNodeInternetAvaiable() node.Node {
 }
 
 func createExternalNode() node.Node {
-	return node.New(http.New("http://benjaminborbe.zenfolio.com/").ExpectTitle("Zenfolio | Benjamin Borbe Fotografie"))
+	return node.New(http.New("http://benjaminborbe.zenfolio.com/").ExpectStatusCode(200).ExpectTitle("Zenfolio | Benjamin Borbe Fotografie"))
 }
 
 func createRnNode() node.Node {
@@ -44,75 +44,79 @@ func createRnNode() node.Node {
 	list = append(list, node.New(tcp.New("144.76.187.199", 443)))
 	list = append(list, node.New(tcp.New("144.76.187.200", 443)))
 
-	list = append(list, node.New(http.New("http://www.benjamin-borbe.de/").ExpectTitle("Portfolio")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/").ExpectTitle("Portfolio")))
-	list = append(list, node.New(http.New("http://www.benjaminborbe.de/").ExpectTitle("Portfolio")))
-	list = append(list, node.New(http.New("https://www.benjaminborbe.de/").ExpectTitle("Portfolio")))
+	list = append(list, node.New(http.New("http://www.benjamin-borbe.de/").ExpectStatusCode(200).ExpectTitle("Portfolio")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/").ExpectStatusCode(200).ExpectTitle("Portfolio")))
+	list = append(list, node.New(http.New("http://www.benjaminborbe.de/").ExpectStatusCode(200).ExpectTitle("Portfolio")))
+	list = append(list, node.New(http.New("https://www.benjaminborbe.de/").ExpectStatusCode(200).ExpectTitle("Portfolio")))
 
-	list = append(list, node.New(http.New("http://www.benjamin-borbe.de/blog").ExpectTitle("Benjamin Borbe Fotografie")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/blog").ExpectTitle("Benjamin Borbe Fotografie")))
-	list = append(list, node.New(http.New("http://www.benjaminborbe.de/blog").ExpectTitle("Benjamin Borbe Fotografie")))
-	list = append(list, node.New(http.New("https://www.benjaminborbe.de/blog").ExpectTitle("Benjamin Borbe Fotografie")))
-	list = append(list, node.New(http.New("http://www.benjamin-borbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
-	list = append(list, node.New(http.New("http://www.benjaminborbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
-	list = append(list, node.New(http.New("https://www.benjaminborbe.de/blog/").ExpectTitle("Benjamin Borbe Fotografie")))
-	list = append(list, node.New(http.New("http://blog.benjamin-borbe.de/").ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("http://www.benjamin-borbe.de/blog").ExpectStatusCode(200).ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/blog").ExpectStatusCode(200).ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("http://www.benjaminborbe.de/blog").ExpectStatusCode(200).ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("https://www.benjaminborbe.de/blog").ExpectStatusCode(200).ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("http://www.benjamin-borbe.de/blog/").ExpectStatusCode(200).ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/blog/").ExpectStatusCode(200).ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("http://www.benjaminborbe.de/blog/").ExpectStatusCode(200).ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("https://www.benjaminborbe.de/blog/").ExpectStatusCode(200).ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("http://blog.benjamin-borbe.de/").ExpectStatusCode(200).ExpectTitle("Benjamin Borbe Fotografie")))
 
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/googlebd5f3e34a3e508a2.html").ExpectContent("google-site-verification: googlebd5f3e34a3e508a2.html")))
-	list = append(list, node.New(http.New("https://www.harteslicht.de/googlebd5f3e34a3e508a2.html").ExpectContent("google-site-verification: googlebd5f3e34a3e508a2.html")))
-	list = append(list, node.New(http.New("https://www.harteslicht.com/googlebd5f3e34a3e508a2.html").ExpectContent("google-site-verification: googlebd5f3e34a3e508a2.html")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/googlebd5f3e34a3e508a2.html").ExpectStatusCode(200).ExpectContent("google-site-verification: googlebd5f3e34a3e508a2.html")))
+	list = append(list, node.New(http.New("https://www.harteslicht.de/googlebd5f3e34a3e508a2.html").ExpectStatusCode(200).ExpectContent("google-site-verification: googlebd5f3e34a3e508a2.html")))
+	list = append(list, node.New(http.New("https://www.harteslicht.com/googlebd5f3e34a3e508a2.html").ExpectStatusCode(200).ExpectContent("google-site-verification: googlebd5f3e34a3e508a2.html")))
 
-	list = append(list, node.New(http.New("http://www.harteslicht.com/").ExpectTitle("Portfolio")))
-	list = append(list, node.New(http.New("http://www.harteslicht.de/").ExpectTitle("Portfolio")))
+	list = append(list, node.New(http.New("http://www.harteslicht.com/").ExpectStatusCode(200).ExpectTitle("Portfolio")))
+	list = append(list, node.New(http.New("http://www.harteslicht.de/").ExpectStatusCode(200).ExpectTitle("Portfolio")))
 
-	list = append(list, node.New(http.New("http://www.harteslicht.com/blog/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
-	list = append(list, node.New(http.New("http://www.harteslicht.de/blog/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
-	list = append(list, node.New(http.New("http://blog.harteslicht.com/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
-	list = append(list, node.New(http.New("http://blog.harteslicht.de/").ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
+	list = append(list, node.New(http.New("http://www.harteslicht.com/blog/").ExpectStatusCode(200).ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
+	list = append(list, node.New(http.New("http://www.harteslicht.de/blog/").ExpectStatusCode(200).ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
+	list = append(list, node.New(http.New("http://blog.harteslicht.com/").ExpectStatusCode(200).ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
+	list = append(list, node.New(http.New("http://blog.harteslicht.de/").ExpectStatusCode(200).ExpectTitle("www.Harteslicht.com | Fotografieren das Spass macht.")))
 
 	list = append(list, node.New(http.New("http://portfolio.benjamin-borbe.de/")))
-	list = append(list, node.New(http.New("http://jana-und-ben.benjamin-borbe.de/").ExpectTitle("Portfolio")))
-	list = append(list, node.New(http.New("http://jbf.benjamin-borbe.de/").ExpectTitle("Portfolio")))
+	list = append(list, node.New(http.New("http://jana-und-ben.benjamin-borbe.de/").ExpectStatusCode(200).ExpectTitle("Portfolio")))
+	list = append(list, node.New(http.New("http://jbf.benjamin-borbe.de/").ExpectStatusCode(200).ExpectTitle("Portfolio")))
 
-	list = append(list, node.New(http.New("http://confluence.benjamin-borbe.de/").ExpectTitle("Dashboard - Confluence")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/confluence").ExpectTitle("Dashboard - Confluence")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/confluence/").ExpectTitle("Dashboard - Confluence")))
+	list = append(list, node.New(http.New("http://confluence.benjamin-borbe.de/").ExpectStatusCode(200).ExpectTitle("Dashboard - Confluence")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/confluence").ExpectStatusCode(200).ExpectTitle("Dashboard - Confluence")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/confluence/").ExpectStatusCode(200).ExpectTitle("Dashboard - Confluence")))
 
-	list = append(list, node.New(http.New("http://portfolio.harteslicht.com/")))
-	list = append(list, node.New(http.New("http://portfolio.harteslicht.de/")))
+	list = append(list, node.New(http.New("http://portfolio.harteslicht.com/").ExpectStatusCode(200)))
+	list = append(list, node.New(http.New("http://portfolio.harteslicht.de/").ExpectStatusCode(200)))
 
-	list = append(list, node.New(http.New("http://kickstart.benjamin-borbe.de/").ExpectBody("ks.cfg")))
-	list = append(list, node.New(http.New("http://ks.benjamin-borbe.de/").ExpectBody("ks.cfg")))
+	list = append(list, node.New(http.New("http://kickstart.benjamin-borbe.de/").ExpectStatusCode(200).ExpectBody("ks.cfg")))
+	list = append(list, node.New(http.New("http://ks.benjamin-borbe.de/").ExpectStatusCode(200).ExpectBody("ks.cfg")))
 
-	list = append(list, node.New(http.New("http://slideshow.benjamin-borbe.de/").ExpectBody("go.html")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/slideshow/").ExpectBody("go.html")))
+	list = append(list, node.New(http.New("http://slideshow.benjamin-borbe.de/").ExpectStatusCode(200).ExpectBody("go.html")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/slideshow/").ExpectStatusCode(200).ExpectBody("go.html")))
 
-	list = append(list, node.New(http.New("http://jenkins.benjamin-borbe.de/").ExpectTitle("Dashboard [Jenkins]")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/jenkins").ExpectTitle("Dashboard [Jenkins]")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/jenkins/").ExpectTitle("Dashboard [Jenkins]")))
+	list = append(list, node.New(http.New("http://jenkins.benjamin-borbe.de/").ExpectStatusCode(200).ExpectTitle("Dashboard [Jenkins]")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/jenkins").ExpectStatusCode(200).ExpectTitle("Dashboard [Jenkins]")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/jenkins/").ExpectStatusCode(200).ExpectTitle("Dashboard [Jenkins]")))
 
-	list = append(list, node.New(http.New("http://ip.benjamin-borbe.de/")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/ip")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/ip/")))
+	list = append(list, node.New(http.New("http://ip.benjamin-borbe.de/").ExpectStatusCode(200)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/ip").ExpectStatusCode(200)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/ip/").ExpectStatusCode(200)))
 
-	list = append(list, node.New(http.New("http://rocketnews.de/")))
-	list = append(list, node.New(http.New("http://www.rocketnews.de/")))
-	list = append(list, node.New(http.New("http://rocketsource.de/")))
-	list = append(list, node.New(http.New("http://www.rocketsource.de/")))
+	list = append(list, node.New(http.New("http://password.benjamin-borbe.de/").ExpectStatusCode(200)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/password").ExpectStatusCode(200)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/password/").ExpectStatusCode(200)))
 
-	list = append(list, node.New(http.New("http://backup.benjamin-borbe.de/").ExpectBody("Backup-Status")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/backup").ExpectBody("Backup-Status")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/backup/").ExpectBody("Backup-Status")))
+	list = append(list, node.New(http.New("http://rocketnews.de/").ExpectStatusCode(200)))
+	list = append(list, node.New(http.New("http://www.rocketnews.de/").ExpectStatusCode(200)))
+	list = append(list, node.New(http.New("http://rocketsource.de/").ExpectStatusCode(200)))
+	list = append(list, node.New(http.New("http://www.rocketsource.de/").ExpectStatusCode(200)))
 
-	list = append(list, node.New(http.New("http://booking.benjamin-borbe.de/status").ExpectContent("OK")))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/booking/status").ExpectContent("OK")))
+	list = append(list, node.New(http.New("http://backup.benjamin-borbe.de/").ExpectStatusCode(200).ExpectBody("Backup-Status")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/backup").ExpectStatusCode(200).ExpectBody("Backup-Status")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/backup/").ExpectStatusCode(200).ExpectBody("Backup-Status")))
 
-	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/").ExpectTitle(`Index of /`)))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly").ExpectTitle(`Index of /`)))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/").ExpectTitle(`Index of /`)))
-	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/api/version").AuthFile("api", "/etc/aptly_api_password").ExpectContent(`{"Version":"0.9.5"}`)))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/api/version").AuthFile("api", "/etc/aptly_api_password").ExpectContent(`{"Version":"0.9.5"}`)))
+	list = append(list, node.New(http.New("http://booking.benjamin-borbe.de/status").ExpectStatusCode(200).ExpectStatusCode(200).ExpectContent("OK")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/booking/status").ExpectStatusCode(200).ExpectStatusCode(200).ExpectContent("OK")))
+
+	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/").ExpectStatusCode(200).ExpectTitle(`Index of /`)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly").ExpectStatusCode(200).ExpectTitle(`Index of /`)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/").ExpectStatusCode(200).ExpectTitle(`Index of /`)))
+	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/api/version").ExpectStatusCode(200).AuthFile("api", "/etc/aptly_api_password").ExpectContent(`{"Version":"0.9.5"}`)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/api/version").ExpectStatusCode(200).AuthFile("api", "/etc/aptly_api_password").ExpectContent(`{"Version":"0.9.5"}`)))
 
 	list = append(list, createRnMailNode())
 
@@ -131,7 +135,7 @@ func createPnNode() node.Node {
 	list := make([]node.Node, 0)
 	var contentExpectation http.Expectation
 	contentExpectation = checkBackupJson
-	list = append(list, node.New(http.New("http://backup.pn.benjamin-borbe.de:7777?status=false").AddExpectation(contentExpectation)))
+	list = append(list, node.New(http.New("http://backup.pn.benjamin-borbe.de:7777?status=false").ExpectStatusCode(200).AddExpectation(contentExpectation)))
 	return node.New(tcp.New("backup.pn.benjamin-borbe.de", 7777), list...)
 }
 
