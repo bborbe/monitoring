@@ -8,10 +8,9 @@ import (
 	"regexp"
 
 	"strings"
+	http_client_builder "github.com/bborbe/http/client/builder"
 
-	http_client "github.com/bborbe/http/client"
- 	http_client_builder "github.com/bborbe/http/client/builder"
- 	"github.com/bborbe/log"
+	"github.com/bborbe/log"
 	"github.com/bborbe/monitoring/check"
 )
 
@@ -155,8 +154,10 @@ func get(url string, username string, password string) ([]byte, error) {
 	if len(username) > 0 || len(password) > 0 {
 		req.SetBasicAuth(username, password)
 	}
-	client := http_client.GetClientWithoutProxy()
-	resp, err := client.Do(req)
+
+	httpClientBuilder := http_client_builder.New().WithoutProxy()
+	httpClient := httpClientBuilder.Build()
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
