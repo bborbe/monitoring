@@ -58,6 +58,9 @@ func createRnNode() node.Node {
 	list = append(list, node.New(http.New("http://www.benjaminborbe.de/blog/").ExpectStatusCode(200).ExpectTitle("Benjamin Borbe Fotografie")))
 	list = append(list, node.New(http.New("https://www.benjaminborbe.de/blog/").ExpectStatusCode(200).ExpectTitle("Benjamin Borbe Fotografie")))
 	list = append(list, node.New(http.New("http://blog.benjamin-borbe.de/").ExpectStatusCode(200).ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("https://www.benjaminborbe.de/blog/").ExpectStatusCode(200).ExpectTitle("Benjamin Borbe Fotografie")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/wp-content").ExpectStatusCode(200)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/wp-content/").ExpectStatusCode(200)))
 
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/googlebd5f3e34a3e508a2.html").ExpectStatusCode(200).ExpectContent("google-site-verification: googlebd5f3e34a3e508a2.html")))
 	list = append(list, node.New(http.New("https://www.harteslicht.de/googlebd5f3e34a3e508a2.html").ExpectStatusCode(200).ExpectContent("google-site-verification: googlebd5f3e34a3e508a2.html")))
@@ -73,6 +76,8 @@ func createRnNode() node.Node {
 
 	list = append(list, node.New(http.New("http://portfolio.benjamin-borbe.de/")))
 	list = append(list, node.New(http.New("http://jana-und-ben.benjamin-borbe.de/").ExpectStatusCode(200).ExpectTitle("Portfolio")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/jana-und-ben").ExpectStatusCode(200).ExpectTitle("Portfolio")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/jana-und-ben/").ExpectStatusCode(200).ExpectTitle("Portfolio")))
 	list = append(list, node.New(http.New("http://jbf.benjamin-borbe.de/").ExpectStatusCode(200).ExpectTitle("Portfolio")))
 
 	list = append(list, node.New(http.New("http://confluence.benjamin-borbe.de/").ExpectStatusCode(200).ExpectTitle("Dashboard - Confluence")))
@@ -83,9 +88,12 @@ func createRnNode() node.Node {
 	list = append(list, node.New(http.New("http://portfolio.harteslicht.de/").ExpectStatusCode(200)))
 
 	list = append(list, node.New(http.New("http://kickstart.benjamin-borbe.de/").ExpectStatusCode(200).ExpectBody("ks.cfg")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/kickstart").ExpectStatusCode(200).ExpectBody("ks.cfg")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/kickstart/").ExpectStatusCode(200).ExpectBody("ks.cfg")))
 	list = append(list, node.New(http.New("http://ks.benjamin-borbe.de/").ExpectStatusCode(200).ExpectBody("ks.cfg")))
 
 	list = append(list, node.New(http.New("http://slideshow.benjamin-borbe.de/").ExpectStatusCode(200).ExpectBody("go.html")))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/slideshow").ExpectStatusCode(200).ExpectBody("go.html")))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/slideshow/").ExpectStatusCode(200).ExpectBody("go.html")))
 
 	list = append(list, node.New(http.New("http://jenkins.benjamin-borbe.de/").ExpectStatusCode(200).ExpectTitle("Dashboard [Jenkins]")))
@@ -111,12 +119,18 @@ func createRnNode() node.Node {
 
 	list = append(list, node.New(http.New("http://booking.benjamin-borbe.de/status").ExpectStatusCode(200).ExpectStatusCode(200).ExpectContent("OK")))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/booking/status").ExpectStatusCode(200).ExpectStatusCode(200).ExpectContent("OK")))
+	list = append(list, node.New(http.New("http://booking.benjamin-borbe.de/").ExpectStatusCode(200)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/booking").ExpectStatusCode(200)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/booking/").ExpectStatusCode(200)))
 
 	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/").ExpectStatusCode(200).ExpectTitle(`Index of /`)))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly").ExpectStatusCode(200).ExpectTitle(`Index of /`)))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/").ExpectStatusCode(200).ExpectTitle(`Index of /`)))
 	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/api/version").ExpectStatusCode(200).AuthFile("api", "/etc/aptly_api_password").ExpectContent(`{"Version":"0.9.5"}`)))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/api/version").ExpectStatusCode(200).AuthFile("api", "/etc/aptly_api_password").ExpectContent(`{"Version":"0.9.5"}`)))
+
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/webdav").ExpectStatusCode(401)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/webdav/").ExpectStatusCode(401)))
 
 	list = append(list, createRnMailNode())
 
