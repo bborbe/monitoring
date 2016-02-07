@@ -30,7 +30,7 @@ func TestRun(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	resultChan := Run(1,nodes)
+	resultChan := Run(1, nodes)
 	result := <-resultChan
 
 	err = AssertThat(c.counter, Is(1))
@@ -68,7 +68,7 @@ func TestRunRecursive(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	resultChan := Run(1,nodes)
+	resultChan := Run(1, nodes)
 	<-resultChan
 	<-resultChan
 	<-resultChan
@@ -99,7 +99,7 @@ func TestRunRecursiveOnlyIfParentSuccess(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	resultChan := Run(1,nodes)
+	resultChan := Run(1, nodes)
 	<-resultChan
 
 	err = AssertThat(checkFail.counter, Is(1))

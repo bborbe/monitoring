@@ -3,11 +3,12 @@ package all
 import (
 	"testing"
 
+	"runtime"
+
 	. "github.com/bborbe/assert"
 	"github.com/bborbe/monitoring/check"
 	"github.com/bborbe/monitoring/check/dummy"
 	"github.com/bborbe/monitoring/runner"
-	"runtime"
 )
 
 func TestImplementsRunner(t *testing.T) {
@@ -23,7 +24,7 @@ func TestRun(t *testing.T) {
 	var err error
 	checks := make([]check.Check, 0)
 	checks = append(checks, dummy.New(check.NewCheckResultSuccess("ok"), "ok"))
-	results := Run(runtime.NumCPU() * 2, checks)
+	results := Run(runtime.NumCPU()*2, checks)
 	for i := 0; i < len(checks); i++ {
 		result := <-results
 		err = AssertThat(result.Success(), Is(true))

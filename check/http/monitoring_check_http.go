@@ -8,10 +8,11 @@ import (
 	"regexp"
 
 	"strings"
-	"github.com/bborbe/log"
-	"github.com/bborbe/monitoring/check"
+
 	http_client_builder "github.com/bborbe/http/client_builder"
 	"github.com/bborbe/http/redirect_follower"
+	"github.com/bborbe/log"
+	"github.com/bborbe/monitoring/check"
 )
 
 type ExecuteRequest func(req *http.Request) (resp *http.Response, err error)

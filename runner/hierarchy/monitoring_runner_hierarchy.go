@@ -46,7 +46,7 @@ func Run(maxConcurrency int, nodes []node.Node) <-chan check.CheckResult {
 	return resultChan
 }
 
-func exec(nodes []node.Node, resultChan chan <- check.CheckResult, wg *sync.WaitGroup, throttle chan bool) {
+func exec(nodes []node.Node, resultChan chan<- check.CheckResult, wg *sync.WaitGroup, throttle chan bool) {
 	for _, n := range nodes {
 		if n.IsDisabled() {
 			logger.Debugf("node %s disabled => skip", n.Check().Description())
