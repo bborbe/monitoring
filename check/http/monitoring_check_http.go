@@ -8,11 +8,13 @@ import (
 	"regexp"
 
 	"strings"
-	http_client_builder "github.com/bborbe/http/client_builder"
-
 	"github.com/bborbe/log"
 	"github.com/bborbe/monitoring/check"
+	http_client_builder "github.com/bborbe/http/client_builder"
+	"github.com/bborbe/http/redirect_follower"
 )
+
+type ExecuteRequest func(req *http.Request) (resp *http.Response, err error)
 
 type ContentExpectation func([]byte) error
 
@@ -22,6 +24,7 @@ type httpCheck struct {
 	password            string
 	passwordFile        string
 	contentExpectations []ContentExpectation
+	executeRequest      ExecuteRequest
 }
 
 var logger = log.DefaultLogger
@@ -29,6 +32,8 @@ var logger = log.DefaultLogger
 func New(url string) *httpCheck {
 	h := new(httpCheck)
 	h.url = url
+	redirectFollower := redirect_follower.New(http_client_builder.New().WithoutProxy().BuildRoundTripper().RoundTrip)
+	h.executeRequest = redirectFollower.ExecuteRequestAndFollow
 	return h
 }
 
@@ -46,7 +51,7 @@ func (h *httpCheck) Check() check.CheckResult {
 		}
 		h.password = strings.TrimSpace(string(password))
 	}
-	content, err := get(h.url, h.username, h.password)
+	content, err := get(h.executeRequest, h.url, h.username, h.password)
 	if err != nil {
 		logger.Debugf("fetch url failed %s: %v", h.url, err)
 		return check.NewCheckResult(h, err)
@@ -146,7 +151,7 @@ func checkTitle(expectedTitle string, content []byte) error {
 	return fmt.Errorf("title %s not found", expectedTitle)
 }
 
-func get(url string, username string, password string) ([]byte, error) {
+func get(executeRequest ExecuteRequest, url string, username string, password string) ([]byte, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -154,10 +159,7 @@ func get(url string, username string, password string) ([]byte, error) {
 	if len(username) > 0 || len(password) > 0 {
 		req.SetBasicAuth(username, password)
 	}
-
-	httpClientBuilder := http_client_builder.New().WithoutProxy()
-	httpClient := httpClientBuilder.Build()
-	resp, err := httpClient.Do(req)
+	resp, err := executeRequest(req)
 	if err != nil {
 		return nil, err
 	}

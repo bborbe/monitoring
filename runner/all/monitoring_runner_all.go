@@ -1,7 +1,6 @@
 package all
 
 import (
-	"runtime"
 	"sync"
 
 	"github.com/bborbe/log"
@@ -13,21 +12,24 @@ import (
 var logger = log.DefaultLogger
 
 type runnerAll struct {
+	maxConcurrency int
 }
 
-func New() *runnerAll {
-	return new(runnerAll)
+func New(maxConcurrency int) *runnerAll {
+	r := new(runnerAll)
+	r.maxConcurrency = maxConcurrency
+
+	return r
 }
 
 func (r *runnerAll) Run(c configuration.Configuration) <-chan check.CheckResult {
 	logger.Debug("run all checks")
-	return Run(Checks(c))
+	return Run(r.maxConcurrency, Checks(c))
 }
 
-func Run(checks []check.Check) <-chan check.CheckResult {
+func Run(maxConcurrency int, checks []check.Check) <-chan check.CheckResult {
 	var wg sync.WaitGroup
 
-	maxConcurrency := runtime.NumCPU() * 2
 	throttle := make(chan bool, maxConcurrency)
 
 	resultChan := make(chan check.CheckResult)

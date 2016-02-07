@@ -22,8 +22,7 @@ func New() Configuration {
 
 func (c *configuration) Nodes() []node.Node {
 	list := make([]node.Node, 0)
-	//	list = append(list, createNodeInternetAvaiable())
-	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/api/version").AuthFile("api", "/etc/aptly_api_password").ExpectContent(`{"Version":"0.9.5"}`)))
+	list = append(list, createNodeInternetAvaiable())
 	return list
 }
 

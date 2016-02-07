@@ -11,6 +11,7 @@ import (
 	"github.com/bborbe/monitoring/runner"
 	"github.com/bborbe/monitoring/runner/all"
 	"github.com/bborbe/monitoring/runner/hierarchy"
+	"runtime"
 )
 
 var logger = log.DefaultLogger
@@ -19,17 +20,20 @@ func main() {
 	defer logger.Close()
 	logLevelPtr := flag.String("loglevel", log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
 	modePtr := flag.String("mode", "", "mode (all|hierachy)")
+	maxConcurrencyPtr := flag.Int("max", runtime.NumCPU() * 2, "max concurrency")
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
 	logger.Debugf("set log level to %s", *logLevelPtr)
 
+	logger.Debugf("max concurrency: %d", *maxConcurrencyPtr)
+
 	var r runner.Runner
 	if "all" == *modePtr {
 		logger.Debug("runner = all")
-		r = all.New()
+		r = all.New(*maxConcurrencyPtr)
 	} else {
 		logger.Debug("runner = hierarchy")
-		r = hierarchy.New()
+		r = hierarchy.New(*maxConcurrencyPtr)
 	}
 	c := configuration.New()
 	writer := os.Stdout

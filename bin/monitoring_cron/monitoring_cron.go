@@ -14,6 +14,7 @@ import (
 	monitoring_notifier "github.com/bborbe/monitoring/notifier"
 	monitoring_runner "github.com/bborbe/monitoring/runner"
 	monitoring_runner_hierarchy "github.com/bborbe/monitoring/runner/hierarchy"
+	"runtime"
 )
 
 var logger = log.DefaultLogger
@@ -27,9 +28,13 @@ func main() {
 	smtpPortPtr := flag.Int("smtp-port", 465, "int")
 	senderPtr := flag.String("sender", "smtp@benjamin-borbe.de", "string")
 	recipientPtr := flag.String("recipient", "bborbe@rocketnews.de", "string")
+	maxConcurrencyPtr := flag.Int("max", runtime.NumCPU() * 2, "max concurrency")
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
 	logger.Debugf("set log level to %s", *logLevelPtr)
+
+	logger.Debugf("max concurrency: %d", *maxConcurrencyPtr)
+
 	mailConfig := mail_config.New()
 	mailConfig.SetSmtpUser(*smtpUserPtr)
 	mailConfig.SetSmtpPassword(*smtpPasswordPtr)
@@ -37,9 +42,10 @@ func main() {
 	mailConfig.SetSmtpPort(*smtpPortPtr)
 	writer := os.Stdout
 	configuration := monitoring_configuration.New()
-	runner := monitoring_runner_hierarchy.New()
+	runner := monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
 	mailer := mailer.New(mailConfig)
 	notifier := monitoring_notifier.New(mailer, *senderPtr, *recipientPtr)
+
 	err := do(writer, runner, configuration, notifier)
 	if err != nil {
 		logger.Fatal(err)

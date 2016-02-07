@@ -1,7 +1,6 @@
 package hierarchy
 
 import (
-	"runtime"
 	"sync"
 
 	"github.com/bborbe/log"
@@ -11,24 +10,26 @@ import (
 )
 
 type hierarchyRunner struct {
+	maxConcurrency int
 }
 
 var logger = log.DefaultLogger
 
-func New() *hierarchyRunner {
-	return new(hierarchyRunner)
+func New(maxConcurrency int) *hierarchyRunner {
+	h := new(hierarchyRunner)
+	h.maxConcurrency = maxConcurrency
+	return h
 }
 
 func (h *hierarchyRunner) Run(c configuration.Configuration) <-chan check.CheckResult {
 	logger.Debug("run hierarchy checks")
-	return Run(c.Nodes())
+	return Run(h.maxConcurrency, c.Nodes())
 }
 
-func Run(nodes []node.Node) <-chan check.CheckResult {
+func Run(maxConcurrency int, nodes []node.Node) <-chan check.CheckResult {
 	resultChan := make(chan check.CheckResult)
 	wg := new(sync.WaitGroup)
 
-	maxConcurrency := runtime.NumCPU() * 2
 	throttle := make(chan bool, maxConcurrency)
 
 	wg.Add(1)
@@ -45,7 +46,7 @@ func Run(nodes []node.Node) <-chan check.CheckResult {
 	return resultChan
 }
 
-func exec(nodes []node.Node, resultChan chan<- check.CheckResult, wg *sync.WaitGroup, throttle chan bool) {
+func exec(nodes []node.Node, resultChan chan <- check.CheckResult, wg *sync.WaitGroup, throttle chan bool) {
 	for _, n := range nodes {
 		if n.IsDisabled() {
 			logger.Debugf("node %s disabled => skip", n.Check().Description())
