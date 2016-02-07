@@ -1,6 +1,10 @@
 # Monitoring
 
-    monitoring_server
+## Install
+
+`go get github.com/bborbe/monitoring/bin/monitoring_check`
+
+`go get github.com/bborbe/monitoring/bin/monitoring_cron`
 
 ## Documentation
 
