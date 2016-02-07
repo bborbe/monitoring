@@ -10,7 +10,8 @@ import (
 	"strings"
 
 	http_client "github.com/bborbe/http/client"
-	"github.com/bborbe/log"
+ 	http_client_builder "github.com/bborbe/http/client/builder"
+ 	"github.com/bborbe/log"
 	"github.com/bborbe/monitoring/check"
 )
 
