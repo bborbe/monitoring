@@ -8,7 +8,7 @@ import (
 	"regexp"
 
 	"strings"
-	http_client_builder "github.com/bborbe/http/client/builder"
+	http_client_builder "github.com/bborbe/http/client_builder"
 
 	"github.com/bborbe/log"
 	"github.com/bborbe/monitoring/check"
