@@ -12,7 +12,7 @@ import (
 
 func TestDoEmpty(t *testing.T) {
 	writer := io_mock.NewWriter()
-	err := do(writer, all.New(), NewConfiguration())
+	err := do(writer, all.New(1), NewConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
