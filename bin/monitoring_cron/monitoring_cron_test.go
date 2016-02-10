@@ -3,8 +3,9 @@ package main
 import (
 	"testing"
 
+	"bytes"
+
 	. "github.com/bborbe/assert"
-	io_mock "github.com/bborbe/io/mock"
 	"github.com/bborbe/monitoring/check"
 	"github.com/bborbe/monitoring/configuration"
 	"github.com/bborbe/monitoring/node"
@@ -12,17 +13,17 @@ import (
 )
 
 func TestDoEmpty(t *testing.T) {
-	writer := io_mock.NewWriter()
+	writer := bytes.NewBufferString("")
 	r := all.New(1)
 	err := do(writer, r, NewConfigurationDummy(make([]check.Check, 0), make([]node.Node, 0)), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = AssertThat(writer.Content(), NotNilValue())
+	err = AssertThat(writer.String(), NotNilValue())
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = AssertThat(len(writer.Content()) > 0, Is(true))
+	err = AssertThat(len(writer.String()) > 0, Is(true))
 	if err != nil {
 		t.Fatal(err)
 	}

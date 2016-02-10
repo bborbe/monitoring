@@ -3,24 +3,25 @@ package main
 import (
 	"testing"
 
+	"bytes"
+
 	. "github.com/bborbe/assert"
-	io_mock "github.com/bborbe/io/mock"
 	"github.com/bborbe/monitoring/check"
 	"github.com/bborbe/monitoring/node"
 	"github.com/bborbe/monitoring/runner/all"
 )
 
 func TestDoEmpty(t *testing.T) {
-	writer := io_mock.NewWriter()
+	writer := bytes.NewBufferString("")
 	err := do(writer, all.New(1), NewConfiguration())
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = AssertThat(writer.Content(), NotNilValue())
+	err = AssertThat(writer.String(), NotNilValue())
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = AssertThat(len(writer.Content()) > 0, Is(true))
+	err = AssertThat(len(writer.String()) > 0, Is(true))
 	if err != nil {
 		t.Fatal(err)
 	}
