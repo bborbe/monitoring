@@ -126,8 +126,8 @@ func createRnNode() node.Node {
 	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/").ExpectStatusCode(200).ExpectTitle(`Index of /`)))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly").ExpectStatusCode(200).ExpectTitle(`Index of /`)))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/").ExpectStatusCode(200).ExpectTitle(`Index of /`)))
-	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/api/version").ExpectStatusCode(200).AuthFile("api", "/etc/aptly_api_password").ExpectContent(`{"Version":"0.9.5"}`)))
-	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/api/version").ExpectStatusCode(200).AuthFile("api", "/etc/aptly_api_password").ExpectContent(`{"Version":"0.9.5"}`)))
+	list = append(list, node.New(http.New("http://aptly.benjamin-borbe.de/api/version").ExpectStatusCode(200).AuthFile("api", "/etc/aptly_api_password").ExpectContent(`{"Version":"0.9.6"}`)))
+	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/aptly/api/version").ExpectStatusCode(200).AuthFile("api", "/etc/aptly_api_password").ExpectContent(`{"Version":"0.9.6"}`)))
 
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/webdav").ExpectStatusCode(401)))
 	list = append(list, node.New(http.New("https://www.benjamin-borbe.de/webdav/").ExpectStatusCode(401)))
