@@ -17,9 +17,13 @@ import (
 
 var logger = log.DefaultLogger
 
+const (
+	PARAMETER_LOGLEVEL = "loglevel"
+)
+
 func main() {
 	defer logger.Close()
-	logLevelPtr := flag.String("loglevel", log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
+	logLevelPtr := flag.String(PARAMETER_LOGLEVEL, log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
 	modePtr := flag.String("mode", "", "mode (all|hierachy)")
 	maxConcurrencyPtr := flag.Int("max", runtime.NumCPU()*2, "max concurrency")
 	flag.Parse()
