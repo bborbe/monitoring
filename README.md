@@ -6,10 +6,6 @@
 
 `go get github.com/bborbe/monitoring/bin/monitoring_cron`
 
-## Documentation
-
-http://godoc.org/github.com/bborbe/monitoring
-
 ## Continuous integration
 
 http://jenkins.benjamin-borbe.de/job/Go-Monitoring/
