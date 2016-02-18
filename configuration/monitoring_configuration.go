@@ -163,7 +163,7 @@ func createDevelNode() node.Node {
 	list := make([]node.Node, 0)
 	list = append(list, node.New(http.New("http://bborbe.devel.lf.seibert-media.net/collaborate/").ExpectStatusCode(200).ExpectContent("collaboratetheme")))
 	list = append(list, node.New(http.New("http://bborbe.devel.lf.seibert-media.net/").ExpectStatusCode(200)))
-	list = append(list, tcp.New("bborbe.devel.lf.seibert-media.net", 80))
+	list = append(list, node.New(tcp.New("bborbe.devel.lf.seibert-media.net", 80)))
 	return node.New(tcp.New("bborbe.devel.lf.seibert-media.net", 22), list...).Silent(true)
 }
 
