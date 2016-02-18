@@ -160,11 +160,17 @@ func createPnNode() node.Node {
 }
 
 func createDevelNode() node.Node {
-	list := make([]node.Node, 0)
-	list = append(list, node.New(http.New("http://bborbe.devel.lf.seibert-media.net/collaborate/").ExpectStatusCode(200).ExpectContent("collaboratetheme")))
-	list = append(list, node.New(http.New("http://bborbe.devel.lf.seibert-media.net/").ExpectStatusCode(200)))
-	list = append(list, node.New(tcp.New("bborbe.devel.lf.seibert-media.net", 80)))
-	return node.New(tcp.New("bborbe.devel.lf.seibert-media.net", 22), list...).Silent(true)
+	return node.New(tcp.New("bborbe.devel.lf.seibert-media.net", 22),
+		node.New(tcp.New("bborbe.devel.lf.seibert-media.net", 80),
+			node.New(http.New("http://bborbe.devel.lf.seibert-media.net/").ExpectStatusCode(200)),
+			node.New(http.New("http://bborbe.devel.lf.seibert-media.net/dash/").ExpectStatusCode(200).ExpectTitle("Dash")),
+			node.New(http.New("http://bborbe.devel.lf.seibert-media.net/collaborate/").ExpectStatusCode(200).ExpectContent("collaboratetheme")),
+		),
+		node.New(tcp.New("bborbe.devel.lf.seibert-media.net", 443),
+			node.New(http.New("https://bborbe.devel.lf.seibert-media.net/").ExpectStatusCode(200)),
+			node.New(http.New("https://bborbe.devel.lf.seibert-media.net/dash/").ExpectStatusCode(200).ExpectTitle("Dash")),
+		),
+	).Silent(true)
 }
 
 func createRaspVPN() node.Node {
