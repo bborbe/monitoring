@@ -27,7 +27,13 @@ func (c *configuration) Nodes() []node.Node {
 }
 
 func createNodeInternetAvaiable() node.Node {
-	return node.New(tcp.New("www.google.com", 80), createExternalNode(), createHmNode(), createRnNode(), createRaspVPN(), createRocketnewsVPN()).Silent(true)
+	return node.New(tcp.New("www.google.com", 80),
+		createExternalNode(),
+		createHmNode(),
+		createRnNode(),
+		createRaspVPN(),
+		createRocketnewsVPN(),
+		createDevelNode()).Silent(true)
 }
 
 func createExternalNode() node.Node {
@@ -151,6 +157,14 @@ func createPnNode() node.Node {
 	contentExpectation = checkBackupJson
 	list = append(list, node.New(http.New("http://backup.pn.benjamin-borbe.de:7777?status=false").ExpectStatusCode(200).AddExpectation(contentExpectation)))
 	return node.New(tcp.New("backup.pn.benjamin-borbe.de", 7777), list...)
+}
+
+func createDevelNode() node.Node {
+	list := make([]node.Node, 0)
+	list = append(list, node.New(http.New("http://bborbe.devel.lf.seibert-media.net/collaborate/").ExpectStatusCode(200).ExpectContent("collaboratetheme")))
+	list = append(list, node.New(http.New("http://bborbe.devel.lf.seibert-media.net/").ExpectStatusCode(200)))
+	list = append(list, tcp.New("bborbe.devel.lf.seibert-media.net", 80))
+	return node.New(tcp.New("bborbe.devel.lf.seibert-media.net", 22), list...).Silent(true)
 }
 
 func createRaspVPN() node.Node {
