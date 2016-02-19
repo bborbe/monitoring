@@ -11,6 +11,7 @@ import (
 	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_configuration "github.com/bborbe/monitoring/configuration"
+	monitoring_node "github.com/bborbe/monitoring/node"
 	monitoring_runner "github.com/bborbe/monitoring/runner"
 	monitoring_runner_all "github.com/bborbe/monitoring/runner/all"
 	monitoring_runner_hierarchy "github.com/bborbe/monitoring/runner/hierarchy"
@@ -21,6 +22,8 @@ var logger = log.DefaultLogger
 const (
 	PARAMETER_LOGLEVEL = "loglevel"
 )
+
+type GetNodes func() ([]monitoring_node.Node, error)
 
 func main() {
 	defer logger.Close()
@@ -33,17 +36,17 @@ func main() {
 
 	logger.Debugf("max concurrency: %d", *maxConcurrencyPtr)
 
-	var r monitoring_runner.Runner
+	var runner monitoring_runner.Runner
 	if "all" == *modePtr {
 		logger.Debug("runner = all")
-		r = monitoring_runner_all.New(*maxConcurrencyPtr)
+		runner = monitoring_runner_all.New(*maxConcurrencyPtr)
 	} else {
 		logger.Debug("runner = hierarchy")
-		r = monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
+		runner = monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
 	}
-	c := monitoring_configuration.New()
+	configuration := monitoring_configuration.New()
 	writer := os.Stdout
-	err := do(writer, r, c)
+	err := do(writer, runner, configuration.Nodes)
 	if err != nil {
 		logger.Fatal(err)
 		logger.Close()
@@ -52,10 +55,14 @@ func main() {
 	logger.Debug("done")
 }
 
-func do(writer io.Writer, r monitoring_runner.Runner, c monitoring_configuration.Configuration) error {
+func do(writer io.Writer, runner monitoring_runner.Runner, getNodes GetNodes) error {
 	var err error
 	fmt.Fprintf(writer, "check started\n")
-	results := r.Run(c)
+	nodes, err := getNodes()
+	if err != nil {
+		return err
+	}
+	results := runner.Run(nodes)
 	var result monitoring_check.CheckResult
 	for result = range results {
 		if result.Success() {

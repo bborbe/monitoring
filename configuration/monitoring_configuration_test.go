@@ -10,21 +10,21 @@ import (
 func TestImplementsConfiguration(t *testing.T) {
 	c := New()
 	var i *Configuration
-	err := AssertThat(c, Implements(i))
-	if err != nil {
+	if err := AssertThat(c, Implements(i)); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestNodesFound(t *testing.T) {
 	c := New()
-	nodes := c.Nodes()
-	err := AssertThat(nodes, NotNilValue())
-	if err != nil {
+	nodes, err := c.Nodes()
+	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
 	}
-	err = AssertThat(len(nodes) > 0, Is(true))
-	if err != nil {
+	if err = AssertThat(nodes, NotNilValue()); err != nil {
+		t.Fatal(err)
+	}
+	if err = AssertThat(len(nodes) > 0, Is(true)); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -2,9 +2,9 @@ package runner
 
 import (
 	monitoring_check "github.com/bborbe/monitoring/check"
-	monitoring_configuration "github.com/bborbe/monitoring/configuration"
+	monitoring_node "github.com/bborbe/monitoring/node"
 )
 
 type Runner interface {
-	Run(configuration monitoring_configuration.Configuration) <-chan monitoring_check.CheckResult
+	Run(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
 }

@@ -10,7 +10,7 @@ import (
 )
 
 type Configuration interface {
-	Nodes() []monitoring_node.Node
+	Nodes() ([]monitoring_node.Node, error)
 }
 
 type configuration struct {
@@ -20,10 +20,10 @@ func New() Configuration {
 	return new(configuration)
 }
 
-func (c *configuration) Nodes() []monitoring_node.Node {
+func (c *configuration) Nodes() ([]monitoring_node.Node, error) {
 	list := make([]monitoring_node.Node, 0)
 	list = append(list, createNodeInternetAvaiable())
-	return list
+	return list, nil
 }
 
 func createNodeInternetAvaiable() monitoring_node.Node {

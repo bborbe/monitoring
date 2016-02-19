@@ -13,6 +13,7 @@ import (
 	mail_config "github.com/bborbe/mailer/config"
 	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_configuration "github.com/bborbe/monitoring/configuration"
+	monitoring_node "github.com/bborbe/monitoring/node"
 	monitoring_notifier "github.com/bborbe/monitoring/notifier"
 	monitoring_runner "github.com/bborbe/monitoring/runner"
 	monitoring_runner_hierarchy "github.com/bborbe/monitoring/runner/hierarchy"
@@ -23,6 +24,8 @@ var logger = log.DefaultLogger
 const (
 	PARAMETER_LOGLEVEL = "loglevel"
 )
+
+type GetNodes func() ([]monitoring_node.Node, error)
 
 func main() {
 	defer logger.Close()
@@ -51,7 +54,7 @@ func main() {
 	mailer := mailer.New(mailConfig)
 	notifier := monitoring_notifier.New(mailer, *senderPtr, *recipientPtr)
 
-	err := do(writer, runner, configuration, notifier)
+	err := do(writer, runner, configuration.Nodes, notifier)
 	if err != nil {
 		logger.Fatal(err)
 		logger.Close()
@@ -60,10 +63,14 @@ func main() {
 	logger.Debug("done")
 }
 
-func do(writer io.Writer, runner monitoring_runner.Runner, configuration monitoring_configuration.Configuration, notifier monitoring_notifier.Notifier) error {
+func do(writer io.Writer, runner monitoring_runner.Runner, getNodes GetNodes, notifier monitoring_notifier.Notifier) error {
 	var err error
 	fmt.Fprintf(writer, "check started\n")
-	resultChannel := runner.Run(configuration)
+	nodes, err := getNodes()
+	if err != nil {
+		return err
+	}
+	resultChannel := runner.Run(nodes)
 	results := make([]monitoring_check.CheckResult, 0)
 	failedChecks := 0
 	var result monitoring_check.CheckResult

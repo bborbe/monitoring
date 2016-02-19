@@ -5,7 +5,6 @@ import (
 
 	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
-	monitoring_configuration "github.com/bborbe/monitoring/configuration"
 	monitoring_node "github.com/bborbe/monitoring/node"
 )
 
@@ -22,9 +21,9 @@ func New(maxConcurrency int) *runnerAll {
 	return r
 }
 
-func (r *runnerAll) Run(c monitoring_configuration.Configuration) <-chan monitoring_check.CheckResult {
+func (r *runnerAll) Run(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult {
 	logger.Debug("run all checks")
-	return Run(r.maxConcurrency, Checks(c))
+	return Run(r.maxConcurrency, Checks(nodes))
 }
 
 func Run(maxConcurrency int, checks []monitoring_check.Check) <-chan monitoring_check.CheckResult {
@@ -54,9 +53,9 @@ func Run(maxConcurrency int, checks []monitoring_check.Check) <-chan monitoring_
 	return resultChan
 }
 
-func Checks(configuration monitoring_configuration.Configuration) []monitoring_check.Check {
+func Checks(nodes []monitoring_node.Node) []monitoring_check.Check {
 	list := make([]monitoring_check.Check, 0)
-	list = addChecksToList(configuration.Nodes(), list)
+	list = addChecksToList(nodes, list)
 	return list
 }
 

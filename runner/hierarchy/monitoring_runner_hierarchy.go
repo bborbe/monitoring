@@ -5,7 +5,6 @@ import (
 
 	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
-	monitoring_configuration "github.com/bborbe/monitoring/configuration"
 	monitoring_node "github.com/bborbe/monitoring/node"
 )
 
@@ -21,9 +20,9 @@ func New(maxConcurrency int) *hierarchyRunner {
 	return h
 }
 
-func (h *hierarchyRunner) Run(c monitoring_configuration.Configuration) <-chan monitoring_check.CheckResult {
+func (h *hierarchyRunner) Run(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult {
 	logger.Debug("run hierarchy checks")
-	return Run(h.maxConcurrency, c.Nodes())
+	return Run(h.maxConcurrency, nodes)
 }
 
 func Run(maxConcurrency int, nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult {
