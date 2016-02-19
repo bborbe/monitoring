@@ -24,7 +24,8 @@ type XmlNodes struct {
 }
 
 type XmlNode struct {
-	IsSilent bool `xml:"IsSilent,attr"`
+	Silent bool `xml:"silent,attr"`
+	Disabled bool `xml:"disabled,attr"`
 }
 
 func New() *configurationParser {
@@ -58,6 +59,6 @@ func convertXmlNodesToNodes(xmlNodes XmlNodes) ([]monitoring_node.Node, error) {
 
 func convertXmlNodeToNode(xmlNode XmlNode) (monitoring_node.Node, error) {
 	check := monitoring_check_dummy.New(monitoring_check.NewCheckResultSuccess("ok"), "dummy")
-	result := monitoring_node.New(check).Silent(xmlNode.IsSilent)
+	result := monitoring_node.New(check).Silent(xmlNode.Silent).Disabled(xmlNode.Disabled)
 	return result, nil
 }

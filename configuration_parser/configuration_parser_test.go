@@ -46,7 +46,7 @@ func TestParseOneNode(t *testing.T) {
 
 func TestParseOneNodeSilentTrue(t *testing.T) {
 	c := New()
-	nodes, err := c.ParseConfiguration([]byte(`<nodes><node IsSilent="true"></node></nodes>`))
+	nodes, err := c.ParseConfiguration([]byte(`<nodes><node silent="true"></node></nodes>`))
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
 	}
@@ -60,7 +60,7 @@ func TestParseOneNodeSilentTrue(t *testing.T) {
 
 func TestParseOneNodeSilentFalse(t *testing.T) {
 	c := New()
-	nodes, err := c.ParseConfiguration([]byte(`<nodes><node IsSilent="false"></node></nodes>`))
+	nodes, err := c.ParseConfiguration([]byte(`<nodes><node silent="false"></node></nodes>`))
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
 	}
@@ -82,6 +82,48 @@ func TestParseOneNodeSilentNotSet(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err = AssertThat(nodes[0].IsSilent(), Is(false)); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestParseOneNodeDisabledTrue(t *testing.T) {
+	c := New()
+	nodes, err := c.ParseConfiguration([]byte(`<nodes><node disabled="true"></node></nodes>`))
+	if err = AssertThat(err, NilValue()); err != nil {
+		t.Fatal(err)
+	}
+	if err = AssertThat(len(nodes), Is(1)); err != nil {
+		t.Fatal(err)
+	}
+	if err = AssertThat(nodes[0].IsDisabled(), Is(true)); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestParseOneNodeDisabledFalse(t *testing.T) {
+	c := New()
+	nodes, err := c.ParseConfiguration([]byte(`<nodes><node disabled="false"></node></nodes>`))
+	if err = AssertThat(err, NilValue()); err != nil {
+		t.Fatal(err)
+	}
+	if err = AssertThat(len(nodes), Is(1)); err != nil {
+		t.Fatal(err)
+	}
+	if err = AssertThat(nodes[0].IsDisabled(), Is(false)); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestParseOneNodeDisabledNotSet(t *testing.T) {
+	c := New()
+	nodes, err := c.ParseConfiguration([]byte(`<nodes><node></node></nodes>`))
+	if err = AssertThat(err, NilValue()); err != nil {
+		t.Fatal(err)
+	}
+	if err = AssertThat(len(nodes), Is(1)); err != nil {
+		t.Fatal(err)
+	}
+	if err = AssertThat(nodes[0].IsDisabled(), Is(false)); err != nil {
 		t.Fatal(err)
 	}
 }
