@@ -1,27 +1,26 @@
 package main
 
 import (
+	"bytes"
 	"testing"
 
-	"bytes"
-
 	. "github.com/bborbe/assert"
+	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_node "github.com/bborbe/monitoring/node"
-	monitoring_runner_all "github.com/bborbe/monitoring/runner/all"
 )
 
 func TestDoEmpty(t *testing.T) {
 	writer := bytes.NewBufferString("")
-	err := do(writer, monitoring_runner_all.New(1), func() ([]monitoring_node.Node, error) {
-		return make([]monitoring_node.Node, 0), nil
-	})
-	if err = AssertThat(err, NilValue()); err != nil {
-		t.Fatal(err)
-	}
-	if err = AssertThat(writer.String(), NotNilValue()); err != nil {
-		t.Fatal(err)
-	}
-	if err = AssertThat(len(writer.String()) > 0, Is(true)); err != nil {
+	err := do(writer,
+		func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult {
+			return nil
+		},
+
+		func(content []byte) ([]monitoring_node.Node, error) {
+			return nil, nil
+
+		}, "")
+	if err = AssertThat(err, NotNilValue()); err != nil {
 		t.Fatal(err)
 	}
 }

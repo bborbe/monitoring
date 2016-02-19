@@ -11,8 +11,7 @@ import (
 	io_util "github.com/bborbe/io/util"
 	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
-	monitoring_configuration "github.com/bborbe/monitoring/configuration"
-	"github.com/bborbe/monitoring/configuration_parser"
+	monitoring_configuration_parser "github.com/bborbe/monitoring/configuration_parser"
 	monitoring_node "github.com/bborbe/monitoring/node"
 	monitoring_runner "github.com/bborbe/monitoring/runner"
 	monitoring_runner_all "github.com/bborbe/monitoring/runner/all"
@@ -28,7 +27,9 @@ const (
 	PARAMETER_MAX      = "max"
 )
 
-type GetNodes func() ([]monitoring_node.Node, error)
+type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
+
+type ParseConfiguration func(content []byte) ([]monitoring_node.Node, error)
 
 func main() {
 	defer logger.Close()
@@ -50,28 +51,10 @@ func main() {
 		logger.Debug("runner = hierarchy")
 		runner = monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
 	}
-	var getNodes GetNodes
-	if len(*configPtr) > 0 {
-		configurationParser := configuration_parser.New()
-		getNodes = func() ([]monitoring_node.Node, error) {
-			path, err := io_util.NormalizePath(*configPtr)
-			if err != nil {
-				return nil, err
-			}
-			content, err := ioutil.ReadFile(path)
-			if err != nil {
-				return nil, err
-			}
-			return configurationParser.ParseConfiguration(content)
-		}
-	} else {
-		configuration := monitoring_configuration.New()
-		getNodes = configuration.Nodes
-	}
-
+	configurationParser := monitoring_configuration_parser.New()
 	writer := os.Stdout
 	defer writer.Close()
-	err := do(writer, runner, getNodes)
+	err := do(writer, runner.Run, configurationParser.ParseConfiguration, *configPtr)
 	if err != nil {
 		logger.Fatal(err)
 		logger.Close()
@@ -80,16 +63,26 @@ func main() {
 	logger.Debug("done")
 }
 
-func do(writer io.Writer, runner monitoring_runner.Runner, getNodes GetNodes) error {
+func do(writer io.Writer, run Run, parseConfiguration ParseConfiguration, configPath string) error {
 	var err error
 	fmt.Fprintf(writer, "check started\n")
-	nodes, err := getNodes()
+	if len(configPath) == 0 {
+		return fmt.Errorf("parameter {} missing", PARAMETER_CONFIG)
+	}
+	path, err := io_util.NormalizePath(configPath)
 	if err != nil {
 		return err
 	}
-	results := runner.Run(nodes)
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	nodes, err := parseConfiguration(content)
+	if err != nil {
+		return err
+	}
 	var result monitoring_check.CheckResult
-	for result = range results {
+	for result = range run(nodes) {
 		if result.Success() {
 			fmt.Fprintf(writer, "[OK]   %s\n", result.Message())
 		} else {

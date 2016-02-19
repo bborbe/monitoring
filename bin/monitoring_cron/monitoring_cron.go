@@ -4,22 +4,18 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"os"
-
-	"runtime"
-
 	"io/ioutil"
+	"os"
+	"runtime"
 
 	io_util "github.com/bborbe/io/util"
 	"github.com/bborbe/log"
 	"github.com/bborbe/mailer"
 	mail_config "github.com/bborbe/mailer/config"
 	monitoring_check "github.com/bborbe/monitoring/check"
-	monitoring_configuration "github.com/bborbe/monitoring/configuration"
-	"github.com/bborbe/monitoring/configuration_parser"
+	monitoring_configuration_parser "github.com/bborbe/monitoring/configuration_parser"
 	monitoring_node "github.com/bborbe/monitoring/node"
 	monitoring_notifier "github.com/bborbe/monitoring/notifier"
-	monitoring_runner "github.com/bborbe/monitoring/runner"
 	monitoring_runner_hierarchy "github.com/bborbe/monitoring/runner/hierarchy"
 )
 
@@ -30,7 +26,11 @@ const (
 	PARAMETER_CONFIG   = "config"
 )
 
-type GetNodes func() ([]monitoring_node.Node, error)
+type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
+
+type Notify func(results []monitoring_check.CheckResult) error
+
+type ParseConfiguration func(content []byte) ([]monitoring_node.Node, error)
 
 func main() {
 	defer logger.Close()
@@ -58,26 +58,9 @@ func main() {
 	runner := monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
 	mailer := mailer.New(mailConfig)
 	notifier := monitoring_notifier.New(mailer, *senderPtr, *recipientPtr)
-	var getNodes GetNodes
-	if len(*configPtr) > 0 {
-		configurationParser := configuration_parser.New()
-		getNodes = func() ([]monitoring_node.Node, error) {
-			path, err := io_util.NormalizePath(*configPtr)
-			if err != nil {
-				return nil, err
-			}
-			content, err := ioutil.ReadFile(path)
-			if err != nil {
-				return nil, err
-			}
-			return configurationParser.ParseConfiguration(content)
-		}
-	} else {
-		configuration := monitoring_configuration.New()
-		getNodes = configuration.Nodes
-	}
+	configurationParser := monitoring_configuration_parser.New()
 
-	err := do(writer, runner, getNodes, notifier)
+	err := do(writer, runner.Run, notifier.Notify, configurationParser.ParseConfiguration, *configPtr)
 	if err != nil {
 		logger.Fatal(err)
 		logger.Close()
@@ -86,18 +69,28 @@ func main() {
 	logger.Debug("done")
 }
 
-func do(writer io.Writer, runner monitoring_runner.Runner, getNodes GetNodes, notifier monitoring_notifier.Notifier) error {
+func do(writer io.Writer, run Run, notify Notify, parseConfiguration ParseConfiguration, configPath string) error {
 	var err error
 	fmt.Fprintf(writer, "check started\n")
-	nodes, err := getNodes()
+	if len(configPath) == 0 {
+		return fmt.Errorf("parameter {} missing", PARAMETER_CONFIG)
+	}
+	path, err := io_util.NormalizePath(configPath)
 	if err != nil {
 		return err
 	}
-	resultChannel := runner.Run(nodes)
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	nodes, err := parseConfiguration(content)
+	if err != nil {
+		return err
+	}
 	results := make([]monitoring_check.CheckResult, 0)
 	failedChecks := 0
 	var result monitoring_check.CheckResult
-	for result = range resultChannel {
+	for result = range run(nodes) {
 		if result.Success() {
 			fmt.Fprintf(writer, "[OK]   %s\n", result.Message())
 		} else {
@@ -109,7 +102,7 @@ func do(writer io.Writer, runner monitoring_runner.Runner, getNodes GetNodes, no
 	logger.Debugf("all checks executed")
 	if failedChecks > 0 {
 		fmt.Fprintf(writer, "found %d failed checks => send mail\n", failedChecks)
-		err = notifier.Notify(results)
+		err = notify(results)
 		if err != nil {
 			return err
 		}

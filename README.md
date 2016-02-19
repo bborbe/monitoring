@@ -6,6 +6,33 @@
 
 `go get github.com/bborbe/monitoring/bin/monitoring_cron`
 
+## Check
+
+```
+monitoring_check \ 
+-loglevel INFO \
+-config sample_config.xml
+```
+
+## Cron
+
+```
+monitoring_cron \ 
+-loglevel INFO \
+-config sample_config.xml
+```
+
+## Config
+
+```
+<?xml version="1.0"?>
+<nodes>
+  <node check="tcp" host="www.google.com" port="80">
+    <node check="http" url="http://www.google.com" expectstatuscode="200" expecttitle="Google"></node>
+  </node>
+</nodes>
+```
+
 ## Continuous integration
 
 http://jenkins.benjamin-borbe.de/job/Go-Monitoring/
