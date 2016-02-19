@@ -36,7 +36,7 @@ func main() {
 	logLevelPtr := flag.String(PARAMETER_LOGLEVEL, log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
 	modePtr := flag.String(PARAMETER_MODE, "", "mode (all|hierachy)")
 	configPtr := flag.String(PARAMETER_CONFIG, "", "config")
-	maxConcurrencyPtr := flag.Int(PARAMETER_MAX, runtime.NumCPU()*2, "max concurrency")
+	maxConcurrencyPtr := flag.Int(PARAMETER_MAX, runtime.NumCPU()*4, "max concurrency")
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
 	logger.Debugf("set log level to %s", *logLevelPtr)

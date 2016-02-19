@@ -42,7 +42,7 @@ func main() {
 	smtpPortPtr := flag.Int("smtp-port", 465, "int")
 	senderPtr := flag.String("sender", "smtp@benjamin-borbe.de", "string")
 	recipientPtr := flag.String("recipient", "bborbe@rocketnews.de", "string")
-	maxConcurrencyPtr := flag.Int("max", runtime.NumCPU()*2, "max concurrency")
+	maxConcurrencyPtr := flag.Int("max", runtime.NumCPU(), "max concurrency")
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
 	logger.Debugf("set log level to %s", *logLevelPtr)
