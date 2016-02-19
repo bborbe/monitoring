@@ -5,6 +5,8 @@ import (
 
 	"runtime"
 
+	"time"
+
 	. "github.com/bborbe/assert"
 	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_check_dummy "github.com/bborbe/monitoring/check/dummy"
@@ -23,7 +25,7 @@ func TestImplementsRunner(t *testing.T) {
 func TestRun(t *testing.T) {
 	var err error
 	checks := make([]monitoring_check.Check, 0)
-	checks = append(checks, monitoring_check_dummy.New(monitoring_check.NewCheckResultSuccess("ok"), "ok"))
+	checks = append(checks, monitoring_check_dummy.New(monitoring_check.NewCheckResultSuccess("ok", time.Duration(1)), "ok"))
 	results := Run(runtime.NumCPU()*2, checks)
 	for i := 0; i < len(checks); i++ {
 		result := <-results

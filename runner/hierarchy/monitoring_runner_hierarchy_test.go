@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"time"
+
 	. "github.com/bborbe/assert"
 	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_node "github.com/bborbe/monitoring/node"
@@ -21,7 +23,7 @@ func TestImplementsRunner(t *testing.T) {
 
 func TestRun(t *testing.T) {
 	var err error
-	c := NewCheck(monitoring_check.NewCheckResultSuccess("success"))
+	c := NewCheck(monitoring_check.NewCheckResultSuccess("success", time.Duration(1)))
 	nodes := make([]monitoring_node.Node, 0)
 	nodes = append(nodes, monitoring_node.New(c))
 
@@ -54,7 +56,7 @@ func TestRun(t *testing.T) {
 
 func TestRunRecursive(t *testing.T) {
 	var err error
-	c := NewCheck(monitoring_check.NewCheckResultSuccess("success"))
+	c := NewCheck(monitoring_check.NewCheckResultSuccess("success", time.Duration(1)))
 
 	subnodes := make([]monitoring_node.Node, 0)
 	subnodes = append(subnodes, monitoring_node.New(c))
@@ -81,8 +83,8 @@ func TestRunRecursive(t *testing.T) {
 
 func TestRunRecursiveOnlyIfParentSuccess(t *testing.T) {
 	var err error
-	checkSuccess := NewCheck(monitoring_check.NewCheckResultSuccess("success"))
-	checkFail := NewCheck(monitoring_check.NewCheckResultFail("fail", fmt.Errorf("foo")))
+	checkSuccess := NewCheck(monitoring_check.NewCheckResultSuccess("success", time.Duration(1)))
+	checkFail := NewCheck(monitoring_check.NewCheckResultFail("fail", fmt.Errorf("foo"), time.Duration(1)))
 
 	subnodes := make([]monitoring_node.Node, 0)
 	subnodes = append(subnodes, monitoring_node.New(checkSuccess))

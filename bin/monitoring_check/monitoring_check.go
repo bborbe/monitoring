@@ -8,6 +8,8 @@ import (
 	"os"
 	"runtime"
 
+	"time"
+
 	io_util "github.com/bborbe/io/util"
 	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
@@ -84,9 +86,9 @@ func do(writer io.Writer, run Run, parseConfiguration ParseConfiguration, config
 	var result monitoring_check.CheckResult
 	for result = range run(nodes) {
 		if result.Success() {
-			fmt.Fprintf(writer, "[OK]   %s\n", result.Message())
+			fmt.Fprintf(writer, "[OK]   %s (%d ms)\n", result.Message(), result.Duration()/time.Millisecond)
 		} else {
-			fmt.Fprintf(writer, "[FAIL] %s - %v\n", result.Message(), result.Error())
+			fmt.Fprintf(writer, "[FAIL] %s - %v (%d ms)\n", result.Message(), result.Error(), result.Duration()/time.Millisecond)
 		}
 	}
 	fmt.Fprintf(writer, "check finished\n")

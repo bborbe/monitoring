@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"time"
+
 	. "github.com/bborbe/assert"
 	monitoring_check "github.com/bborbe/monitoring/check"
 )
@@ -21,7 +23,7 @@ func TestBuildMailContentNoResults(t *testing.T) {
 func TestBuildMailContentSuccess(t *testing.T) {
 	var err error
 	results := make([]monitoring_check.CheckResult, 0)
-	results = append(results, monitoring_check.NewCheckResultSuccess("ok"))
+	results = append(results, monitoring_check.NewCheckResultSuccess("ok", time.Duration(1)))
 	content := buildMailContent(results)
 	err = AssertThat(content, Is("Checks executed: 1\nChecks failed: 0\n"))
 	if err != nil {
@@ -32,7 +34,7 @@ func TestBuildMailContentSuccess(t *testing.T) {
 func TestBuildMailContentFail(t *testing.T) {
 	var err error
 	results := make([]monitoring_check.CheckResult, 0)
-	results = append(results, monitoring_check.NewCheckResultFail("fail", fmt.Errorf("error")))
+	results = append(results, monitoring_check.NewCheckResultFail("fail", fmt.Errorf("error"), time.Duration(1)))
 	content := buildMailContent(results)
 	err = AssertThat(content, Is("Checks executed: 1\nChecks failed: 1\nfail - error\n"))
 	if err != nil {

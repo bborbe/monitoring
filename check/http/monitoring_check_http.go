@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"strings"
 
+	"time"
+
 	http_client_builder "github.com/bborbe/http/client_builder"
 	"github.com/bborbe/http/redirect_follower"
 	"github.com/bborbe/log"
@@ -46,26 +48,27 @@ func (h *httpCheck) Description() string {
 }
 
 func (h *httpCheck) Check() monitoring_check.CheckResult {
+	start := time.Now()
 	if len(h.password) == 0 && len(h.passwordFile) > 0 {
 		logger.Debugf("read password from file %s", h.passwordFile)
 		password, err := ioutil.ReadFile(h.passwordFile)
 		if err != nil {
 			logger.Debugf("read password file failed %s: %v", h.passwordFile, err)
-			return monitoring_check.NewCheckResult(h, err)
+			return monitoring_check.NewCheckResult(h, err, time.Now().Sub(start))
 		}
 		h.password = strings.TrimSpace(string(password))
 	}
 	httpResponse, err := get(h.executeRequest, h.url, h.username, h.password)
 	if err != nil {
 		logger.Debugf("fetch url failed %s: %v", h.url, err)
-		return monitoring_check.NewCheckResult(h, err)
+		return monitoring_check.NewCheckResult(h, err, time.Now().Sub(start))
 	}
 	for _, expectation := range h.expectations {
 		if err = expectation(httpResponse); err != nil {
-			return monitoring_check.NewCheckResult(h, err)
+			return monitoring_check.NewCheckResult(h, err, time.Now().Sub(start))
 		}
 	}
-	return monitoring_check.NewCheckResult(h, err)
+	return monitoring_check.NewCheckResult(h, err, time.Now().Sub(start))
 }
 
 func (h *httpCheck) AddExpectation(expectation Expectation) *httpCheck {

@@ -1,15 +1,19 @@
 package check
 
+import "time"
+
 type CheckResult interface {
 	Success() bool
 	Error() error
 	Message() string
+	Duration() time.Duration
 }
 
 type checkResult struct {
-	success bool
-	error   error
-	message string
+	success  bool
+	error    error
+	message  string
+	duration time.Duration
 }
 
 func (c *checkResult) Success() bool {
@@ -24,25 +28,31 @@ func (c *checkResult) Message() string {
 	return c.message
 }
 
-func NewCheckResult(chk Check, err error) CheckResult {
-	if err != nil {
-		return NewCheckResultFail(chk.Description(), err)
-	}
-	return NewCheckResultSuccess(chk.Description())
+func (c *checkResult) Duration() time.Duration {
+	return c.duration
 }
 
-func NewCheckResultSuccess(message string) CheckResult {
+func NewCheckResult(chk Check, err error, duration time.Duration) CheckResult {
+	if err != nil {
+		return NewCheckResultFail(chk.Description(), err, duration)
+	}
+	return NewCheckResultSuccess(chk.Description(), duration)
+}
+
+func NewCheckResultSuccess(message string, duration time.Duration) CheckResult {
 	r := new(checkResult)
 	r.success = true
 	r.message = message
+	r.duration = duration
 	r.error = nil
 	return r
 }
 
-func NewCheckResultFail(message string, err error) CheckResult {
+func NewCheckResultFail(message string, err error, duration time.Duration) CheckResult {
 	r := new(checkResult)
 	r.success = false
 	r.message = message
+	r.duration = duration
 	r.error = err
 	return r
 }

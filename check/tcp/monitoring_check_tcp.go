@@ -30,16 +30,17 @@ func New(host string, port int) *tcpCheck {
 }
 
 func (c *tcpCheck) Check() monitoring_check.CheckResult {
+	start := time.Now()
 	address := fmt.Sprintf("%s:%d", c.host, c.port)
 	var err error
 	for i := 0; i < tries; i++ {
 		_, err = net.DialTimeout("tcp", address, timeout)
 		logger.Debugf("tcp check on %s: %v", address, err)
 		if err == nil {
-			return monitoring_check.NewCheckResult(c, err)
+			return monitoring_check.NewCheckResult(c, err, time.Now().Sub(start))
 		}
 	}
-	return monitoring_check.NewCheckResult(c, err)
+	return monitoring_check.NewCheckResult(c, err, time.Now().Sub(start))
 }
 
 func (c *tcpCheck) Description() string {
