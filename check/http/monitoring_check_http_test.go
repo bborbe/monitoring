@@ -4,12 +4,12 @@ import (
 	"testing"
 
 	. "github.com/bborbe/assert"
-	"github.com/bborbe/monitoring/check"
+	monitoring_check "github.com/bborbe/monitoring/check"
 )
 
 func TestImplementsCheck(t *testing.T) {
 	c := New("http://www.example.com")
-	var i *check.Check
+	var i *monitoring_check.Check
 	err := AssertThat(c, Implements(i))
 	if err != nil {
 		t.Fatal(err)

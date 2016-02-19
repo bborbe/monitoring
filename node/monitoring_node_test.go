@@ -4,13 +4,13 @@ import (
 	"testing"
 
 	. "github.com/bborbe/assert"
-	"github.com/bborbe/monitoring/check"
-	"github.com/bborbe/monitoring/check/dummy"
-	"github.com/bborbe/monitoring/check/tcp"
+	monitoring_check "github.com/bborbe/monitoring/check"
+	monitoring_check_dummy "github.com/bborbe/monitoring/check/dummy"
+	monitoring_check_tcp "github.com/bborbe/monitoring/check/tcp"
 )
 
 func TestImplementsNode(t *testing.T) {
-	c := New(tcp.New("www.benjamin-borbe.de", 80))
+	c := New(monitoring_check_tcp.New("www.benjamin-borbe.de", 80))
 	var i *Node
 	err := AssertThat(c, Implements(i))
 	if err != nil {
@@ -21,7 +21,7 @@ func TestImplementsNode(t *testing.T) {
 func TestNewWithoutSubnode(t *testing.T) {
 	var err error
 	var node Node
-	check := dummy.New(check.NewCheckResultSuccess("succes"), "description")
+	check := monitoring_check_dummy.New(monitoring_check.NewCheckResultSuccess("succes"), "description")
 	node = New(check)
 	err = AssertThat(node, NotNilValue())
 	if err != nil {
@@ -36,7 +36,7 @@ func TestNewWithoutSubnode(t *testing.T) {
 func TestNewOneSubnode(t *testing.T) {
 	var err error
 	var node Node
-	check := dummy.New(check.NewCheckResultSuccess("succes"), "description")
+	check := monitoring_check_dummy.New(monitoring_check.NewCheckResultSuccess("succes"), "description")
 
 	node = New(check, New(check))
 	err = AssertThat(node, NotNilValue())
@@ -52,7 +52,7 @@ func TestNewOneSubnode(t *testing.T) {
 func TestIsDisabledDefaultIsFalse(t *testing.T) {
 	var err error
 	var node Node
-	check := dummy.New(check.NewCheckResultSuccess("succes"), "description")
+	check := monitoring_check_dummy.New(monitoring_check.NewCheckResultSuccess("succes"), "description")
 
 	node = New(check, New(check))
 	err = AssertThat(node, NotNilValue())
@@ -68,7 +68,7 @@ func TestIsDisabledDefaultIsFalse(t *testing.T) {
 func TestIsSilentDefaultIsFalse(t *testing.T) {
 	var err error
 	var node Node
-	check := dummy.New(check.NewCheckResultSuccess("succes"), "description")
+	check := monitoring_check_dummy.New(monitoring_check.NewCheckResultSuccess("succes"), "description")
 
 	node = New(check, New(check))
 	err = AssertThat(node, NotNilValue())
@@ -84,7 +84,7 @@ func TestIsSilentDefaultIsFalse(t *testing.T) {
 func TestDisabledSetToTrue(t *testing.T) {
 	var err error
 	var node Node
-	check := dummy.New(check.NewCheckResultSuccess("succes"), "description")
+	check := monitoring_check_dummy.New(monitoring_check.NewCheckResultSuccess("succes"), "description")
 
 	node = New(check, New(check)).Disabled(true)
 	err = AssertThat(node, NotNilValue())
@@ -100,7 +100,7 @@ func TestDisabledSetToTrue(t *testing.T) {
 func TestSilentSetToTrue(t *testing.T) {
 	var err error
 	var node Node
-	check := dummy.New(check.NewCheckResultSuccess("succes"), "description")
+	check := monitoring_check_dummy.New(monitoring_check.NewCheckResultSuccess("succes"), "description")
 
 	node = New(check, New(check)).Silent(true)
 	err = AssertThat(node, NotNilValue())

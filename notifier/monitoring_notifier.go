@@ -7,7 +7,7 @@ import (
 	"github.com/bborbe/log"
 	"github.com/bborbe/mailer"
 	"github.com/bborbe/mailer/message"
-	"github.com/bborbe/monitoring/check"
+	monitoring_check "github.com/bborbe/monitoring/check"
 )
 
 var logger = log.DefaultLogger
@@ -19,7 +19,7 @@ type notifier struct {
 }
 
 type Notifier interface {
-	Notify(results []check.CheckResult) error
+	Notify(results []monitoring_check.CheckResult) error
 }
 
 func New(mailer mailer.Mailer, sender string, recipient string) *notifier {
@@ -30,7 +30,7 @@ func New(mailer mailer.Mailer, sender string, recipient string) *notifier {
 	return n
 }
 
-func (n *notifier) Notify(results []check.CheckResult) error {
+func (n *notifier) Notify(results []monitoring_check.CheckResult) error {
 	logger.Debug("notify results")
 	mailContent := buildMailContent(results)
 	message := buildMessage(n.sender, n.recipient, mailContent)
@@ -48,7 +48,7 @@ func buildMessage(sender string, recipient string, content string) mailer.Messag
 	return m
 }
 
-func buildMailContent(results []check.CheckResult) string {
+func buildMailContent(results []monitoring_check.CheckResult) string {
 	failures := failures(results)
 	var buffer bytes.Buffer
 	buffer.WriteString(fmt.Sprintf("Checks executed: %d\n", len(results)))
@@ -60,8 +60,8 @@ func buildMailContent(results []check.CheckResult) string {
 	return buffer.String()
 }
 
-func failures(results []check.CheckResult) []check.CheckResult {
-	failures := make([]check.CheckResult, 0)
+func failures(results []monitoring_check.CheckResult) []monitoring_check.CheckResult {
+	failures := make([]monitoring_check.CheckResult, 0)
 	for _, result := range results {
 		if !result.Success() {
 			failures = append(failures, result)

@@ -4,9 +4,9 @@ import (
 	"sync"
 
 	"github.com/bborbe/log"
-	"github.com/bborbe/monitoring/check"
-	"github.com/bborbe/monitoring/configuration"
-	"github.com/bborbe/monitoring/node"
+	monitoring_check "github.com/bborbe/monitoring/check"
+	monitoring_configuration "github.com/bborbe/monitoring/configuration"
+	monitoring_node "github.com/bborbe/monitoring/node"
 )
 
 var logger = log.DefaultLogger
@@ -22,17 +22,17 @@ func New(maxConcurrency int) *runnerAll {
 	return r
 }
 
-func (r *runnerAll) Run(c configuration.Configuration) <-chan check.CheckResult {
+func (r *runnerAll) Run(c monitoring_configuration.Configuration) <-chan monitoring_check.CheckResult {
 	logger.Debug("run all checks")
 	return Run(r.maxConcurrency, Checks(c))
 }
 
-func Run(maxConcurrency int, checks []check.Check) <-chan check.CheckResult {
+func Run(maxConcurrency int, checks []monitoring_check.Check) <-chan monitoring_check.CheckResult {
 	var wg sync.WaitGroup
 
 	throttle := make(chan bool, maxConcurrency)
 
-	resultChan := make(chan check.CheckResult)
+	resultChan := make(chan monitoring_check.CheckResult)
 
 	for _, check := range checks {
 		c := check
@@ -54,13 +54,13 @@ func Run(maxConcurrency int, checks []check.Check) <-chan check.CheckResult {
 	return resultChan
 }
 
-func Checks(c configuration.Configuration) []check.Check {
-	list := make([]check.Check, 0)
-	list = addChecksToList(c.Nodes(), list)
+func Checks(configuration monitoring_configuration.Configuration) []monitoring_check.Check {
+	list := make([]monitoring_check.Check, 0)
+	list = addChecksToList(configuration.Nodes(), list)
 	return list
 }
 
-func addChecksToList(nodes []node.Node, checks []check.Check) []check.Check {
+func addChecksToList(nodes []monitoring_node.Node, checks []monitoring_check.Check) []monitoring_check.Check {
 	if nodes != nil {
 		for _, n := range nodes {
 			if n.IsDisabled() {

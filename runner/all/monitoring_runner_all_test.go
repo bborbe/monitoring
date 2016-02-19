@@ -6,14 +6,14 @@ import (
 	"runtime"
 
 	. "github.com/bborbe/assert"
-	"github.com/bborbe/monitoring/check"
-	"github.com/bborbe/monitoring/check/dummy"
-	"github.com/bborbe/monitoring/runner"
+	monitoring_check "github.com/bborbe/monitoring/check"
+	monitoring_check_dummy "github.com/bborbe/monitoring/check/dummy"
+	monitoring_runner "github.com/bborbe/monitoring/runner"
 )
 
 func TestImplementsRunner(t *testing.T) {
 	c := New(123)
-	var i *runner.Runner
+	var i *monitoring_runner.Runner
 	err := AssertThat(c, Implements(i))
 	if err != nil {
 		t.Fatal(err)
@@ -22,8 +22,8 @@ func TestImplementsRunner(t *testing.T) {
 
 func TestRun(t *testing.T) {
 	var err error
-	checks := make([]check.Check, 0)
-	checks = append(checks, dummy.New(check.NewCheckResultSuccess("ok"), "ok"))
+	checks := make([]monitoring_check.Check, 0)
+	checks = append(checks, monitoring_check_dummy.New(monitoring_check.NewCheckResultSuccess("ok"), "ok"))
 	results := Run(runtime.NumCPU()*2, checks)
 	for i := 0; i < len(checks); i++ {
 		result := <-results

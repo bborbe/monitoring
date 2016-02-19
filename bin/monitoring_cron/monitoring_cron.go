@@ -11,7 +11,7 @@ import (
 	"github.com/bborbe/log"
 	"github.com/bborbe/mailer"
 	mail_config "github.com/bborbe/mailer/config"
-	"github.com/bborbe/monitoring/check"
+	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_configuration "github.com/bborbe/monitoring/configuration"
 	monitoring_notifier "github.com/bborbe/monitoring/notifier"
 	monitoring_runner "github.com/bborbe/monitoring/runner"
@@ -64,9 +64,10 @@ func do(writer io.Writer, runner monitoring_runner.Runner, configuration monitor
 	var err error
 	fmt.Fprintf(writer, "check started\n")
 	resultChannel := runner.Run(configuration)
-	results := make([]check.CheckResult, 0)
+	results := make([]monitoring_check.CheckResult, 0)
 	failedChecks := 0
-	for result := range resultChannel {
+	var result monitoring_check.CheckResult
+	for result = range resultChannel {
 		if result.Success() {
 			fmt.Fprintf(writer, "[OK]   %s\n", result.Message())
 		} else {

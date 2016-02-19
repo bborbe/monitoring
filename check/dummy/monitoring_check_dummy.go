@@ -1,22 +1,22 @@
 package dummy
 
 import (
-	"github.com/bborbe/monitoring/check"
+	monitoring_check "github.com/bborbe/monitoring/check"
 )
 
 type checkDummy struct {
-	result      check.CheckResult
+	result      monitoring_check.CheckResult
 	description string
 }
 
-func New(result check.CheckResult, description string) check.Check {
+func New(result monitoring_check.CheckResult, description string) monitoring_check.Check {
 	c := new(checkDummy)
 	c.result = result
 	c.description = description
 	return c
 }
 
-func (c *checkDummy) Check() check.CheckResult {
+func (c *checkDummy) Check() monitoring_check.CheckResult {
 	return c.result
 }
 

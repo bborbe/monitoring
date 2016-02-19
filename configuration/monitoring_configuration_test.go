@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	. "github.com/bborbe/assert"
-	"github.com/bborbe/monitoring/check/http"
+	monitoring_check_http "github.com/bborbe/monitoring/check/http"
 )
 
 func TestImplementsConfiguration(t *testing.T) {
@@ -30,25 +30,25 @@ func TestNodesFound(t *testing.T) {
 }
 
 func TestCheckBackupJsonParseNilFailed(t *testing.T) {
-	if err := AssertThat(checkBackupJson(&http.HttpResponse{}), NotNilValue()); err != nil {
+	if err := AssertThat(checkBackupJson(&monitoring_check_http.HttpResponse{}), NotNilValue()); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestCheckBackupJsonParseFailed(t *testing.T) {
-	if err := AssertThat(checkBackupJson(&http.HttpResponse{Content: []byte("")}), NotNilValue()); err != nil {
+	if err := AssertThat(checkBackupJson(&monitoring_check_http.HttpResponse{Content: []byte("")}), NotNilValue()); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestCheckBackupJsonSuccessParseAndNoMissingBackupFound(t *testing.T) {
-	if err := AssertThat(checkBackupJson(&http.HttpResponse{Content: []byte("[]")}), NilValue()); err != nil {
+	if err := AssertThat(checkBackupJson(&monitoring_check_http.HttpResponse{Content: []byte("[]")}), NilValue()); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestCheckBackupJsonSuccessParseButMissingBackupFound(t *testing.T) {
-	if err := AssertThat(checkBackupJson(&http.HttpResponse{Content: []byte("[{'a' : 'b'},{'b' : 'c'}]")}), NotNilValue()); err != nil {
+	if err := AssertThat(checkBackupJson(&monitoring_check_http.HttpResponse{Content: []byte("[{'a' : 'b'},{'b' : 'c'}]")}), NotNilValue()); err != nil {
 		t.Fatal(err)
 	}
 }

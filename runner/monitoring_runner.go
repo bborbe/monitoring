@@ -1,10 +1,10 @@
 package runner
 
 import (
-	"github.com/bborbe/monitoring/check"
-	"github.com/bborbe/monitoring/configuration"
+	monitoring_check "github.com/bborbe/monitoring/check"
+	monitoring_configuration "github.com/bborbe/monitoring/configuration"
 )
 
 type Runner interface {
-	Run(c configuration.Configuration) <-chan check.CheckResult
+	Run(configuration monitoring_configuration.Configuration) <-chan monitoring_check.CheckResult
 }

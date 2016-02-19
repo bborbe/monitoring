@@ -4,15 +4,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-
 	"regexp"
-
 	"strings"
 
 	http_client_builder "github.com/bborbe/http/client_builder"
 	"github.com/bborbe/http/redirect_follower"
 	"github.com/bborbe/log"
-	"github.com/bborbe/monitoring/check"
+	monitoring_check "github.com/bborbe/monitoring/check"
 )
 
 type ExecuteRequest func(req *http.Request) (resp *http.Response, err error)
@@ -47,27 +45,27 @@ func (h *httpCheck) Description() string {
 	return fmt.Sprintf("http check on url %s", h.url)
 }
 
-func (h *httpCheck) Check() check.CheckResult {
+func (h *httpCheck) Check() monitoring_check.CheckResult {
 	if len(h.password) == 0 && len(h.passwordFile) > 0 {
 		logger.Debugf("read password from file %s", h.passwordFile)
 		password, err := ioutil.ReadFile(h.passwordFile)
 		if err != nil {
 			logger.Debugf("read password file failed %s: %v", h.passwordFile, err)
-			return check.NewCheckResult(h, err)
+			return monitoring_check.NewCheckResult(h, err)
 		}
 		h.password = strings.TrimSpace(string(password))
 	}
 	httpResponse, err := get(h.executeRequest, h.url, h.username, h.password)
 	if err != nil {
 		logger.Debugf("fetch url failed %s: %v", h.url, err)
-		return check.NewCheckResult(h, err)
+		return monitoring_check.NewCheckResult(h, err)
 	}
 	for _, expectation := range h.expectations {
 		if err = expectation(httpResponse); err != nil {
-			return check.NewCheckResult(h, err)
+			return monitoring_check.NewCheckResult(h, err)
 		}
 	}
-	return check.NewCheckResult(h, err)
+	return monitoring_check.NewCheckResult(h, err)
 }
 
 func (h *httpCheck) AddExpectation(expectation Expectation) *httpCheck {

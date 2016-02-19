@@ -5,14 +5,14 @@ import (
 	"testing"
 
 	. "github.com/bborbe/assert"
-	"github.com/bborbe/monitoring/check"
-	"github.com/bborbe/monitoring/node"
-	"github.com/bborbe/monitoring/runner"
+	monitoring_check "github.com/bborbe/monitoring/check"
+	monitoring_node "github.com/bborbe/monitoring/node"
+	monitoring_runner "github.com/bborbe/monitoring/runner"
 )
 
 func TestImplementsRunner(t *testing.T) {
 	c := New(1)
-	var i *runner.Runner
+	var i *monitoring_runner.Runner
 	err := AssertThat(c, Implements(i))
 	if err != nil {
 		t.Fatal(err)
@@ -21,9 +21,9 @@ func TestImplementsRunner(t *testing.T) {
 
 func TestRun(t *testing.T) {
 	var err error
-	c := NewCheck(check.NewCheckResultSuccess("success"))
-	nodes := make([]node.Node, 0)
-	nodes = append(nodes, node.New(c))
+	c := NewCheck(monitoring_check.NewCheckResultSuccess("success"))
+	nodes := make([]monitoring_node.Node, 0)
+	nodes = append(nodes, monitoring_node.New(c))
 
 	err = AssertThat(c.counter, Is(0))
 	if err != nil {
@@ -54,14 +54,14 @@ func TestRun(t *testing.T) {
 
 func TestRunRecursive(t *testing.T) {
 	var err error
-	c := NewCheck(check.NewCheckResultSuccess("success"))
+	c := NewCheck(monitoring_check.NewCheckResultSuccess("success"))
 
-	subnodes := make([]node.Node, 0)
-	subnodes = append(subnodes, node.New(c))
-	subnodes = append(subnodes, node.New(c))
+	subnodes := make([]monitoring_node.Node, 0)
+	subnodes = append(subnodes, monitoring_node.New(c))
+	subnodes = append(subnodes, monitoring_node.New(c))
 
-	nodes := make([]node.Node, 0)
-	nodes = append(nodes, node.New(c, subnodes...))
+	nodes := make([]monitoring_node.Node, 0)
+	nodes = append(nodes, monitoring_node.New(c, subnodes...))
 
 	err = AssertThat(c.counter, Is(0))
 	if err != nil {
@@ -81,14 +81,14 @@ func TestRunRecursive(t *testing.T) {
 
 func TestRunRecursiveOnlyIfParentSuccess(t *testing.T) {
 	var err error
-	checkSuccess := NewCheck(check.NewCheckResultSuccess("success"))
-	checkFail := NewCheck(check.NewCheckResultFail("fail", fmt.Errorf("foo")))
+	checkSuccess := NewCheck(monitoring_check.NewCheckResultSuccess("success"))
+	checkFail := NewCheck(monitoring_check.NewCheckResultFail("fail", fmt.Errorf("foo")))
 
-	subnodes := make([]node.Node, 0)
-	subnodes = append(subnodes, node.New(checkSuccess))
+	subnodes := make([]monitoring_node.Node, 0)
+	subnodes = append(subnodes, monitoring_node.New(checkSuccess))
 
-	nodes := make([]node.Node, 0)
-	nodes = append(nodes, node.New(checkFail, subnodes...))
+	nodes := make([]monitoring_node.Node, 0)
+	nodes = append(nodes, monitoring_node.New(checkFail, subnodes...))
 
 	err = AssertThat(checkFail.counter, Is(0))
 	if err != nil {
@@ -115,17 +115,17 @@ func TestRunRecursiveOnlyIfParentSuccess(t *testing.T) {
 
 type countCheck struct {
 	counter int
-	result  check.CheckResult
+	result  monitoring_check.CheckResult
 }
 
-func NewCheck(result check.CheckResult) *countCheck {
+func NewCheck(result monitoring_check.CheckResult) *countCheck {
 	c := new(countCheck)
 	c.counter = 0
 	c.result = result
 	return c
 }
 
-func (c *countCheck) Check() check.CheckResult {
+func (c *countCheck) Check() monitoring_check.CheckResult {
 	c.counter++
 	return c.result
 }

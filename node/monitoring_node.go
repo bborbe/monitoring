@@ -1,11 +1,11 @@
 package node
 
 import (
-	"github.com/bborbe/monitoring/check"
+	monitoring_check "github.com/bborbe/monitoring/check"
 )
 
 type Node interface {
-	Check() check.Check
+	Check() monitoring_check.Check
 	Nodes() []Node
 	IsSilent() bool
 	IsDisabled() bool
@@ -14,20 +14,20 @@ type Node interface {
 }
 
 type node struct {
-	check    check.Check
+	check    monitoring_check.Check
 	nodes    []Node
 	silent   bool
 	disabled bool
 }
 
-func New(c check.Check, nodes ...Node) *node {
+func New(check monitoring_check.Check, nodes ...Node) *node {
 	n := new(node)
-	n.check = c
+	n.check = check
 	n.nodes = nodes
 	return n
 }
 
-func (n *node) Check() check.Check {
+func (n *node) Check() monitoring_check.Check {
 	return n.check
 }
 
