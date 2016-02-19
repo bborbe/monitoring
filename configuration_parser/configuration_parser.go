@@ -7,6 +7,8 @@ import (
 	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_check_dummy "github.com/bborbe/monitoring/check/dummy"
+	monitoring_check_tcp "github.com/bborbe/monitoring/check/tcp"
+	monitoring_check_http "github.com/bborbe/monitoring/check/http"
 	monitoring_node "github.com/bborbe/monitoring/node"
 )
 
@@ -24,8 +26,12 @@ type XmlNodes struct {
 }
 
 type XmlNode struct {
-	Silent bool `xml:"silent,attr"`
+	Silent   bool `xml:"silent,attr"`
 	Disabled bool `xml:"disabled,attr"`
+	Check    string `xml:"check,attr"`
+	Port     int`xml:"port,attr"`
+	Host     string `xml:"host,attr"`
+	Url      string `xml:"url,attr"`
 }
 
 func New() *configurationParser {
@@ -58,7 +64,16 @@ func convertXmlNodesToNodes(xmlNodes XmlNodes) ([]monitoring_node.Node, error) {
 }
 
 func convertXmlNodeToNode(xmlNode XmlNode) (monitoring_node.Node, error) {
-	check := monitoring_check_dummy.New(monitoring_check.NewCheckResultSuccess("ok"), "dummy")
+	var check monitoring_check.Check
+	if xmlNode.Check == "dummy" {
+		check = monitoring_check_dummy.New(monitoring_check.NewCheckResultSuccess("ok"), "dummy")
+	}
+	if xmlNode.Check == "tcp" {
+		check = monitoring_check_tcp.New(xmlNode.Host, xmlNode.Port)
+	}
+	if xmlNode.Check == "http" {
+		check = monitoring_check_http.New(xmlNode.Url)
+	}
 	result := monitoring_node.New(check).Silent(xmlNode.Silent).Disabled(xmlNode.Disabled)
 	return result, nil
 }
