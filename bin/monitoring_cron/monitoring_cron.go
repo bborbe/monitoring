@@ -8,11 +8,15 @@ import (
 
 	"runtime"
 
+	"io/ioutil"
+
+	io_util "github.com/bborbe/io/util"
 	"github.com/bborbe/log"
 	"github.com/bborbe/mailer"
 	mail_config "github.com/bborbe/mailer/config"
 	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_configuration "github.com/bborbe/monitoring/configuration"
+	"github.com/bborbe/monitoring/configuration_parser"
 	monitoring_node "github.com/bborbe/monitoring/node"
 	monitoring_notifier "github.com/bborbe/monitoring/notifier"
 	monitoring_runner "github.com/bborbe/monitoring/runner"
@@ -23,6 +27,7 @@ var logger = log.DefaultLogger
 
 const (
 	PARAMETER_LOGLEVEL = "loglevel"
+	PARAMETER_CONFIG   = "config"
 )
 
 type GetNodes func() ([]monitoring_node.Node, error)
@@ -30,6 +35,7 @@ type GetNodes func() ([]monitoring_node.Node, error)
 func main() {
 	defer logger.Close()
 	logLevelPtr := flag.String(PARAMETER_LOGLEVEL, log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
+	configPtr := flag.String(PARAMETER_CONFIG, "", "config")
 	smtpUserPtr := flag.String("smtp-user", "smtp@benjamin-borbe.de", "string")
 	smtpPasswordPtr := flag.String("smtp-password", "-", "string")
 	smtpHostPtr := flag.String("smtp-host", "iredmail.mailfolder.org", "string")
@@ -49,12 +55,29 @@ func main() {
 	mailConfig.SetSmtpHost(*smtpHostPtr)
 	mailConfig.SetSmtpPort(*smtpPortPtr)
 	writer := os.Stdout
-	configuration := monitoring_configuration.New()
 	runner := monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
 	mailer := mailer.New(mailConfig)
 	notifier := monitoring_notifier.New(mailer, *senderPtr, *recipientPtr)
+	var getNodes GetNodes
+	if len(*configPtr) > 0 {
+		configurationParser := configuration_parser.New()
+		getNodes = func() ([]monitoring_node.Node, error) {
+			path, err := io_util.NormalizePath(*configPtr)
+			if err != nil {
+				return nil, err
+			}
+			content, err := ioutil.ReadFile(path)
+			if err != nil {
+				return nil, err
+			}
+			return configurationParser.ParseConfiguration(content)
+		}
+	} else {
+		configuration := monitoring_configuration.New()
+		getNodes = configuration.Nodes
+	}
 
-	err := do(writer, runner, configuration.Nodes, notifier)
+	err := do(writer, runner, getNodes, notifier)
 	if err != nil {
 		logger.Fatal(err)
 		logger.Close()
