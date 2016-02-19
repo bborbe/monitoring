@@ -70,6 +70,7 @@ func main() {
 	}
 
 	writer := os.Stdout
+	defer writer.Close()
 	err := do(writer, runner, getNodes)
 	if err != nil {
 		logger.Fatal(err)

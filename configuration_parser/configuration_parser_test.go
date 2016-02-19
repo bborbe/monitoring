@@ -191,3 +191,11 @@ func TestParseOneNodeWithSubNode(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestParseInvalidXmlReturnError(t *testing.T) {
+	c := New()
+	_, err := c.ParseConfiguration([]byte(`<nodes><node</nodes>`))
+	if err = AssertThat(err, NotNilValue()); err != nil {
+		t.Fatal(err)
+	}
+}
