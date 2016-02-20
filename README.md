@@ -35,7 +35,7 @@ monitoring_cron \
 
 ## Continuous integration
 
-http://jenkins.benjamin-borbe.de/job/Go-Monitoring/
+[Jenkins](https://www.benjamin-borbe.de/jenkins/job/Go-Monitoring/)
 
 ## Copyright and license
 
