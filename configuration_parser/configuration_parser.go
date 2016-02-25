@@ -4,6 +4,8 @@ import (
 	"encoding/xml"
 	"fmt"
 
+	"time"
+
 	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_check_http "github.com/bborbe/monitoring/check/http"
@@ -88,16 +90,19 @@ func convertXmlNodeToNode(xmlNode XmlNode) (monitoring_node.Node, error) {
 func createCheck(xmlNode XmlNode) (monitoring_check.Check, error) {
 	if xmlNode.Check == "tcp" {
 		check := monitoring_check_tcp.New(xmlNode.Host, xmlNode.Port)
-		if xmlNode.Retrycount > 0 {
-
-		}
 		if xmlNode.Timeout > 0 {
-
+			check.Timeout(time.Duration(xmlNode.Timeout) * time.Second)
+		}
+		if xmlNode.Retrycount > 0 {
+			check.RetryCounter(xmlNode.Retrycount)
 		}
 		return check, nil
 	}
 	if xmlNode.Check == "http" {
 		check := monitoring_check_http.New(xmlNode.Url)
+		if xmlNode.Timeout > 0 {
+			check.Timeout(time.Duration(xmlNode.Timeout) * time.Second)
+		}
 		if len(xmlNode.ExpectContent) > 0 {
 			check.ExpectContent(xmlNode.ExpectContent)
 		}
