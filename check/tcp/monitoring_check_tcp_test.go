@@ -2,6 +2,7 @@ package tcp
 
 import (
 	"testing"
+	"time"
 
 	. "github.com/bborbe/assert"
 	monitoring_check "github.com/bborbe/monitoring/check"
@@ -72,6 +73,36 @@ func TestCheckFailure(t *testing.T) {
 	}
 	err = AssertThat(result.Error(), NotNilValue())
 	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestDefaultTimeout(t *testing.T) {
+	c := New("www.benjamin-borbe.de", 81)
+	if err := AssertThat(c.timeout, Is(5*time.Second)); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestSetTimeout(t *testing.T) {
+	c := New("www.benjamin-borbe.de", 81)
+	c.Timeout(30 * time.Second)
+	if err := AssertThat(c.timeout, Is(30*time.Second)); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestDefaultRetryCounter(t *testing.T) {
+	c := New("www.benjamin-borbe.de", 81)
+	if err := AssertThat(c.retryCounter, Is(3)); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestRetryCounter(t *testing.T) {
+	c := New("www.benjamin-borbe.de", 81)
+	c.RetryCounter(25)
+	if err := AssertThat(c.retryCounter, Is(25)); err != nil {
 		t.Fatal(err)
 	}
 }

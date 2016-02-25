@@ -30,6 +30,8 @@ type XmlNode struct {
 	Disabled         bool      `xml:"disabled,attr"`
 	Check            string    `xml:"check,attr"`
 	Port             int       `xml:"port,attr"`
+	Retrycount       int       `xml:"retrycount,attr"`
+	Timeout          int       `xml:"timeout,attr"`
 	Host             string    `xml:"host,attr"`
 	Url              string    `xml:"url,attr"`
 	ExpectBody       string    `xml:"expectbody,attr"`
@@ -85,7 +87,14 @@ func convertXmlNodeToNode(xmlNode XmlNode) (monitoring_node.Node, error) {
 
 func createCheck(xmlNode XmlNode) (monitoring_check.Check, error) {
 	if xmlNode.Check == "tcp" {
-		return monitoring_check_tcp.New(xmlNode.Host, xmlNode.Port), nil
+		check := monitoring_check_tcp.New(xmlNode.Host, xmlNode.Port)
+		if xmlNode.Retrycount > 0 {
+
+		}
+		if xmlNode.Timeout > 0 {
+
+		}
+		return check, nil
 	}
 	if xmlNode.Check == "http" {
 		check := monitoring_check_http.New(xmlNode.Url)
