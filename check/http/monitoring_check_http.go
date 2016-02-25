@@ -15,17 +15,21 @@ import (
 	monitoring_check "github.com/bborbe/monitoring/check"
 )
 
+const (
+	DEFAULT_TIMEOUT = 30 * time.Second
+)
+
 type ExecuteRequest func(req *http.Request) (resp *http.Response, err error)
 
 type Expectation func(httpResponse *HttpResponse) error
 
 type httpCheck struct {
-	url            string
-	username       string
-	password       string
-	passwordFile   string
-	expectations   []Expectation
-	executeRequest ExecuteRequest
+	url          string
+	username     string
+	password     string
+	passwordFile string
+	expectations []Expectation
+	timeout      time.Duration
 }
 
 type HttpResponse struct {
@@ -38,13 +42,23 @@ var logger = log.DefaultLogger
 func New(url string) *httpCheck {
 	h := new(httpCheck)
 	h.url = url
-	redirectFollower := redirect_follower.New(http_client_builder.New().WithoutProxy().BuildRoundTripper().RoundTrip)
-	h.executeRequest = redirectFollower.ExecuteRequestAndFollow
+	h.timeout = DEFAULT_TIMEOUT
 	return h
 }
 
 func (h *httpCheck) Description() string {
 	return fmt.Sprintf("http check on url %s", h.url)
+}
+
+func (h *httpCheck) executeRequest() ExecuteRequest {
+	builder := http_client_builder.New().WithoutProxy().WithTimeout(h.timeout)
+	redirectFollower := redirect_follower.New(builder.BuildRoundTripper().RoundTrip)
+	return redirectFollower.ExecuteRequestAndFollow
+}
+
+func (h *httpCheck) Timeout(timeout time.Duration) *httpCheck {
+	h.timeout = timeout
+	return h
 }
 
 func (h *httpCheck) Check() monitoring_check.CheckResult {
@@ -58,7 +72,7 @@ func (h *httpCheck) Check() monitoring_check.CheckResult {
 		}
 		h.password = strings.TrimSpace(string(password))
 	}
-	httpResponse, err := get(h.executeRequest, h.url, h.username, h.password)
+	httpResponse, err := get(h.executeRequest(), h.url, h.username, h.password)
 	if err != nil {
 		logger.Debugf("fetch url failed %s: %v", h.url, err)
 		return monitoring_check.NewCheckResult(h, err, time.Now().Sub(start))
