@@ -12,6 +12,10 @@ import (
 	"github.com/bborbe/webdriver"
 )
 
+const (
+	DEFAULT_TIMEOUT = 30 * time.Second
+)
+
 var logger = log.DefaultLogger
 
 type Action func(session *webdriver.Session) error
@@ -19,11 +23,13 @@ type Action func(session *webdriver.Session) error
 type webdriverCheck struct {
 	url     string
 	actions []Action
+	timeout time.Duration
 }
 
 func New(url string) *webdriverCheck {
 	w := new(webdriverCheck)
 	w.url = url
+	w.timeout = DEFAULT_TIMEOUT
 	return w
 }
 
@@ -33,8 +39,13 @@ func (w *webdriverCheck) Check() monitoring_check.CheckResult {
 	return monitoring_check.NewCheckResult(w, w.check(), time.Now().Sub(start))
 }
 
-func (h *webdriverCheck) Description() string {
-	return fmt.Sprintf("webdriver check on url %s", h.url)
+func (w *webdriverCheck) Description() string {
+	return fmt.Sprintf("webdriver check on url %s", w.url)
+}
+
+func (w *webdriverCheck) Timeout(timeout time.Duration) *webdriverCheck {
+	w.timeout = timeout
+	return w
 }
 
 func (w *webdriverCheck) check() error {
@@ -54,6 +65,10 @@ func (w *webdriverCheck) check() error {
 		return err
 	}
 	defer session.Delete()
+
+	if err = session.SetTimeouts("script", int(w.timeout)); err != nil {
+		return err
+	}
 
 	logger.Debugf("fetch url")
 	if err = session.Url(w.url); err != nil {

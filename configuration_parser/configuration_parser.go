@@ -9,6 +9,7 @@ import (
 	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_check_http "github.com/bborbe/monitoring/check/http"
+	monitoring_check_nop "github.com/bborbe/monitoring/check/nop"
 	monitoring_check_tcp "github.com/bborbe/monitoring/check/tcp"
 	monitoring_check_webdriver "github.com/bborbe/monitoring/check/webdriver"
 	monitoring_node "github.com/bborbe/monitoring/node"
@@ -38,6 +39,7 @@ type XmlNode struct {
 	Timeout          int         `xml:"timeout,attr"`
 	Host             string      `xml:"host,attr"`
 	Url              string      `xml:"url,attr"`
+	Name             string      `xml:"name,attr"`
 	ExpectBody       string      `xml:"expectbody,attr"`
 	ExpectContent    string      `xml:"expectcontent,attr"`
 	ExpectStatusCode int         `xml:"expectstatuscode,attr"`
@@ -97,6 +99,8 @@ func convertXmlNodeToNode(xmlNode XmlNode) (monitoring_node.Node, error) {
 
 func createCheck(xmlNode XmlNode) (monitoring_check.Check, error) {
 	switch xmlNode.Check {
+	case "nop":
+		return monitoring_check_nop.New(xmlNode.Name), nil
 	case "tcp":
 		check := monitoring_check_tcp.New(xmlNode.Host, xmlNode.Port)
 		if xmlNode.Timeout > 0 {
