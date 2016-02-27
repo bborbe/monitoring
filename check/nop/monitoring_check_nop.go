@@ -18,7 +18,7 @@ func New(name string) monitoring_check.Check {
 
 func (c *checkNop) Check() monitoring_check.CheckResult {
 	start := time.Now()
-	return monitoring_check.NewCheckResultSuccess("nop", time.Now().Sub(start))
+	return monitoring_check.NewCheckResultSuccess(c.name, time.Now().Sub(start))
 }
 
 func (c *checkNop) Description() string {
