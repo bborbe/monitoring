@@ -28,22 +28,29 @@ type XmlNodes struct {
 }
 
 type XmlNode struct {
-	NodeList         []XmlNode `xml:"node"`
-	Silent           bool      `xml:"silent,attr"`
-	Disabled         bool      `xml:"disabled,attr"`
-	Check            string    `xml:"check,attr"`
-	Port             int       `xml:"port,attr"`
-	Retrycount       int       `xml:"retrycount,attr"`
-	Timeout          int       `xml:"timeout,attr"`
-	Host             string    `xml:"host,attr"`
-	Url              string    `xml:"url,attr"`
-	ExpectBody       string    `xml:"expectbody,attr"`
-	ExpectContent    string    `xml:"expectcontent,attr"`
-	ExpectStatusCode int       `xml:"expectstatuscode,attr"`
-	ExpectTitle      string    `xml:"expecttitle,attr"`
-	Username         string    `xml:"username,attr"`
-	Password         string    `xml:"password,attr"`
-	PasswordFile     string    `xml:"passwordfile,attr"`
+	NodeList         []XmlNode   `xml:"node"`
+	ActionList       []XmlAction `xml:"action"`
+	Silent           bool        `xml:"silent,attr"`
+	Disabled         bool        `xml:"disabled,attr"`
+	Check            string      `xml:"check,attr"`
+	Port             int         `xml:"port,attr"`
+	Retrycount       int         `xml:"retrycount,attr"`
+	Timeout          int         `xml:"timeout,attr"`
+	Host             string      `xml:"host,attr"`
+	Url              string      `xml:"url,attr"`
+	ExpectBody       string      `xml:"expectbody,attr"`
+	ExpectContent    string      `xml:"expectcontent,attr"`
+	ExpectStatusCode int         `xml:"expectstatuscode,attr"`
+	ExpectTitle      string      `xml:"expecttitle,attr"`
+	Username         string      `xml:"username,attr"`
+	Password         string      `xml:"password,attr"`
+	PasswordFile     string      `xml:"passwordfile,attr"`
+}
+
+type XmlAction struct {
+	Type  string `xml:"type,attr"`
+	Value string `xml:"value,attr"`
+	XPath string `xml:"xpath,attr"`
 }
 
 func New() *configurationParser {
@@ -89,7 +96,8 @@ func convertXmlNodeToNode(xmlNode XmlNode) (monitoring_node.Node, error) {
 }
 
 func createCheck(xmlNode XmlNode) (monitoring_check.Check, error) {
-	if xmlNode.Check == "tcp" {
+	switch xmlNode.Check {
+	case "tcp":
 		check := monitoring_check_tcp.New(xmlNode.Host, xmlNode.Port)
 		if xmlNode.Timeout > 0 {
 			check.Timeout(time.Duration(xmlNode.Timeout) * time.Second)
@@ -98,8 +106,7 @@ func createCheck(xmlNode XmlNode) (monitoring_check.Check, error) {
 			check.RetryCounter(xmlNode.Retrycount)
 		}
 		return check, nil
-	}
-	if xmlNode.Check == "http" {
+	case "http":
 		check := monitoring_check_http.New(xmlNode.Url)
 		if xmlNode.Timeout > 0 {
 			check.Timeout(time.Duration(xmlNode.Timeout) * time.Second)
@@ -123,13 +130,22 @@ func createCheck(xmlNode XmlNode) (monitoring_check.Check, error) {
 			check.AuthFile(xmlNode.Username, xmlNode.PasswordFile)
 		}
 		return check, nil
-	}
-	if xmlNode.Check == "webdriver" {
+	case "webdriver":
 		check := monitoring_check_webdriver.New(xmlNode.Url)
-		if len(xmlNode.ExpectTitle) > 0 {
-			check.ExpectTitle(xmlNode.ExpectTitle)
+		for _, action := range xmlNode.ActionList {
+			switch action.Type {
+			case "expecttitle":
+				check.ExpectTitle(action.Value)
+			case "fill":
+				check.Fill(action.XPath, action.Value)
+			case "submit":
+				check.Submit(action.XPath)
+			default:
+				return nil, fmt.Errorf("unkown action '%s'", action.Type)
+			}
 		}
 		return check, nil
+	default:
+		return nil, fmt.Errorf("not check with typ '%s' found", xmlNode.Check)
 	}
-	return nil, fmt.Errorf("not check with typ '%s' found", xmlNode.Check)
 }

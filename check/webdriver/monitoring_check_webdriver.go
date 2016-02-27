@@ -14,11 +14,11 @@ import (
 
 var logger = log.DefaultLogger
 
-type Expectation func(session *webdriver.Session) error
+type Action func(session *webdriver.Session) error
 
 type webdriverCheck struct {
-	url          string
-	expectations []Expectation
+	url     string
+	actions []Action
 }
 
 func New(url string) *webdriverCheck {
@@ -59,32 +59,81 @@ func (w *webdriverCheck) check() error {
 	if err = session.Url(w.url); err != nil {
 		return err
 	}
-
-	for _, expectation := range w.expectations {
-		if err = expectation(session); err != nil {
+	for _, action := range w.actions {
+		if err = action(session); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (h *webdriverCheck) AddExpectation(expectation Expectation) *webdriverCheck {
-	h.expectations = append(h.expectations, expectation)
+func (h *webdriverCheck) AddAction(action Action) *webdriverCheck {
+	h.actions = append(h.actions, action)
 	return h
 }
 
 func (h *webdriverCheck) ExpectTitle(expectedTitle string) *webdriverCheck {
-	var expectation Expectation
-	expectation = func(session *webdriver.Session) error {
+	var action Action
+	action = func(session *webdriver.Session) error {
+		logger.Debugf("expect title '%s' - started", expectedTitle)
 		title, err := session.Title()
 		if err != nil {
+			logger.Debugf("expect title '%s' - failed", expectedTitle)
 			return err
 		}
 		if !strings.Contains(title, expectedTitle) {
+			logger.Debugf("expect title '%s' - failed", expectedTitle)
 			return fmt.Errorf("expected title '%s' but got '%s'", expectedTitle, title)
 		}
+		logger.Debugf("expect title '%s' - success", expectedTitle)
 		return nil
 	}
-	h.AddExpectation(expectation)
+	h.AddAction(action)
+	return h
+}
+
+func (h *webdriverCheck) Fill(xpath string, value string) *webdriverCheck {
+	var action Action
+	action = func(session *webdriver.Session) error {
+		logger.Debugf("fill value '%s' to '%s' - started", value, xpath)
+		var err error
+		var webElements []webdriver.WebElement
+		if webElements, err = session.FindElements(webdriver.XPath, xpath); err != nil {
+			logger.Debugf("fill value '%s' to '%s' - failed", value, xpath)
+			return err
+		}
+		for _, webElement := range webElements {
+			if err = webElement.SendKeys(value); err != nil {
+				logger.Debugf("fill value '%s' to '%s' - failed", value, xpath)
+				return err
+			}
+		}
+		logger.Debugf("fill value '%s' to '%s' - success", value, xpath)
+		return nil
+	}
+	h.AddAction(action)
+	return h
+}
+
+func (h *webdriverCheck) Submit(xpath string) *webdriverCheck {
+	var action Action
+	action = func(session *webdriver.Session) error {
+		logger.Debugf("submit '%s' - started", xpath)
+		var err error
+		var webElements []webdriver.WebElement
+		if webElements, err = session.FindElements(webdriver.XPath, xpath); err != nil {
+			logger.Debugf("submit '%s' - failed", xpath)
+			return err
+		}
+		for _, webElement := range webElements {
+			if err = webElement.Submit(); err != nil {
+				logger.Debugf("submit '%s' - failed", xpath)
+				return err
+			}
+		}
+		logger.Debugf("submit '%s' - success", xpath)
+		return nil
+	}
+	h.AddAction(action)
 	return h
 }
