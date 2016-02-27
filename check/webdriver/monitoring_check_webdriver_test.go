@@ -8,7 +8,7 @@ import (
 )
 
 func TestImplementsCheck(t *testing.T) {
-	c := New("http://www.example.com")
+	c := New(nil,"http://www.example.com")
 	var i *monitoring_check.Check
 	err := AssertThat(c, Implements(i))
 	if err != nil {
@@ -17,7 +17,7 @@ func TestImplementsCheck(t *testing.T) {
 }
 
 func TestDescription(t *testing.T) {
-	c := New("http://www.example.com")
+	c := New(nil,"http://www.example.com")
 	err := AssertThat(c.Description(), Is("webdriver check on url http://www.example.com"))
 	if err != nil {
 		t.Fatal(err)

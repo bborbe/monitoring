@@ -9,7 +9,7 @@ import (
 )
 
 func TestImplementsConfigurationParser(t *testing.T) {
-	c := New()
+	c := New(nil)
 	var i *ConfigurationParser
 	if err := AssertThat(c, Implements(i)); err != nil {
 		t.Fatal(err)
@@ -17,7 +17,7 @@ func TestImplementsConfigurationParser(t *testing.T) {
 }
 
 func TestParseEmptyConfigurationReturnError(t *testing.T) {
-	c := New()
+	c := New(nil)
 	_, err := c.ParseConfiguration([]byte(``))
 	if err = AssertThat(err, NotNilValue()); err != nil {
 		t.Fatal(err)
@@ -25,7 +25,7 @@ func TestParseEmptyConfigurationReturnError(t *testing.T) {
 }
 
 func TestParseEmptyNodes(t *testing.T) {
-	c := New()
+	c := New(nil)
 	nodes, err := c.ParseConfiguration([]byte(`<nodes></nodes>`))
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
@@ -36,7 +36,7 @@ func TestParseEmptyNodes(t *testing.T) {
 }
 
 func TestParseOneNode(t *testing.T) {
-	c := New()
+	c := New(nil)
 	nodes, err := c.ParseConfiguration([]byte(`<nodes><node check="tcp"></node></nodes>`))
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
@@ -47,7 +47,7 @@ func TestParseOneNode(t *testing.T) {
 }
 
 func TestParseOneNodeSilentTrue(t *testing.T) {
-	c := New()
+	c := New(nil)
 	nodes, err := c.ParseConfiguration([]byte(`<nodes><node check="tcp" silent="true"></node></nodes>`))
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
@@ -61,7 +61,7 @@ func TestParseOneNodeSilentTrue(t *testing.T) {
 }
 
 func TestParseOneNodeSilentFalse(t *testing.T) {
-	c := New()
+	c := New(nil)
 	nodes, err := c.ParseConfiguration([]byte(`<nodes><node check="tcp" silent="false"></node></nodes>`))
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
@@ -75,7 +75,7 @@ func TestParseOneNodeSilentFalse(t *testing.T) {
 }
 
 func TestParseOneNodeSilentNotSet(t *testing.T) {
-	c := New()
+	c := New(nil)
 	nodes, err := c.ParseConfiguration([]byte(`<nodes><node check="tcp"></node></nodes>`))
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
@@ -89,7 +89,7 @@ func TestParseOneNodeSilentNotSet(t *testing.T) {
 }
 
 func TestParseOneNodeDisabledTrue(t *testing.T) {
-	c := New()
+	c := New(nil)
 	nodes, err := c.ParseConfiguration([]byte(`<nodes><node check="tcp" disabled="true"></node></nodes>`))
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
@@ -103,7 +103,7 @@ func TestParseOneNodeDisabledTrue(t *testing.T) {
 }
 
 func TestParseOneNodeDisabledFalse(t *testing.T) {
-	c := New()
+	c := New(nil)
 	nodes, err := c.ParseConfiguration([]byte(`<nodes><node check="tcp" disabled="false"></node></nodes>`))
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
@@ -117,7 +117,7 @@ func TestParseOneNodeDisabledFalse(t *testing.T) {
 }
 
 func TestParseOneNodeDisabledNotSet(t *testing.T) {
-	c := New()
+	c := New(nil)
 	nodes, err := c.ParseConfiguration([]byte(`<nodes><node check="tcp"></node></nodes>`))
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
@@ -131,7 +131,7 @@ func TestParseOneNodeDisabledNotSet(t *testing.T) {
 }
 
 func TestParseTcpCheck(t *testing.T) {
-	c := New()
+	c := New(nil)
 	nodes, err := c.ParseConfiguration([]byte(`<nodes><node check="tcp"></node></nodes>`))
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
@@ -145,7 +145,7 @@ func TestParseTcpCheck(t *testing.T) {
 }
 
 func TestParseHttpCheck(t *testing.T) {
-	c := New()
+	c := New(nil)
 	nodes, err := c.ParseConfiguration([]byte(`<nodes><node check="http"></node></nodes>`))
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
@@ -159,7 +159,7 @@ func TestParseHttpCheck(t *testing.T) {
 }
 
 func TestParseOneNodeWithoutSubNode(t *testing.T) {
-	c := New()
+	c := New(nil)
 	nodes, err := c.ParseConfiguration([]byte(`<nodes><node check="tcp"></node></nodes>`))
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
@@ -176,7 +176,7 @@ func TestParseOneNodeWithoutSubNode(t *testing.T) {
 }
 
 func TestParseOneNodeWithSubNode(t *testing.T) {
-	c := New()
+	c := New(nil)
 	nodes, err := c.ParseConfiguration([]byte(`<nodes><node check="tcp"><node check="tcp"></node></node></nodes>`))
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
@@ -193,7 +193,7 @@ func TestParseOneNodeWithSubNode(t *testing.T) {
 }
 
 func TestParseInvalidXmlReturnError(t *testing.T) {
-	c := New()
+	c := New(nil)
 	_, err := c.ParseConfiguration([]byte(`<nodes><node</nodes>`))
 	if err = AssertThat(err, NotNilValue()); err != nil {
 		t.Fatal(err)
@@ -201,7 +201,7 @@ func TestParseInvalidXmlReturnError(t *testing.T) {
 }
 
 func TestParseWebdriverCheck(t *testing.T) {
-	c := New()
+	c := New(nil)
 	nodes, err := c.ParseConfiguration([]byte(`<nodes><node check="webdriver"></node></nodes>`))
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
