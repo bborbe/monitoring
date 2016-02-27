@@ -18,7 +18,7 @@ import (
 	monitoring_runner "github.com/bborbe/monitoring/runner"
 	monitoring_runner_all "github.com/bborbe/monitoring/runner/all"
 	monitoring_runner_hierarchy "github.com/bborbe/monitoring/runner/hierarchy"
-"github.com/bborbe/webdriver"
+	"github.com/bborbe/webdriver"
 )
 
 var logger = log.DefaultLogger

@@ -21,10 +21,10 @@ var logger = log.DefaultLogger
 type Action func(session *webdriver.Session) error
 
 type webdriverCheck struct {
-	url     string
-	actions []Action
+	url       string
+	actions   []Action
 	webDriver webdriver.WebDriver
-	timeout time.Duration
+	timeout   time.Duration
 }
 
 func New(webDriver webdriver.WebDriver, url string) *webdriverCheck {

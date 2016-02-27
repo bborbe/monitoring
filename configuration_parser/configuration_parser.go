@@ -52,9 +52,9 @@ type XmlNode struct {
 }
 
 type XmlAction struct {
-	Type     string `xml:"type,attr"`
-	Value    string `xml:"value,attr"`
-	XPath    string `xml:"xpath,attr"`
+	Type     string        `xml:"type,attr"`
+	Value    string        `xml:"value,attr"`
+	XPath    string        `xml:"xpath,attr"`
 	Duration time.Duration `xml:"duration,attr"`
 }
 
@@ -158,7 +158,7 @@ func (c *configurationParser) createCheck(xmlNode XmlNode) (monitoring_check.Che
 			case "printsource":
 				check.PrintSource()
 			case "waitfor":
-				check.WaitFor(action.XPath, action.Duration * time.Millisecond)
+				check.WaitFor(action.XPath, action.Duration*time.Millisecond)
 			case "sleep":
 				check.Sleep(action.Duration * time.Millisecond)
 			default:
