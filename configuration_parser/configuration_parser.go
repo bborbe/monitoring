@@ -126,6 +126,9 @@ func createCheck(xmlNode XmlNode) (monitoring_check.Check, error) {
 	}
 	if xmlNode.Check == "webdriver" {
 		check := monitoring_check_webdriver.New(xmlNode.Url)
+		if len(xmlNode.ExpectTitle) > 0 {
+			check.ExpectTitle(xmlNode.ExpectTitle)
+		}
 		return check, nil
 	}
 	return nil, fmt.Errorf("not check with typ '%s' found", xmlNode.Check)
