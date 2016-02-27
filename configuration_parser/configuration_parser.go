@@ -140,6 +140,12 @@ func createCheck(xmlNode XmlNode) (monitoring_check.Check, error) {
 				check.Fill(action.XPath, action.Value)
 			case "submit":
 				check.Submit(action.XPath)
+			case "click":
+				check.Click(action.XPath)
+			case "exists":
+				check.Exists(action.XPath)
+			case "notexists":
+				check.NotExists(action.XPath)
 			default:
 				return nil, fmt.Errorf("unkown action '%s'", action.Type)
 			}
