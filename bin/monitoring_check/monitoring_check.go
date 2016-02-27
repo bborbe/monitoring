@@ -18,6 +18,7 @@ import (
 	monitoring_runner "github.com/bborbe/monitoring/runner"
 	monitoring_runner_all "github.com/bborbe/monitoring/runner/all"
 	monitoring_runner_hierarchy "github.com/bborbe/monitoring/runner/hierarchy"
+"github.com/bborbe/webdriver"
 )
 
 var logger = log.DefaultLogger
@@ -53,9 +54,14 @@ func main() {
 		logger.Debug("runner = hierarchy")
 		runner = monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
 	}
-	configurationParser := monitoring_configuration_parser.New()
+	driver := webdriver.NewPhantomJsDriver("/opt/phantomjs-2.1.1-macosx/bin/phantomjs")
+	driver.Start()
+	defer driver.Stop()
+
+	configurationParser := monitoring_configuration_parser.New(driver)
 	writer := os.Stdout
 	defer writer.Close()
+
 	err := do(writer, runner.Run, configurationParser.ParseConfiguration, *configPtr)
 	if err != nil {
 		logger.Fatal(err)

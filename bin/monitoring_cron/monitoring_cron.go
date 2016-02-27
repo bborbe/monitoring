@@ -19,13 +19,14 @@ import (
 	monitoring_node "github.com/bborbe/monitoring/node"
 	monitoring_notifier "github.com/bborbe/monitoring/notifier"
 	monitoring_runner_hierarchy "github.com/bborbe/monitoring/runner/hierarchy"
+	"github.com/bborbe/webdriver"
 )
 
 var logger = log.DefaultLogger
 
 const (
 	PARAMETER_LOGLEVEL = "loglevel"
-	PARAMETER_CONFIG   = "config"
+	PARAMETER_CONFIG = "config"
 )
 
 type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
@@ -60,7 +61,10 @@ func main() {
 	runner := monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
 	mailer := mailer.New(mailConfig)
 	notifier := monitoring_notifier.New(mailer, *senderPtr, *recipientPtr)
-	configurationParser := monitoring_configuration_parser.New()
+	driver := webdriver.NewPhantomJsDriver("/opt/phantomjs-2.1.1-macosx/bin/phantomjs")
+	driver.Start()
+	defer driver.Stop()
+	configurationParser := monitoring_configuration_parser.New(driver)
 
 	err := do(writer, runner.Run, notifier.Notify, configurationParser.ParseConfiguration, *configPtr)
 	if err != nil {
@@ -94,9 +98,9 @@ func do(writer io.Writer, run Run, notify Notify, parseConfiguration ParseConfig
 	var result monitoring_check.CheckResult
 	for result = range run(nodes) {
 		if result.Success() {
-			fmt.Fprintf(writer, "[OK]   %s (%d ms)\n", result.Message(), result.Duration()/time.Millisecond)
+			fmt.Fprintf(writer, "[OK]   %s (%d ms)\n", result.Message(), result.Duration() / time.Millisecond)
 		} else {
-			fmt.Fprintf(writer, "[FAIL] %s - %v (%d ms)\n", result.Message(), result.Error(), result.Duration()/time.Millisecond)
+			fmt.Fprintf(writer, "[FAIL] %s - %v (%d ms)\n", result.Message(), result.Error(), result.Duration() / time.Millisecond)
 			failedChecks++
 		}
 		results = append(results, result)

@@ -13,6 +13,7 @@ import (
 	monitoring_check_tcp "github.com/bborbe/monitoring/check/tcp"
 	monitoring_check_webdriver "github.com/bborbe/monitoring/check/webdriver"
 	monitoring_node "github.com/bborbe/monitoring/node"
+	"github.com/bborbe/webdriver"
 )
 
 var logger = log.DefaultLogger
@@ -22,6 +23,7 @@ type ConfigurationParser interface {
 }
 
 type configurationParser struct {
+	webDriver webdriver.WebDriver
 }
 
 type XmlNodes struct {
@@ -50,13 +52,16 @@ type XmlNode struct {
 }
 
 type XmlAction struct {
-	Type  string `xml:"type,attr"`
-	Value string `xml:"value,attr"`
-	XPath string `xml:"xpath,attr"`
+	Type     string `xml:"type,attr"`
+	Value    string `xml:"value,attr"`
+	XPath    string `xml:"xpath,attr"`
+	Duration time.Duration `xml:"duration,attr"`
 }
 
-func New() *configurationParser {
-	return new(configurationParser)
+func New(webDriver webdriver.WebDriver) *configurationParser {
+	c := new(configurationParser)
+	c.webDriver = webDriver
+	return c
 }
 
 func (c *configurationParser) ParseConfiguration(content []byte) ([]monitoring_node.Node, error) {
@@ -69,13 +74,13 @@ func (c *configurationParser) ParseConfiguration(content []byte) ([]monitoring_n
 	if err != nil {
 		return nil, err
 	}
-	return convertXmlNodesToNodes(data.NodeList)
+	return c.convertXmlNodesToNodes(data.NodeList)
 }
 
-func convertXmlNodesToNodes(xmlNodes []XmlNode) ([]monitoring_node.Node, error) {
+func (c *configurationParser) convertXmlNodesToNodes(xmlNodes []XmlNode) ([]monitoring_node.Node, error) {
 	var result []monitoring_node.Node
 	for _, xmlNode := range xmlNodes {
-		node, err := convertXmlNodeToNode(xmlNode)
+		node, err := c.convertXmlNodeToNode(xmlNode)
 		if err != nil {
 			return nil, err
 		}
@@ -84,12 +89,12 @@ func convertXmlNodesToNodes(xmlNodes []XmlNode) ([]monitoring_node.Node, error) 
 	return result, nil
 }
 
-func convertXmlNodeToNode(xmlNode XmlNode) (monitoring_node.Node, error) {
-	check, err := createCheck(xmlNode)
+func (c *configurationParser) convertXmlNodeToNode(xmlNode XmlNode) (monitoring_node.Node, error) {
+	check, err := c.createCheck(xmlNode)
 	if err != nil {
 		return nil, err
 	}
-	nodes, err := convertXmlNodesToNodes(xmlNode.NodeList)
+	nodes, err := c.convertXmlNodesToNodes(xmlNode.NodeList)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +102,7 @@ func convertXmlNodeToNode(xmlNode XmlNode) (monitoring_node.Node, error) {
 	return result, nil
 }
 
-func createCheck(xmlNode XmlNode) (monitoring_check.Check, error) {
+func (c *configurationParser) createCheck(xmlNode XmlNode) (monitoring_check.Check, error) {
 	switch xmlNode.Check {
 	case "nop":
 		return monitoring_check_nop.New(xmlNode.Name), nil
@@ -135,7 +140,7 @@ func createCheck(xmlNode XmlNode) (monitoring_check.Check, error) {
 		}
 		return check, nil
 	case "webdriver":
-		check := monitoring_check_webdriver.New(xmlNode.Url)
+		check := monitoring_check_webdriver.New(c.webDriver, xmlNode.Url)
 		for _, action := range xmlNode.ActionList {
 			switch action.Type {
 			case "expecttitle":
@@ -150,6 +155,12 @@ func createCheck(xmlNode XmlNode) (monitoring_check.Check, error) {
 				check.Exists(action.XPath)
 			case "notexists":
 				check.NotExists(action.XPath)
+			case "printsource":
+				check.PrintSource()
+			case "waitfor":
+				check.WaitFor(action.XPath, action.Duration * time.Millisecond)
+			case "sleep":
+				check.Sleep(action.Duration * time.Millisecond)
 			default:
 				return nil, fmt.Errorf("unkown action '%s'", action.Type)
 			}

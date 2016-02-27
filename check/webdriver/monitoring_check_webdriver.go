@@ -23,13 +23,15 @@ type Action func(session *webdriver.Session) error
 type webdriverCheck struct {
 	url     string
 	actions []Action
+	webDriver webdriver.WebDriver
 	timeout time.Duration
 }
 
-func New(url string) *webdriverCheck {
+func New(webDriver webdriver.WebDriver, url string) *webdriverCheck {
 	w := new(webdriverCheck)
 	w.url = url
 	w.timeout = DEFAULT_TIMEOUT
+	w.webDriver = webDriver
 	return w
 }
 
@@ -49,18 +51,10 @@ func (w *webdriverCheck) Timeout(timeout time.Duration) *webdriverCheck {
 }
 
 func (w *webdriverCheck) check() error {
-	var err error
-	logger.Debugf("create new driver")
-	driver := webdriver.NewPhantomJsDriver("/opt/phantomjs-2.1.1-macosx/bin/phantomjs")
-	if err = driver.Start(); err != nil {
-		return err
-	}
-	defer driver.Stop()
-
 	desired := webdriver.Capabilities{"Platform": "Linux"}
 	required := webdriver.Capabilities{}
 	logger.Debugf("create new session")
-	session, err := driver.NewSession(desired, required)
+	session, err := w.webDriver.NewSession(desired, required)
 	if err != nil {
 		return err
 	}
@@ -224,6 +218,60 @@ func (h *webdriverCheck) NotExists(xpath string) *webdriverCheck {
 			return fmt.Errorf("element '%s' found", xpath)
 		}
 		logger.Debugf("notexists '%s' - success", xpath)
+		return nil
+	}
+	h.AddAction(action)
+	return h
+}
+
+func (h *webdriverCheck) PrintSource() *webdriverCheck {
+	var action Action
+	action = func(session *webdriver.Session) error {
+		logger.Debugf("printsource - started")
+		source, err := session.Source()
+		if err != nil {
+			logger.Debugf("printsource  - failed")
+			return fmt.Errorf("element found")
+		}
+		fmt.Println(source)
+		logger.Debugf("printsource - success")
+		return nil
+	}
+	h.AddAction(action)
+	return h
+}
+
+func (h *webdriverCheck) WaitFor(xpath string, duration time.Duration) *webdriverCheck {
+	var action Action
+	action = func(session *webdriver.Session) error {
+		logger.Debugf("waitfor '%s' - started", xpath)
+		var err error
+		iterations := time.Duration(10)
+		for i := time.Duration(0); i < iterations; i++ {
+			var webElements []webdriver.WebElement
+			if webElements, err = session.FindElements(webdriver.XPath, xpath); err != nil {
+				logger.Debugf("waitfor '%s' - failed", xpath)
+				return err
+			}
+			if len(webElements) != 0 {
+				logger.Debugf("waitfor '%s' - success", xpath)
+				return nil
+			}
+			time.Sleep(duration / iterations)
+		}
+		logger.Debugf("waitfor '%s' - failed", xpath)
+		return fmt.Errorf("wait for element '%s' failed", xpath)
+	}
+	h.AddAction(action)
+	return h
+}
+
+func (h *webdriverCheck) Sleep(duration time.Duration) *webdriverCheck {
+	var action Action
+	action = func(session *webdriver.Session) error {
+		logger.Debugf("sleep %v - started", duration)
+		time.Sleep(duration)
+		logger.Debugf("sleep %v - success", duration)
 		return nil
 	}
 	h.AddAction(action)
