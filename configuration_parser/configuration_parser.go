@@ -10,6 +10,7 @@ import (
 	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_check_http "github.com/bborbe/monitoring/check/http"
 	monitoring_check_tcp "github.com/bborbe/monitoring/check/tcp"
+	monitoring_check_webdriver "github.com/bborbe/monitoring/check/webdriver"
 	monitoring_node "github.com/bborbe/monitoring/node"
 )
 
@@ -121,6 +122,10 @@ func createCheck(xmlNode XmlNode) (monitoring_check.Check, error) {
 		if len(xmlNode.Username) > 0 && len(xmlNode.PasswordFile) > 0 {
 			check.AuthFile(xmlNode.Username, xmlNode.PasswordFile)
 		}
+		return check, nil
+	}
+	if xmlNode.Check == "webdriver" {
+		check := monitoring_check_webdriver.New()
 		return check, nil
 	}
 	return nil, fmt.Errorf("not check with typ '%s' found", xmlNode.Check)

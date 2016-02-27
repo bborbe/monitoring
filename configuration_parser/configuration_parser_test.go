@@ -199,3 +199,17 @@ func TestParseInvalidXmlReturnError(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestParseWebdriverCheck(t *testing.T) {
+	c := New()
+	nodes, err := c.ParseConfiguration([]byte(`<nodes><node check="webdriver"></node></nodes>`))
+	if err = AssertThat(err, NilValue()); err != nil {
+		t.Fatal(err)
+	}
+	if err = AssertThat(len(nodes), Is(1)); err != nil {
+		t.Fatal(err)
+	}
+	if err = AssertThat(reflect.TypeOf(nodes[0].Check()).String(), Is("*webdriver.webdriverCheck")); err != nil {
+		t.Fatal(err)
+	}
+}
