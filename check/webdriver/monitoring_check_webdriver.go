@@ -275,20 +275,26 @@ func (h *webdriverCheck) Sleep(duration time.Duration) *webdriverCheck {
 func findElements(session *webdriver.Session, xpath string, duration time.Duration) ([]webdriver.WebElement, error) {
 	return findElementsWait(func() ([]webdriver.WebElement, error) {
 		return session.FindElements(webdriver.XPath, xpath)
-	}, func(webElements []webdriver.WebElement) bool {
-		return len(webElements) != 0
+	}, func(webElements []webdriver.WebElement) error {
+		if len(webElements) == 0 {
+			return fmt.Errorf("element '%s' not found", xpath)
+		}
+		return nil
 	}, duration)
 }
 
 func findElementsNot(session *webdriver.Session, xpath string, duration time.Duration) ([]webdriver.WebElement, error) {
 	return findElementsWait(func() ([]webdriver.WebElement, error) {
 		return session.FindElements(webdriver.XPath, xpath)
-	}, func(webElements []webdriver.WebElement) bool {
-		return len(webElements) == 0
+	}, func(webElements []webdriver.WebElement) error {
+		if len(webElements) != 0 {
+			return fmt.Errorf("element '%s' found", xpath)
+		}
+		return nil
 	}, duration)
 }
 
-func findElementsWait(action func() ([]webdriver.WebElement, error), exitConstraint func([]webdriver.WebElement) bool, duration time.Duration) ([]webdriver.WebElement, error) {
+func findElementsWait(action func() ([]webdriver.WebElement, error), exitConstraint func([]webdriver.WebElement) error, duration time.Duration) ([]webdriver.WebElement, error) {
 	logger.Debugf("find elements")
 	if duration == 0 {
 		logger.Debugf("duration 0 => execute action")
@@ -296,6 +302,7 @@ func findElementsWait(action func() ([]webdriver.WebElement, error), exitConstra
 	}
 	var err error
 	start := time.Now()
+	var exitConstraintError error
 	for start.Add(duration).After(time.Now()) {
 		var webElements []webdriver.WebElement
 		logger.Debugf("execute action")
@@ -304,12 +311,12 @@ func findElementsWait(action func() ([]webdriver.WebElement, error), exitConstra
 			return nil, err
 		}
 		logger.Debugf("check exit constraint")
-		if exitConstraint(webElements) {
+		if exitConstraintError = exitConstraint(webElements); exitConstraintError == nil {
 			logger.Debugf("exit constraint success")
 			return webElements, nil
 		}
 		logger.Debugf("exit constraint failed => sleep")
 		time.Sleep(100 * time.Millisecond)
 	}
-	return nil, fmt.Errorf("exit constraint not succeed after %d", duration)
+	return nil, fmt.Errorf("exit constraint not succeed after %v. %v", duration, exitConstraintError)
 }
