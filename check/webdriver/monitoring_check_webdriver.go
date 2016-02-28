@@ -101,13 +101,13 @@ func (h *webdriverCheck) ExpectTitle(expectedTitle string) *webdriverCheck {
 	return h
 }
 
-func (h *webdriverCheck) Fill(xpath string, value string) *webdriverCheck {
+func (h *webdriverCheck) Fill(xpath string, value string, duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("fill value '%s' to '%s' - started", value, xpath)
 		var err error
 		var webElements []webdriver.WebElement
-		if webElements, err = session.FindElements(webdriver.XPath, xpath); err != nil {
+		if webElements, err = findElements(session, xpath, duration); err != nil {
 			logger.Debugf("fill value '%s' to '%s' - failed", value, xpath)
 			return err
 		}
@@ -128,13 +128,13 @@ func (h *webdriverCheck) Fill(xpath string, value string) *webdriverCheck {
 	return h
 }
 
-func (h *webdriverCheck) Submit(xpath string) *webdriverCheck {
+func (h *webdriverCheck) Submit(xpath string, duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("submit '%s' - started", xpath)
 		var err error
 		var webElements []webdriver.WebElement
-		if webElements, err = session.FindElements(webdriver.XPath, xpath); err != nil {
+		if webElements, err = findElements(session, xpath, duration); err != nil {
 			logger.Debugf("submit '%s' - failed", xpath)
 			return err
 		}
@@ -155,13 +155,13 @@ func (h *webdriverCheck) Submit(xpath string) *webdriverCheck {
 	return h
 }
 
-func (h *webdriverCheck) Click(xpath string) *webdriverCheck {
+func (h *webdriverCheck) Click(xpath string, duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("click '%s' - started", xpath)
 		var err error
 		var webElements []webdriver.WebElement
-		if webElements, err = session.FindElements(webdriver.XPath, xpath); err != nil {
+		if webElements, err = findElements(session, xpath, duration); err != nil {
 			logger.Debugf("click '%s' - failed", xpath)
 			return err
 		}
@@ -182,13 +182,13 @@ func (h *webdriverCheck) Click(xpath string) *webdriverCheck {
 	return h
 }
 
-func (h *webdriverCheck) Exists(xpath string) *webdriverCheck {
+func (h *webdriverCheck) Exists(xpath string, duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("exists '%s' - started", xpath)
 		var err error
 		var webElements []webdriver.WebElement
-		if webElements, err = session.FindElements(webdriver.XPath, xpath); err != nil {
+		if webElements, err = findElements(session, xpath, duration); err != nil {
 			logger.Debugf("exists '%s' - failed", xpath)
 			return err
 		}
@@ -203,13 +203,13 @@ func (h *webdriverCheck) Exists(xpath string) *webdriverCheck {
 	return h
 }
 
-func (h *webdriverCheck) NotExists(xpath string) *webdriverCheck {
+func (h *webdriverCheck) NotExists(xpath string, duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("notexists '%s' - started", xpath)
 		var err error
 		var webElements []webdriver.WebElement
-		if webElements, err = session.FindElements(webdriver.XPath, xpath); err != nil {
+		if webElements, err = findElementsNot(session, xpath, duration); err != nil {
 			logger.Debugf("notexists '%s' - failed", xpath)
 			return err
 		}
@@ -246,21 +246,15 @@ func (h *webdriverCheck) WaitFor(xpath string, duration time.Duration) *webdrive
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("waitfor '%s' - started", xpath)
 		var err error
-		iterations := time.Duration(10)
-		for i := time.Duration(0); i < iterations; i++ {
-			var webElements []webdriver.WebElement
-			if webElements, err = session.FindElements(webdriver.XPath, xpath); err != nil {
-				logger.Debugf("waitfor '%s' - failed", xpath)
-				return err
-			}
-			if len(webElements) != 0 {
-				logger.Debugf("waitfor '%s' - success", xpath)
-				return nil
-			}
-			time.Sleep(duration / iterations)
+		var webElements []webdriver.WebElement
+		if webElements, err = findElements(session, xpath, duration); err != nil {
+			return err
 		}
-		logger.Debugf("waitfor '%s' - failed", xpath)
-		return fmt.Errorf("wait for element '%s' failed", xpath)
+		if len(webElements) == 0 {
+			return fmt.Errorf("wait for element '%s' failed", xpath)
+		}
+		logger.Debugf("waitfor '%s' - success", xpath)
+		return nil
 	}
 	h.AddAction(action)
 	return h
@@ -276,4 +270,46 @@ func (h *webdriverCheck) Sleep(duration time.Duration) *webdriverCheck {
 	}
 	h.AddAction(action)
 	return h
+}
+
+func findElements(session *webdriver.Session, xpath string, duration time.Duration) ([]webdriver.WebElement, error) {
+	return findElementsWait(func() ([]webdriver.WebElement, error) {
+		return session.FindElements(webdriver.XPath, xpath)
+	}, func(webElements []webdriver.WebElement) bool {
+		return len(webElements) != 0
+	}, duration)
+}
+
+func findElementsNot(session *webdriver.Session, xpath string, duration time.Duration) ([]webdriver.WebElement, error) {
+	return findElementsWait(func() ([]webdriver.WebElement, error) {
+		return session.FindElements(webdriver.XPath, xpath)
+	}, func(webElements []webdriver.WebElement) bool {
+		return len(webElements) == 0
+	}, duration)
+}
+
+func findElementsWait(action func() ([]webdriver.WebElement, error), exitConstraint func([]webdriver.WebElement) bool, duration time.Duration) ([]webdriver.WebElement, error) {
+	logger.Debugf("find elements")
+	if duration == 0 {
+		logger.Debugf("duration 0 => execute action")
+		return action()
+	}
+	var err error
+	start := time.Now()
+	for start.Add(duration).After(time.Now()) {
+		var webElements []webdriver.WebElement
+		logger.Debugf("execute action")
+		if webElements, err = action(); err != nil {
+			logger.Debugf("execute action failed")
+			return nil, err
+		}
+		logger.Debugf("check exit constraint")
+		if exitConstraint(webElements) {
+			logger.Debugf("exit constraint success")
+			return webElements, nil
+		}
+		logger.Debugf("exit constraint failed => sleep")
+		time.Sleep(100 * time.Millisecond)
+	}
+	return nil, fmt.Errorf("exit constraint not succeed after %d", duration)
 }
