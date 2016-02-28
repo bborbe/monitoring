@@ -148,17 +148,17 @@ func (c *configurationParser) createCheck(xmlNode XmlNode) (monitoring_check.Che
 			case "printsource":
 				check.PrintSource()
 			case "fill":
-				check.Fill(action.XPath, action.Value, action.Duration * time.Millisecond)
+				check.Fill(action.XPath, action.Value, action.Duration*time.Millisecond)
 			case "submit":
-				check.Submit(action.XPath, action.Duration * time.Millisecond)
+				check.Submit(action.XPath, action.Duration*time.Millisecond)
 			case "click":
-				check.Click(action.XPath, action.Duration * time.Millisecond)
+				check.Click(action.XPath, action.Duration*time.Millisecond)
 			case "exists":
-				check.Exists(action.XPath, action.Duration * time.Millisecond)
+				check.Exists(action.XPath, action.Duration*time.Millisecond)
 			case "notexists":
-				check.NotExists(action.XPath, action.Duration * time.Millisecond)
+				check.NotExists(action.XPath, action.Duration*time.Millisecond)
 			case "waitfor":
-				check.WaitFor(action.XPath, action.Duration * time.Millisecond)
+				check.WaitFor(action.XPath, action.Duration*time.Millisecond)
 			case "sleep":
 				check.Sleep(action.Duration * time.Millisecond)
 			default:

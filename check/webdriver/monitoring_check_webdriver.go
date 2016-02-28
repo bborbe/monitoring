@@ -263,9 +263,9 @@ func (h *webdriverCheck) WaitFor(xpath string, duration time.Duration) *webdrive
 func (h *webdriverCheck) Sleep(duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("sleep %v - started", duration)
+		logger.Debugf("sleep %dms - started", duration/time.Millisecond)
 		time.Sleep(duration)
-		logger.Debugf("sleep %v - success", duration)
+		logger.Debugf("sleep %dms - success", duration/time.Millisecond)
 		return nil
 	}
 	h.AddAction(action)
@@ -296,14 +296,10 @@ func findElementsNot(session *webdriver.Session, xpath string, duration time.Dur
 
 func findElementsWait(action func() ([]webdriver.WebElement, error), exitConstraint func([]webdriver.WebElement) error, duration time.Duration) ([]webdriver.WebElement, error) {
 	logger.Debugf("find elements")
-	if duration == 0 {
-		logger.Debugf("duration 0 => execute action")
-		return action()
-	}
 	var err error
 	start := time.Now()
 	var exitConstraintError error
-	for start.Add(duration).After(time.Now()) {
+	for {
 		var webElements []webdriver.WebElement
 		logger.Debugf("execute action")
 		if webElements, err = action(); err != nil {
@@ -312,11 +308,13 @@ func findElementsWait(action func() ([]webdriver.WebElement, error), exitConstra
 		}
 		logger.Debugf("check exit constraint")
 		if exitConstraintError = exitConstraint(webElements); exitConstraintError == nil {
-			logger.Debugf("exit constraint success")
+			logger.Debugf("exit constraint succeed after %dms", time.Now().Sub(start)/time.Millisecond)
 			return webElements, nil
+		}
+		if start.Add(duration).Before(time.Now()) {
+			return nil, fmt.Errorf("exit constraint not succeed after %dms. %v", duration/time.Millisecond, exitConstraintError)
 		}
 		logger.Debugf("exit constraint failed => sleep")
 		time.Sleep(100 * time.Millisecond)
 	}
-	return nil, fmt.Errorf("exit constraint not succeed after %v. %v", duration, exitConstraintError)
 }
