@@ -61,7 +61,7 @@ func main() {
 	runner := monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
 	mailer := mailer.New(mailConfig)
 	notifier := monitoring_notifier.New(mailer, *senderPtr, *recipientPtr)
-	driver := webdriver.NewPhantomJsDriver("/opt/phantomjs-2.1.1-macosx/bin/phantomjs")
+	driver := webdriver.NewPhantomJsDriver("phantomjs")
 	driver.Start()
 	defer driver.Stop()
 	configurationParser := monitoring_configuration_parser.New(driver)
