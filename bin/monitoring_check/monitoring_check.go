@@ -28,6 +28,7 @@ const (
 	PARAMETER_CONFIG   = "config"
 	PARAMETER_MODE     = "mode"
 	PARAMETER_MAX      = "max"
+	PARAMETER_DRIVER   = "driver"
 )
 
 type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
@@ -40,12 +41,23 @@ func main() {
 	modePtr := flag.String(PARAMETER_MODE, "", "mode (all|hierachy)")
 	configPtr := flag.String(PARAMETER_CONFIG, "", "config")
 	maxConcurrencyPtr := flag.Int(PARAMETER_MAX, runtime.NumCPU()*4, "max concurrency")
+	driverPtr := flag.String(PARAMETER_DRIVER, "phantomjs", "driver phantomjs|chromedriver")
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
 	logger.Debugf("set log level to %s", *logLevelPtr)
 
 	logger.Debugf("max concurrency: %d", *maxConcurrencyPtr)
 
+	var driver webdriver.WebDriver
+	if *driverPtr == "chromedriver" {
+		driver = webdriver.NewChromeDriver("chromedriver")
+	} else {
+		driver = webdriver.NewPhantomJsDriver("phantomjs")
+	}
+	driver.Start()
+	defer driver.Stop()
+
+	writer := os.Stdout
 	var runner monitoring_runner.Runner
 	if "all" == *modePtr {
 		logger.Debug("runner = all")
@@ -54,13 +66,7 @@ func main() {
 		logger.Debug("runner = hierarchy")
 		runner = monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
 	}
-	driver := webdriver.NewPhantomJsDriver("phantomjs")
-	driver.Start()
-	defer driver.Stop()
-
 	configurationParser := monitoring_configuration_parser.New(driver)
-	writer := os.Stdout
-	defer writer.Close()
 
 	err := do(writer, runner.Run, configurationParser.ParseConfiguration, *configPtr)
 	if err != nil {

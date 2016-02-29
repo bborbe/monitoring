@@ -27,6 +27,7 @@ var logger = log.DefaultLogger
 const (
 	PARAMETER_LOGLEVEL = "loglevel"
 	PARAMETER_CONFIG   = "config"
+	PARAMETER_DRIVER   = "driver"
 )
 
 type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
@@ -39,6 +40,7 @@ func main() {
 	defer logger.Close()
 	logLevelPtr := flag.String(PARAMETER_LOGLEVEL, log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
 	configPtr := flag.String(PARAMETER_CONFIG, "", "config")
+	driverPtr := flag.String(PARAMETER_DRIVER, "phantomjs", "driver phantomjs|chromedriver")
 	smtpUserPtr := flag.String("smtp-user", "smtp@benjamin-borbe.de", "string")
 	smtpPasswordPtr := flag.String("smtp-password", "-", "string")
 	smtpHostPtr := flag.String("smtp-host", "iredmail.mailfolder.org", "string")
@@ -52,18 +54,24 @@ func main() {
 
 	logger.Debugf("max concurrency: %d", *maxConcurrencyPtr)
 
+	var driver webdriver.WebDriver
+	if *driverPtr == "chromedriver" {
+		driver = webdriver.NewChromeDriver("chromedriver")
+	} else {
+		driver = webdriver.NewPhantomJsDriver("phantomjs")
+	}
+	driver.Start()
+	defer driver.Stop()
+
+	writer := os.Stdout
 	mailConfig := mail_config.New()
 	mailConfig.SetSmtpUser(*smtpUserPtr)
 	mailConfig.SetSmtpPassword(*smtpPasswordPtr)
 	mailConfig.SetSmtpHost(*smtpHostPtr)
 	mailConfig.SetSmtpPort(*smtpPortPtr)
-	writer := os.Stdout
 	runner := monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
 	mailer := mailer.New(mailConfig)
 	notifier := monitoring_notifier.New(mailer, *senderPtr, *recipientPtr)
-	driver := webdriver.NewPhantomJsDriver("phantomjs")
-	driver.Start()
-	defer driver.Stop()
 	configurationParser := monitoring_configuration_parser.New(driver)
 
 	err := do(writer, runner.Run, notifier.Notify, configurationParser.ParseConfiguration, *configPtr)
