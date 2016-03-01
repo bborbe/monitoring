@@ -156,6 +156,8 @@ func (c *configurationParser) createCheck(xmlNode XmlNode) (monitoring_check.Che
 					return nil, err
 				}
 				check.Fill(strategy, action.Query, action.Value, action.Duration*time.Millisecond)
+			case "executejavascript":
+				check.ExecuteScript(action.Value)
 			case "submit":
 				strategy, err := parseFindElementStrategy(action.Strategy)
 				if err != nil {

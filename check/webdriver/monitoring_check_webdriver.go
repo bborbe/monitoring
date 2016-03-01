@@ -107,6 +107,24 @@ func (h *webdriverCheck) ExpectTitle(expectedTitle string) *webdriverCheck {
 	return h
 }
 
+func (h *webdriverCheck) ExecuteScript(javascript string) *webdriverCheck {
+	var action Action
+	action = func(session *webdriver.Session) error {
+		logger.Debugf("execute script '%s' - started", javascript)
+		args := make([]interface{}, 0)
+		result, err := session.ExecuteScript(javascript, args)
+		if err != nil {
+			return err
+		}
+		logger.Debugf("script result: %s", string(result))
+
+		logger.Debugf("execute script '%s' - success", javascript)
+		return nil
+	}
+	h.AddAction(action)
+	return h
+}
+
 func (h *webdriverCheck) Fill(strategy webdriver.FindElementStrategy, query string, value string, duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
