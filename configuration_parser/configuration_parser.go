@@ -54,7 +54,8 @@ type XmlNode struct {
 type XmlAction struct {
 	Type     string        `xml:"type,attr"`
 	Value    string        `xml:"value,attr"`
-	XPath    string        `xml:"xpath,attr"`
+	Strategy string        `xml:"strategy,attr"`
+	Query    string        `xml:"query,attr"`
 	Duration time.Duration `xml:"duration,attr"`
 }
 
@@ -147,20 +148,44 @@ func (c *configurationParser) createCheck(xmlNode XmlNode) (monitoring_check.Che
 				check.ExpectTitle(action.Value)
 			case "printsource":
 				check.PrintSource()
-			case "fill":
-				check.Fill(action.XPath, action.Value, action.Duration*time.Millisecond)
-			case "submit":
-				check.Submit(action.XPath, action.Duration*time.Millisecond)
-			case "click":
-				check.Click(action.XPath, action.Duration*time.Millisecond)
-			case "exists":
-				check.Exists(action.XPath, action.Duration*time.Millisecond)
-			case "notexists":
-				check.NotExists(action.XPath, action.Duration*time.Millisecond)
-			case "waitfor":
-				check.WaitFor(action.XPath, action.Duration*time.Millisecond)
 			case "sleep":
 				check.Sleep(action.Duration * time.Millisecond)
+			case "fill":
+				strategy, err := parseFindElementStrategy(action.Strategy)
+				if err != nil {
+					return nil, err
+				}
+				check.Fill(strategy, action.Query, action.Value, action.Duration*time.Millisecond)
+			case "submit":
+				strategy, err := parseFindElementStrategy(action.Strategy)
+				if err != nil {
+					return nil, err
+				}
+				check.Submit(strategy, action.Query, action.Duration*time.Millisecond)
+			case "click":
+				strategy, err := parseFindElementStrategy(action.Strategy)
+				if err != nil {
+					return nil, err
+				}
+				check.Click(strategy, action.Query, action.Duration*time.Millisecond)
+			case "exists":
+				strategy, err := parseFindElementStrategy(action.Strategy)
+				if err != nil {
+					return nil, err
+				}
+				check.Exists(strategy, action.Query, action.Duration*time.Millisecond)
+			case "notexists":
+				strategy, err := parseFindElementStrategy(action.Strategy)
+				if err != nil {
+					return nil, err
+				}
+				check.NotExists(strategy, action.Query, action.Duration*time.Millisecond)
+			case "waitfor":
+				strategy, err := parseFindElementStrategy(action.Strategy)
+				if err != nil {
+					return nil, err
+				}
+				check.WaitFor(strategy, action.Query, action.Duration*time.Millisecond)
 			default:
 				return nil, fmt.Errorf("unkown action '%s'", action.Type)
 			}
@@ -168,5 +193,16 @@ func (c *configurationParser) createCheck(xmlNode XmlNode) (monitoring_check.Che
 		return check, nil
 	default:
 		return nil, fmt.Errorf("not check with typ '%s' found", xmlNode.Check)
+	}
+}
+
+func parseFindElementStrategy(value string) (webdriver.FindElementStrategy, error) {
+	switch value {
+	case "xpath":
+		return webdriver.XPath, nil
+	case "css":
+		return webdriver.CSS_Selector, nil
+	default:
+		return "", fmt.Errorf("unknown webdriver find element strategy: %s", value)
 	}
 }

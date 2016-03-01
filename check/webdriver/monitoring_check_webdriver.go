@@ -101,123 +101,123 @@ func (h *webdriverCheck) ExpectTitle(expectedTitle string) *webdriverCheck {
 	return h
 }
 
-func (h *webdriverCheck) Fill(xpath string, value string, duration time.Duration) *webdriverCheck {
+func (h *webdriverCheck) Fill(strategy webdriver.FindElementStrategy, query string, value string, duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("fill value '%s' to '%s' - started", value, xpath)
+		logger.Debugf("fill value '%s' to '%s' - started", value, query)
 		var err error
 		var webElements []webdriver.WebElement
-		if webElements, err = findElements(session, xpath, duration); err != nil {
-			logger.Debugf("fill value '%s' to '%s' - failed", value, xpath)
+		if webElements, err = findElements(session, strategy, query, duration); err != nil {
+			logger.Debugf("fill value '%s' to '%s' - failed", value, query)
 			return err
 		}
 		if len(webElements) == 0 {
-			logger.Debugf("fill value '%s' to '%s' - failed", value, xpath)
-			return fmt.Errorf("element '%s' not found", xpath)
+			logger.Debugf("fill value '%s' to '%s' - failed", value, query)
+			return fmt.Errorf("element '%s' not found", query)
 		}
 		for _, webElement := range webElements {
 			if err = webElement.SendKeys(value); err != nil {
-				logger.Debugf("fill value '%s' to '%s' - failed", value, xpath)
+				logger.Debugf("fill value '%s' to '%s' - failed", value, query)
 				return err
 			}
 		}
-		logger.Debugf("fill value '%s' to '%s' - success", value, xpath)
+		logger.Debugf("fill value '%s' to '%s' - success", value, query)
 		return nil
 	}
 	h.AddAction(action)
 	return h
 }
 
-func (h *webdriverCheck) Submit(xpath string, duration time.Duration) *webdriverCheck {
+func (h *webdriverCheck) Submit(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("submit '%s' - started", xpath)
+		logger.Debugf("submit '%s' - started", query)
 		var err error
 		var webElements []webdriver.WebElement
-		if webElements, err = findElements(session, xpath, duration); err != nil {
-			logger.Debugf("submit '%s' - failed", xpath)
+		if webElements, err = findElements(session, strategy, query, duration); err != nil {
+			logger.Debugf("submit '%s' - failed", query)
 			return err
 		}
 		if len(webElements) == 0 {
-			logger.Debugf("submit '%s' - failed", xpath)
-			return fmt.Errorf("element '%s' not found", xpath)
+			logger.Debugf("submit '%s' - failed", query)
+			return fmt.Errorf("element '%s' not found", query)
 		}
 		for _, webElement := range webElements {
 			if err = webElement.Submit(); err != nil {
-				logger.Debugf("submit '%s' - failed", xpath)
+				logger.Debugf("submit '%s' - failed", query)
 				return err
 			}
 		}
-		logger.Debugf("submit '%s' - success", xpath)
+		logger.Debugf("submit '%s' - success", query)
 		return nil
 	}
 	h.AddAction(action)
 	return h
 }
 
-func (h *webdriverCheck) Click(xpath string, duration time.Duration) *webdriverCheck {
+func (h *webdriverCheck) Click(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("click '%s' - started", xpath)
+		logger.Debugf("click '%s' - started", query)
 		var err error
 		var webElements []webdriver.WebElement
-		if webElements, err = findElements(session, xpath, duration); err != nil {
-			logger.Debugf("click '%s' - failed", xpath)
+		if webElements, err = findElements(session, strategy, query, duration); err != nil {
+			logger.Debugf("click '%s' - failed", query)
 			return err
 		}
 		if len(webElements) == 0 {
-			logger.Debugf("click '%s' - failed", xpath)
-			return fmt.Errorf("element '%s' not found", xpath)
+			logger.Debugf("click '%s' - failed", query)
+			return fmt.Errorf("element '%s' not found", query)
 		}
 		for _, webElement := range webElements {
 			if err = webElement.Click(); err != nil {
-				logger.Debugf("click '%s' - failed", xpath)
+				logger.Debugf("click '%s' - failed", query)
 				return err
 			}
 		}
-		logger.Debugf("click '%s' - success", xpath)
+		logger.Debugf("click '%s' - success", query)
 		return nil
 	}
 	h.AddAction(action)
 	return h
 }
 
-func (h *webdriverCheck) Exists(xpath string, duration time.Duration) *webdriverCheck {
+func (h *webdriverCheck) Exists(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("exists '%s' - started", xpath)
+		logger.Debugf("exists '%s' - started", query)
 		var err error
 		var webElements []webdriver.WebElement
-		if webElements, err = findElements(session, xpath, duration); err != nil {
-			logger.Debugf("exists '%s' - failed", xpath)
+		if webElements, err = findElements(session, strategy, query, duration); err != nil {
+			logger.Debugf("exists '%s' - failed", query)
 			return err
 		}
 		if len(webElements) == 0 {
-			logger.Debugf("exists '%s' - failed", xpath)
-			return fmt.Errorf("element '%s' not found", xpath)
+			logger.Debugf("exists '%s' - failed", query)
+			return fmt.Errorf("element '%s' not found", query)
 		}
-		logger.Debugf("exists '%s' - success", xpath)
+		logger.Debugf("exists '%s' - success", query)
 		return nil
 	}
 	h.AddAction(action)
 	return h
 }
 
-func (h *webdriverCheck) NotExists(xpath string, duration time.Duration) *webdriverCheck {
+func (h *webdriverCheck) NotExists(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("notexists '%s' - started", xpath)
+		logger.Debugf("notexists '%s' - started", query)
 		var err error
 		var webElements []webdriver.WebElement
-		if webElements, err = findElementsNot(session, xpath, duration); err != nil {
-			logger.Debugf("notexists '%s' - failed", xpath)
+		if webElements, err = findElementsNot(session, strategy, query, duration); err != nil {
+			logger.Debugf("notexists '%s' - failed", query)
 			return err
 		}
 		if len(webElements) != 0 {
-			logger.Debugf("notexists '%s' - failed", xpath)
-			return fmt.Errorf("element '%s' found", xpath)
+			logger.Debugf("notexists '%s' - failed", query)
+			return fmt.Errorf("element '%s' found", query)
 		}
-		logger.Debugf("notexists '%s' - success", xpath)
+		logger.Debugf("notexists '%s' - success", query)
 		return nil
 	}
 	h.AddAction(action)
@@ -241,19 +241,19 @@ func (h *webdriverCheck) PrintSource() *webdriverCheck {
 	return h
 }
 
-func (h *webdriverCheck) WaitFor(xpath string, duration time.Duration) *webdriverCheck {
+func (h *webdriverCheck) WaitFor(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("waitfor '%s' - started", xpath)
+		logger.Debugf("waitfor '%s' - started", query)
 		var err error
 		var webElements []webdriver.WebElement
-		if webElements, err = findElements(session, xpath, duration); err != nil {
+		if webElements, err = findElements(session, strategy, query, duration); err != nil {
 			return err
 		}
 		if len(webElements) == 0 {
-			return fmt.Errorf("wait for element '%s' failed", xpath)
+			return fmt.Errorf("wait for element '%s' failed", query)
 		}
-		logger.Debugf("waitfor '%s' - success", xpath)
+		logger.Debugf("waitfor '%s' - success", query)
 		return nil
 	}
 	h.AddAction(action)
@@ -272,23 +272,23 @@ func (h *webdriverCheck) Sleep(duration time.Duration) *webdriverCheck {
 	return h
 }
 
-func findElements(session *webdriver.Session, xpath string, duration time.Duration) ([]webdriver.WebElement, error) {
+func findElements(session *webdriver.Session, strategy webdriver.FindElementStrategy, query string, duration time.Duration) ([]webdriver.WebElement, error) {
 	return findElementsWait(func() ([]webdriver.WebElement, error) {
-		return session.FindElements(webdriver.XPath, xpath)
+		return session.FindElements(strategy, query)
 	}, func(webElements []webdriver.WebElement) error {
 		if len(webElements) == 0 {
-			return fmt.Errorf("element '%s' not found", xpath)
+			return fmt.Errorf("element '%s' not found", query)
 		}
 		return nil
 	}, duration)
 }
 
-func findElementsNot(session *webdriver.Session, xpath string, duration time.Duration) ([]webdriver.WebElement, error) {
+func findElementsNot(session *webdriver.Session, strategy webdriver.FindElementStrategy, query string, duration time.Duration) ([]webdriver.WebElement, error) {
 	return findElementsWait(func() ([]webdriver.WebElement, error) {
-		return session.FindElements(webdriver.XPath, xpath)
+		return session.FindElements(strategy, query)
 	}, func(webElements []webdriver.WebElement) error {
 		if len(webElements) != 0 {
-			return fmt.Errorf("element '%s' found", xpath)
+			return fmt.Errorf("element '%s' found", query)
 		}
 		return nil
 	}, duration)
