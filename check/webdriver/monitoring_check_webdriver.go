@@ -70,10 +70,16 @@ func (w *webdriverCheck) check() error {
 	}
 	for _, action := range w.actions {
 		if err = action(session); err != nil {
+			//printSource(session)
 			return err
 		}
 	}
 	return nil
+}
+
+func printSource(session *webdriver.Session) {
+	source, _ := session.Source()
+	fmt.Printf("source:\n%s\n", source)
 }
 
 func (h *webdriverCheck) AddAction(action Action) *webdriverCheck {
@@ -241,6 +247,41 @@ func (h *webdriverCheck) PrintSource() *webdriverCheck {
 	return h
 }
 
+func (h *webdriverCheck) WaitForDisplayed(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *webdriverCheck {
+	var action Action
+	action = func(session *webdriver.Session) error {
+		logger.Debugf("wait for displayed '%s' - started", query)
+
+		_, err := findElementsWait(func() ([]webdriver.WebElement, error) {
+			return session.FindElements(strategy, query)
+		}, func(webElements []webdriver.WebElement) error {
+			for _, webElement := range webElements {
+				displayed, err := webElement.IsDisplayed()
+				if err != nil {
+					return err
+				}
+				if !displayed {
+					return fmt.Errorf("element '%s' found but not displayed", query)
+				}
+			}
+			if len(webElements) == 0 {
+				return fmt.Errorf("element '%s' not found", query)
+			}
+			return nil
+		}, duration)
+
+		if err != nil {
+			logger.Debugf("wait for displayed '%s' - failed", query)
+			return err
+		}
+
+		logger.Debugf("wait for displayed '%s' - success", query)
+		return nil
+	}
+	h.AddAction(action)
+	return h
+}
+
 func (h *webdriverCheck) WaitFor(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
@@ -263,9 +304,9 @@ func (h *webdriverCheck) WaitFor(strategy webdriver.FindElementStrategy, query s
 func (h *webdriverCheck) Sleep(duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("sleep %dms - started", duration/time.Millisecond)
+		logger.Debugf("sleep %dms - started", duration / time.Millisecond)
 		time.Sleep(duration)
-		logger.Debugf("sleep %dms - success", duration/time.Millisecond)
+		logger.Debugf("sleep %dms - success", duration / time.Millisecond)
 		return nil
 	}
 	h.AddAction(action)
@@ -308,11 +349,11 @@ func findElementsWait(action func() ([]webdriver.WebElement, error), exitConstra
 		}
 		logger.Debugf("check exit constraint")
 		if exitConstraintError = exitConstraint(webElements); exitConstraintError == nil {
-			logger.Debugf("exit constraint succeed after %dms", time.Now().Sub(start)/time.Millisecond)
+			logger.Debugf("exit constraint succeed after %dms", time.Now().Sub(start) / time.Millisecond)
 			return webElements, nil
 		}
 		if start.Add(duration).Before(time.Now()) {
-			return nil, fmt.Errorf("exit constraint not succeed after %dms. %v", duration/time.Millisecond, exitConstraintError)
+			return nil, fmt.Errorf("exit constraint not succeed after %dms. %v", duration / time.Millisecond, exitConstraintError)
 		}
 		logger.Debugf("exit constraint failed => sleep")
 		time.Sleep(100 * time.Millisecond)

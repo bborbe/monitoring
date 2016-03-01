@@ -186,6 +186,12 @@ func (c *configurationParser) createCheck(xmlNode XmlNode) (monitoring_check.Che
 					return nil, err
 				}
 				check.WaitFor(strategy, action.Query, action.Duration*time.Millisecond)
+			case "waitfordisplayed":
+				strategy, err := parseFindElementStrategy(action.Strategy)
+				if err != nil {
+					return nil, err
+				}
+				check.WaitForDisplayed(strategy, action.Query, action.Duration*time.Millisecond)
 			default:
 				return nil, fmt.Errorf("unkown action '%s'", action.Type)
 			}
