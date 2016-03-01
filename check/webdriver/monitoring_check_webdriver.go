@@ -304,9 +304,9 @@ func (h *webdriverCheck) WaitFor(strategy webdriver.FindElementStrategy, query s
 func (h *webdriverCheck) Sleep(duration time.Duration) *webdriverCheck {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("sleep %dms - started", duration / time.Millisecond)
+		logger.Debugf("sleep %dms - started", duration/time.Millisecond)
 		time.Sleep(duration)
-		logger.Debugf("sleep %dms - success", duration / time.Millisecond)
+		logger.Debugf("sleep %dms - success", duration/time.Millisecond)
 		return nil
 	}
 	h.AddAction(action)
@@ -349,11 +349,11 @@ func findElementsWait(action func() ([]webdriver.WebElement, error), exitConstra
 		}
 		logger.Debugf("check exit constraint")
 		if exitConstraintError = exitConstraint(webElements); exitConstraintError == nil {
-			logger.Debugf("exit constraint succeed after %dms", time.Now().Sub(start) / time.Millisecond)
+			logger.Debugf("exit constraint succeed after %dms", time.Now().Sub(start)/time.Millisecond)
 			return webElements, nil
 		}
 		if start.Add(duration).Before(time.Now()) {
-			return nil, fmt.Errorf("exit constraint not succeed after %dms. %v", duration / time.Millisecond, exitConstraintError)
+			return nil, fmt.Errorf("exit constraint not succeed after %dms. %v", duration/time.Millisecond, exitConstraintError)
 		}
 		logger.Debugf("exit constraint failed => sleep")
 		time.Sleep(100 * time.Millisecond)
