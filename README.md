@@ -32,13 +32,13 @@ monitoring_cron \
   </node>
 </nodes>
 ```
-## Available Check
+## Available checks
 
-Silent Check
+Silent check
 
 `silent="true"`
 
-Disable Check
+Disable check
 
 `disabled="true"`
 
@@ -48,7 +48,7 @@ Disable Check
 <node check="tcp" host="www.benjamin-borbe.de" port="80">
 ```
 
-### TCP
+### HTTP
 
 ```
 <node check="http" url="http://www.benjamin-borbe.de"></node>
