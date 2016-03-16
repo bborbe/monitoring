@@ -67,7 +67,7 @@ func TestCheckFailure(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = AssertThat(result.Message(), Is("tcp check on www.benjamin-borbe.de:81"))
+	err = AssertThat(result.Message(), Is("tcp check on www.benjamin-borbe.de:82"))
 	if err != nil {
 		t.Fatal(err)
 	}
