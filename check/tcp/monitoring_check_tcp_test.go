@@ -57,7 +57,7 @@ func TestCheckFailure(t *testing.T) {
 	}
 
 	var err error
-	c := New("www.benjamin-borbe.de", 81)
+	c := New("www.benjamin-borbe.de", 82)
 	result := c.Check()
 	err = AssertThat(result, NotNilValue())
 	if err != nil {
