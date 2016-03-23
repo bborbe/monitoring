@@ -80,7 +80,7 @@ func main() {
 func do(writer io.Writer, run Run, parseConfiguration ParseConfiguration, configPath string) error {
 	var err error
 	start := time.Now()
-	fmt.Fprintf(writer, "check started\n")
+	fmt.Fprintf(writer, "checks started\n")
 	if len(configPath) == 0 {
 		return fmt.Errorf("parameter {} missing", PARAMETER_CONFIG)
 	}
@@ -97,20 +97,18 @@ func do(writer io.Writer, run Run, parseConfiguration ParseConfiguration, config
 		return err
 	}
 	var result monitoring_check.CheckResult
-	var failures int
+	var success int
+	var total int
 	for result = range run(nodes) {
+		total++
 		if result.Success() {
 			fmt.Fprintf(writer, "[OK]   %s (%dms)\n", result.Message(), result.Duration()/time.Millisecond)
+			success++
 		} else {
-			failures++
 			fmt.Fprintf(writer, "[FAIL] %s - %v (%dms)\n", result.Message(), result.Error(), result.Duration()/time.Millisecond)
 		}
 	}
 	duration := time.Now().Sub(start) / time.Millisecond
-	if failures > 0 {
-		fmt.Fprintf(writer, "check finished with %d failures (%dms)\n", failures, duration)
-	} else {
-		fmt.Fprintf(writer, "check finished successful (%dms)\n", duration)
-	}
+	fmt.Fprintf(writer, "checks finished with %d/%d successful (%dms)\n", success, total, duration)
 	return err
 }
