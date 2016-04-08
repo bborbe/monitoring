@@ -52,7 +52,9 @@ func (w *webdriverCheck) Timeout(timeout time.Duration) *webdriverCheck {
 
 func (w *webdriverCheck) check() error {
 	desired := webdriver.Capabilities{"Platform": "Linux"}
-	required := webdriver.Capabilities{}
+	required := webdriver.Capabilities{
+		"phantomjs.page.customHeaders.Accept-Language": "en-US",
+	}
 	logger.Debugf("create new session")
 	session, err := w.webDriver.NewSession(desired, required)
 	if err != nil {
