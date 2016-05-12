@@ -20,14 +20,16 @@ import (
 	monitoring_notifier "github.com/bborbe/monitoring/notifier"
 	monitoring_runner_hierarchy "github.com/bborbe/monitoring/runner/hierarchy"
 	"github.com/bborbe/webdriver"
+	"github.com/bborbe/lock"
 )
 
 var logger = log.DefaultLogger
 
 const (
 	PARAMETER_LOGLEVEL = "loglevel"
-	PARAMETER_CONFIG   = "config"
-	PARAMETER_DRIVER   = "driver"
+	PARAMETER_CONFIG = "config"
+	PARAMETER_DRIVER = "driver"
+	DEFAULT_LOCK = "~/.monitoring_cron.lock"
 )
 
 type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
@@ -48,6 +50,7 @@ func main() {
 	senderPtr := flag.String("sender", "smtp@benjamin-borbe.de", "string")
 	recipientPtr := flag.String("recipient", "bborbe@rocketnews.de", "string")
 	maxConcurrencyPtr := flag.Int("max", runtime.NumCPU(), "max concurrency")
+	lockNamePtr := flag.String("lock", DEFAULT_LOCK, "lock file")
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
 	logger.Debugf("set log level to %s", *logLevelPtr)
@@ -74,7 +77,7 @@ func main() {
 	notifier := monitoring_notifier.New(mailer, *senderPtr, *recipientPtr)
 	configurationParser := monitoring_configuration_parser.New(driver)
 
-	err := do(writer, runner.Run, notifier.Notify, configurationParser.ParseConfiguration, *configPtr)
+	err := do(writer, runner.Run, notifier.Notify, configurationParser.ParseConfiguration, *configPtr, *lockNamePtr)
 	if err != nil {
 		logger.Fatal(err)
 		logger.Close()
@@ -83,8 +86,18 @@ func main() {
 	logger.Debug("done")
 }
 
-func do(writer io.Writer, run Run, notify Notify, parseConfiguration ParseConfiguration, configPath string) error {
+func do(writer io.Writer, run Run, notify Notify, parseConfiguration ParseConfiguration, configPath string, lockName string) error {
 	var err error
+	lockName,err = io_util.NormalizePath(lockName)
+	if err != nil {
+		return err
+	}
+	l := lock.NewLock(lockName)
+	if err = l.Lock(); err != nil {
+		return err
+	}
+	defer l.Unlock()
+
 	fmt.Fprintf(writer, "check started\n")
 	if len(configPath) == 0 {
 		return fmt.Errorf("parameter {} missing", PARAMETER_CONFIG)
@@ -106,9 +119,9 @@ func do(writer io.Writer, run Run, notify Notify, parseConfiguration ParseConfig
 	var result monitoring_check.CheckResult
 	for result = range run(nodes) {
 		if result.Success() {
-			fmt.Fprintf(writer, "[OK]   %s (%dms)\n", result.Message(), result.Duration()/time.Millisecond)
+			fmt.Fprintf(writer, "[OK]   %s (%dms)\n", result.Message(), result.Duration() / time.Millisecond)
 		} else {
-			fmt.Fprintf(writer, "[FAIL] %s - %v (%dms)\n", result.Message(), result.Error(), result.Duration()/time.Millisecond)
+			fmt.Fprintf(writer, "[FAIL] %s - %v (%dms)\n", result.Message(), result.Error(), result.Duration() / time.Millisecond)
 			failedChecks++
 		}
 		results = append(results, result)
