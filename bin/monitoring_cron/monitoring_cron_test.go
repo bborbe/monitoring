@@ -17,7 +17,7 @@ func TestDoEmpty(t *testing.T) {
 		return nil
 	}, func(content []byte) ([]monitoring_node.Node, error) {
 		return nil, nil
-	}, "","/tmp/lock")
+	}, "", "/tmp/lock")
 	if err = AssertThat(err, NotNilValue()); err != nil {
 		t.Fatal(err)
 	}

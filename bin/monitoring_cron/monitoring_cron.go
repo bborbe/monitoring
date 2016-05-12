@@ -11,6 +11,7 @@ import (
 	"time"
 
 	io_util "github.com/bborbe/io/util"
+	"github.com/bborbe/lock"
 	"github.com/bborbe/log"
 	"github.com/bborbe/mailer"
 	mail_config "github.com/bborbe/mailer/config"
@@ -20,16 +21,15 @@ import (
 	monitoring_notifier "github.com/bborbe/monitoring/notifier"
 	monitoring_runner_hierarchy "github.com/bborbe/monitoring/runner/hierarchy"
 	"github.com/bborbe/webdriver"
-	"github.com/bborbe/lock"
 )
 
 var logger = log.DefaultLogger
 
 const (
 	PARAMETER_LOGLEVEL = "loglevel"
-	PARAMETER_CONFIG = "config"
-	PARAMETER_DRIVER = "driver"
-	DEFAULT_LOCK = "~/.monitoring_cron.lock"
+	PARAMETER_CONFIG   = "config"
+	PARAMETER_DRIVER   = "driver"
+	DEFAULT_LOCK       = "~/.monitoring_cron.lock"
 )
 
 type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
@@ -88,7 +88,7 @@ func main() {
 
 func do(writer io.Writer, run Run, notify Notify, parseConfiguration ParseConfiguration, configPath string, lockName string) error {
 	var err error
-	lockName,err = io_util.NormalizePath(lockName)
+	lockName, err = io_util.NormalizePath(lockName)
 	if err != nil {
 		return err
 	}
@@ -119,9 +119,9 @@ func do(writer io.Writer, run Run, notify Notify, parseConfiguration ParseConfig
 	var result monitoring_check.CheckResult
 	for result = range run(nodes) {
 		if result.Success() {
-			fmt.Fprintf(writer, "[OK]   %s (%dms)\n", result.Message(), result.Duration() / time.Millisecond)
+			fmt.Fprintf(writer, "[OK]   %s (%dms)\n", result.Message(), result.Duration()/time.Millisecond)
 		} else {
-			fmt.Fprintf(writer, "[FAIL] %s - %v (%dms)\n", result.Message(), result.Error(), result.Duration() / time.Millisecond)
+			fmt.Fprintf(writer, "[FAIL] %s - %v (%dms)\n", result.Message(), result.Error(), result.Duration()/time.Millisecond)
 			failedChecks++
 		}
 		results = append(results, result)
