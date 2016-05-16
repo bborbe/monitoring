@@ -92,8 +92,10 @@ func do(writer io.Writer, run Run, notify Notify, parseConfiguration ParseConfig
 	if err != nil {
 		return err
 	}
+	logger.Debugf("try locking %s", lockName)
 	l := lock.NewLock(lockName)
 	if err = l.Lock(); err != nil {
+		logger.Debugf("lock %s failed: %v", lockName, err)
 		return err
 	}
 	defer l.Unlock()
