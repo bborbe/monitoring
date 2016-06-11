@@ -1,14 +1,13 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"runtime"
-
 	"time"
 
+	flag "github.com/bborbe/flagenv"
 	io_util "github.com/bborbe/io/util"
 	"github.com/bborbe/lock"
 	"github.com/bborbe/log"
@@ -127,7 +126,7 @@ func do(run Run, notify Notify, parseNodes ParseNodes, configPath string, lockNa
 	defer l.Unlock()
 
 	if len(configPath) == 0 {
-		return fmt.Errorf(fmt.Sprintf("parameter {} missing", PARAMETER_CONFIG))
+		return fmt.Errorf("parameter %s missing", PARAMETER_CONFIG)
 	}
 	path, err := io_util.NormalizePath(configPath)
 	if err != nil {
