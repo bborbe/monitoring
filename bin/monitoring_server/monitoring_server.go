@@ -24,12 +24,12 @@ import (
 var logger = log.DefaultLogger
 
 const (
+	DEFAULT_LOCK             = "~/.monitoring_cron.lock"
+	DEFAULT_DELAY            = time.Minute * 5
 	PARAMETER_LOGLEVEL       = "loglevel"
 	PARAMETER_CONFIG         = "config"
 	PARAMETER_DRIVER         = "driver"
-	DEFAULT_LOCK             = "~/.monitoring_cron.lock"
 	PARAMETER_DELAY          = "delay"
-	DEFAULT_DELAY            = time.Minute * 5
 	PARAMETER_SMTP_USER      = "smtp-user"
 	PARAMETER_SMTP_PASSWORD  = "smtp-password"
 	PARAMETER_SMTP_HOST      = "smtp-host"
