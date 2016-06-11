@@ -26,18 +26,18 @@ import (
 var logger = log.DefaultLogger
 
 const (
-	PARAMETER_LOGLEVEL = "loglevel"
-	PARAMETER_CONFIG   = "config"
-	PARAMETER_DRIVER   = "driver"
-	DEFAULT_LOCK       = "~/.monitoring_cron.lock"
-	PARAMETER_SMTP_USER = "smtp-user"
-	PARAMETER_SMTP_PASSWORD = "smtp-password"
-	PARAMETER_SMTP_HOST = "smtp-host"
-	PARAMETER_SMTP_PORT = "smtp-port"
-	PARAMETER_SMTP_SENDER = "sender"
+	PARAMETER_LOGLEVEL       = "loglevel"
+	PARAMETER_CONFIG         = "config"
+	PARAMETER_DRIVER         = "driver"
+	DEFAULT_LOCK             = "~/.monitoring_cron.lock"
+	PARAMETER_SMTP_USER      = "smtp-user"
+	PARAMETER_SMTP_PASSWORD  = "smtp-password"
+	PARAMETER_SMTP_HOST      = "smtp-host"
+	PARAMETER_SMTP_PORT      = "smtp-port"
+	PARAMETER_SMTP_SENDER    = "sender"
 	PARAMETER_SMTP_RECIPIENT = "recipient"
-	PARAMETER_CONCURRENT = "max"
-	PARAMETER_LOCK = "lock"
+	PARAMETER_CONCURRENT     = "max"
+	PARAMETER_LOCK           = "lock"
 )
 
 type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
