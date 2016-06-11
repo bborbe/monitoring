@@ -117,17 +117,22 @@ func do(run Run, notify Notify, parseConfiguration ParseConfiguration, configPat
 	if err != nil {
 		return err
 	}
-	content, err := ioutil.ReadFile(path)
-	if err != nil {
-		return err
-	}
-	nodes, err := parseConfiguration(content)
-	if err != nil {
-		return err
-	}
 
 	for {
 		logger.Debugf("check started")
+
+		logger.Debugf("read config")
+		content, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		logger.Debugf("parse config")
+		nodes, err := parseConfiguration(content)
+		if err != nil {
+			return err
+		}
+
+		logger.Debugf("run checks")
 		results := make([]monitoring_check.CheckResult, 0)
 		failedChecks := 0
 		var result monitoring_check.CheckResult
