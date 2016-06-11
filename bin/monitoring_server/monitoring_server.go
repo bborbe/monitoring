@@ -30,7 +30,7 @@ const (
 	PARAMETER_DRIVER = "driver"
 	DEFAULT_LOCK = "~/.monitoring_cron.lock"
 	PARAMETER_DELAY = "delay"
-	DEFAULT_DELAY = time.Hour * 12
+	DEFAULT_DELAY = time.Minute * 5
 	PARAMETER_SMTP_USER = "smtp-user"
 	PARAMETER_SMTP_PASSWORD = "smtp-password"
 	PARAMETER_SMTP_HOST = "smtp-host"
