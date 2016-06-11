@@ -30,6 +30,14 @@ const (
 	PARAMETER_CONFIG   = "config"
 	PARAMETER_DRIVER   = "driver"
 	DEFAULT_LOCK       = "~/.monitoring_cron.lock"
+	PARAMETER_SMTP_USER = "smtp-user"
+	PARAMETER_SMTP_PASSWORD = "smtp-password"
+	PARAMETER_SMTP_HOST = "smtp-host"
+	PARAMETER_SMTP_PORT = "smtp-port"
+	PARAMETER_SMTP_SENDER = "sender"
+	PARAMETER_SMTP_RECIPIENT = "recipient"
+	PARAMETER_CONCURRENT = "max"
+	PARAMETER_LOCK = "lock"
 )
 
 type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
@@ -43,14 +51,14 @@ func main() {
 	logLevelPtr := flag.String(PARAMETER_LOGLEVEL, log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
 	configPtr := flag.String(PARAMETER_CONFIG, "", "config")
 	driverPtr := flag.String(PARAMETER_DRIVER, "phantomjs", "driver phantomjs|chromedriver")
-	smtpUserPtr := flag.String("smtp-user", "smtp@benjamin-borbe.de", "string")
-	smtpPasswordPtr := flag.String("smtp-password", "-", "string")
-	smtpHostPtr := flag.String("smtp-host", "iredmail.mailfolder.org", "string")
-	smtpPortPtr := flag.Int("smtp-port", 465, "int")
-	senderPtr := flag.String("sender", "smtp@benjamin-borbe.de", "string")
-	recipientPtr := flag.String("recipient", "bborbe@rocketnews.de", "string")
-	maxConcurrencyPtr := flag.Int("max", runtime.NumCPU(), "max concurrency")
-	lockNamePtr := flag.String("lock", DEFAULT_LOCK, "lock file")
+	smtpUserPtr := flag.String(PARAMETER_SMTP_USER, "smtp@benjamin-borbe.de", "string")
+	smtpPasswordPtr := flag.String(PARAMETER_SMTP_PASSWORD, "-", "string")
+	smtpHostPtr := flag.String(PARAMETER_SMTP_HOST, "iredmail.mailfolder.org", "string")
+	smtpPortPtr := flag.Int(PARAMETER_SMTP_PORT, 465, "int")
+	senderPtr := flag.String(PARAMETER_SMTP_SENDER, "smtp@benjamin-borbe.de", "string")
+	recipientPtr := flag.String(PARAMETER_SMTP_RECIPIENT, "bborbe@rocketnews.de", "string")
+	maxConcurrencyPtr := flag.Int(PARAMETER_CONCURRENT, runtime.NumCPU(), "max concurrency")
+	lockNamePtr := flag.String(PARAMETER_LOCK, DEFAULT_LOCK, "lock file")
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
 	logger.Debugf("set log level to %s", *logLevelPtr)
