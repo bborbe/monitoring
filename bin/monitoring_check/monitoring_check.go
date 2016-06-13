@@ -27,7 +27,7 @@ const (
 	PARAMETER_LOGLEVEL = "loglevel"
 	PARAMETER_CONFIG   = "config"
 	PARAMETER_MODE     = "mode"
-	PARAMETER_MAX      = "max"
+	PARAMETER_CONCURRENT = "concurrent"
 	PARAMETER_DRIVER   = "driver"
 )
 
@@ -40,7 +40,7 @@ func main() {
 	logLevelPtr := flag.String(PARAMETER_LOGLEVEL, log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
 	modePtr := flag.String(PARAMETER_MODE, "", "mode (all|hierachy)")
 	configPtr := flag.String(PARAMETER_CONFIG, "", "config")
-	maxConcurrencyPtr := flag.Int(PARAMETER_MAX, runtime.NumCPU()*4, "max concurrency")
+	maxConcurrencyPtr := flag.Int(PARAMETER_CONCURRENT, runtime.NumCPU()*4, "max concurrency")
 	driverPtr := flag.String(PARAMETER_DRIVER, "phantomjs", "driver phantomjs|chromedriver")
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))

@@ -36,7 +36,7 @@ const (
 	PARAMETER_SMTP_PORT      = "smtp-port"
 	PARAMETER_SMTP_SENDER    = "sender"
 	PARAMETER_SMTP_RECIPIENT = "recipient"
-	PARAMETER_CONCURRENT     = "max"
+	PARAMETER_CONCURRENT     = "concurrent"
 	PARAMETER_ONE_TIME       = "one-time"
 	PARAMETER_LOCK           = "lock"
 )
