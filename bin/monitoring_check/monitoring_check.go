@@ -35,13 +35,16 @@ type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
 
 type ParseConfiguration func(content []byte) ([]monitoring_node.Node, error)
 
+var (
+	logLevelPtr       = flag.String(PARAMETER_LOGLEVEL, log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
+	modePtr           = flag.String(PARAMETER_MODE, "", "mode (all|hierachy)")
+	configPtr         = flag.String(PARAMETER_CONFIG, "", "config")
+	maxConcurrencyPtr = flag.Int(PARAMETER_CONCURRENT, runtime.NumCPU()*4, "max concurrency")
+	driverPtr         = flag.String(PARAMETER_DRIVER, "phantomjs", "driver phantomjs|chromedriver")
+)
+
 func main() {
 	defer logger.Close()
-	logLevelPtr := flag.String(PARAMETER_LOGLEVEL, log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
-	modePtr := flag.String(PARAMETER_MODE, "", "mode (all|hierachy)")
-	configPtr := flag.String(PARAMETER_CONFIG, "", "config")
-	maxConcurrencyPtr := flag.Int(PARAMETER_CONCURRENT, runtime.NumCPU()*4, "max concurrency")
-	driverPtr := flag.String(PARAMETER_DRIVER, "phantomjs", "driver phantomjs|chromedriver")
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
 	logger.Debugf("set log level to %s", *logLevelPtr)

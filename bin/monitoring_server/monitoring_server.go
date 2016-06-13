@@ -24,21 +24,23 @@ import (
 var logger = log.DefaultLogger
 
 const (
-	DEFAULT_LOCK             = "~/.monitoring_cron.lock"
-	DEFAULT_DELAY            = time.Minute * 5
-	PARAMETER_LOGLEVEL       = "loglevel"
-	PARAMETER_CONFIG         = "config"
-	PARAMETER_DRIVER         = "driver"
-	PARAMETER_DELAY          = "delay"
-	PARAMETER_SMTP_USER      = "smtp-user"
-	PARAMETER_SMTP_PASSWORD  = "smtp-password"
-	PARAMETER_SMTP_HOST      = "smtp-host"
-	PARAMETER_SMTP_PORT      = "smtp-port"
-	PARAMETER_SMTP_SENDER    = "sender"
-	PARAMETER_SMTP_RECIPIENT = "recipient"
-	PARAMETER_CONCURRENT     = "concurrent"
-	PARAMETER_ONE_TIME       = "one-time"
-	PARAMETER_LOCK           = "lock"
+	DEFAULT_LOCK                   = "~/.monitoring_cron.lock"
+	DEFAULT_DELAY                  = time.Minute * 5
+	PARAMETER_LOGLEVEL             = "loglevel"
+	PARAMETER_CONFIG               = "config"
+	PARAMETER_DRIVER               = "driver"
+	PARAMETER_DELAY                = "delay"
+	PARAMETER_SMTP_USER            = "smtp-user"
+	PARAMETER_SMTP_PASSWORD        = "smtp-password"
+	PARAMETER_SMTP_HOST            = "smtp-host"
+	PARAMETER_SMTP_PORT            = "smtp-port"
+	PARAMETER_SMTP_SENDER          = "sender"
+	PARAMETER_SMTP_RECIPIENT       = "recipient"
+	PARAMETER_CONCURRENT           = "concurrent"
+	PARAMETER_ONE_TIME             = "one-time"
+	PARAMETER_LOCK                 = "lock"
+	PARAMETER_SMTP_TLS             = "smtp-tls"
+	PARAMETER_SMTP_TLS_SKIP_VERIFY = "smtp-tls-skip-verify"
 )
 
 type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
@@ -49,21 +51,26 @@ type ParseConfiguration func(content []byte) ([]monitoring_node.Node, error)
 
 type ParseNodes func(path string) ([]monitoring_node.Node, error)
 
+var (
+	logLevelPtr       = flag.String(PARAMETER_LOGLEVEL, log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
+	configPtr         = flag.String(PARAMETER_CONFIG, "", "config")
+	driverPtr         = flag.String(PARAMETER_DRIVER, "phantomjs", "driver phantomjs|chromedriver")
+	smtpUserPtr       = flag.String(PARAMETER_SMTP_USER, "", "string")
+	smtpPasswordPtr   = flag.String(PARAMETER_SMTP_PASSWORD, "", "string")
+	smtpHostPtr       = flag.String(PARAMETER_SMTP_HOST, "iredmail.mailfolder.org", "string")
+	smtpPortPtr       = flag.Int(PARAMETER_SMTP_PORT, 25, "int")
+	senderPtr         = flag.String(PARAMETER_SMTP_SENDER, "smtp@benjamin-borbe.de", "string")
+	recipientPtr      = flag.String(PARAMETER_SMTP_RECIPIENT, "bborbe@rocketnews.de", "string")
+	maxConcurrencyPtr = flag.Int(PARAMETER_CONCURRENT, runtime.NumCPU(), "max concurrency")
+	lockNamePtr       = flag.String(PARAMETER_LOCK, DEFAULT_LOCK, "lock file")
+	delayPtr          = flag.Duration(PARAMETER_DELAY, DEFAULT_DELAY, "delay")
+	oneTimePtr        = flag.Bool(PARAMETER_ONE_TIME, false, "exit after first backup")
+	tlsPtr            = flag.Bool(PARAMETER_SMTP_TLS, false, "tls")
+	tlsSkipVerifyPtr  = flag.Bool(PARAMETER_SMTP_TLS_SKIP_VERIFY, false, "tls skip verify")
+)
+
 func main() {
 	defer logger.Close()
-	logLevelPtr := flag.String(PARAMETER_LOGLEVEL, log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
-	configPtr := flag.String(PARAMETER_CONFIG, "", "config")
-	driverPtr := flag.String(PARAMETER_DRIVER, "phantomjs", "driver phantomjs|chromedriver")
-	smtpUserPtr := flag.String(PARAMETER_SMTP_USER, "", "string")
-	smtpPasswordPtr := flag.String(PARAMETER_SMTP_PASSWORD, "", "string")
-	smtpHostPtr := flag.String(PARAMETER_SMTP_HOST, "iredmail.mailfolder.org", "string")
-	smtpPortPtr := flag.Int(PARAMETER_SMTP_PORT, 25, "int")
-	senderPtr := flag.String(PARAMETER_SMTP_SENDER, "smtp@benjamin-borbe.de", "string")
-	recipientPtr := flag.String(PARAMETER_SMTP_RECIPIENT, "bborbe@rocketnews.de", "string")
-	maxConcurrencyPtr := flag.Int(PARAMETER_CONCURRENT, runtime.NumCPU(), "max concurrency")
-	lockNamePtr := flag.String(PARAMETER_LOCK, DEFAULT_LOCK, "lock file")
-	delayPtr := flag.Duration(PARAMETER_DELAY, DEFAULT_DELAY, "delay")
-	oneTimePtr := flag.Bool(PARAMETER_ONE_TIME, false, "exit after first backup")
 
 	flag.Parse()
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
@@ -85,6 +92,9 @@ func main() {
 	mailConfig.SetSmtpPassword(*smtpPasswordPtr)
 	mailConfig.SetSmtpHost(*smtpHostPtr)
 	mailConfig.SetSmtpPort(*smtpPortPtr)
+	mailConfig.SetTls(*tlsPtr)
+	mailConfig.SetTlsSkipVerify(*tlsSkipVerifyPtr)
+
 	runner := monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
 	mailer := mailer.New(mailConfig)
 	notifier := monitoring_notifier.New(mailer, *senderPtr, *recipientPtr)
