@@ -24,11 +24,11 @@ import (
 var logger = log.DefaultLogger
 
 const (
-	PARAMETER_LOGLEVEL = "loglevel"
-	PARAMETER_CONFIG   = "config"
-	PARAMETER_MODE     = "mode"
+	PARAMETER_LOGLEVEL   = "loglevel"
+	PARAMETER_CONFIG     = "config"
+	PARAMETER_MODE       = "mode"
 	PARAMETER_CONCURRENT = "concurrent"
-	PARAMETER_DRIVER   = "driver"
+	PARAMETER_DRIVER     = "driver"
 )
 
 type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
