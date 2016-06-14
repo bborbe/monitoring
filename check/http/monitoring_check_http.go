@@ -17,6 +17,7 @@ import (
 
 const (
 	DEFAULT_TIMEOUT = 30 * time.Second
+	USERAGENT       = "Monitoring"
 )
 
 type ExecuteRequest func(req *http.Request) (resp *http.Response, err error)
@@ -199,6 +200,7 @@ func get(executeRequest ExecuteRequest, url string, username string, password st
 	if len(username) > 0 || len(password) > 0 {
 		req.SetBasicAuth(username, password)
 	}
+	req.Header.Set("User-Agent", USERAGENT)
 	resp, err := executeRequest(req)
 	if err != nil {
 		return nil, err
