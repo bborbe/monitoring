@@ -46,6 +46,7 @@ var (
 func main() {
 	defer logger.Close()
 	flag.Parse()
+
 	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
 	logger.Debugf("set log level to %s", *logLevelPtr)
 
