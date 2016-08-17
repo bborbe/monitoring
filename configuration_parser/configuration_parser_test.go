@@ -144,6 +144,20 @@ func TestParseTcpCheck(t *testing.T) {
 	}
 }
 
+func TestParseDnsCheck(t *testing.T) {
+	c := New(nil)
+	nodes, err := c.ParseConfiguration([]byte(`<nodes><node check="dns"></node></nodes>`))
+	if err = AssertThat(err, NilValue()); err != nil {
+		t.Fatal(err)
+	}
+	if err = AssertThat(len(nodes), Is(1)); err != nil {
+		t.Fatal(err)
+	}
+	if err = AssertThat(reflect.TypeOf(nodes[0].Check()).String(), Is("*dns.dnsCheck")); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestParseHttpCheck(t *testing.T) {
 	c := New(nil)
 	nodes, err := c.ParseConfiguration([]byte(`<nodes><node check="http"></node></nodes>`))

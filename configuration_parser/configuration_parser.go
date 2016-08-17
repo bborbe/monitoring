@@ -8,6 +8,7 @@ import (
 
 	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
+	monitoring_check_dns "github.com/bborbe/monitoring/check/dns"
 	monitoring_check_http "github.com/bborbe/monitoring/check/http"
 	monitoring_check_nop "github.com/bborbe/monitoring/check/nop"
 	monitoring_check_tcp "github.com/bborbe/monitoring/check/tcp"
@@ -107,6 +108,8 @@ func (c *configurationParser) createCheck(xmlNode XmlNode) (monitoring_check.Che
 	switch xmlNode.Check {
 	case "nop":
 		return monitoring_check_nop.New(xmlNode.Name), nil
+	case "dns":
+		return monitoring_check_dns.New(xmlNode.Host), nil
 	case "tcp":
 		check := monitoring_check_tcp.New(xmlNode.Host, xmlNode.Port)
 		if xmlNode.Timeout > 0 {
