@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <nodes>
-  <node check="tcp" host="www.google.com" port="80">
-    <node check="http" url="http://www.google.com" expectstatuscode="200" expecttitle="Google"/>
-  </node>
+	<node check="tcp" host="www.google.com" port="80">
+		<node check="http" url="http://www.google.com" expectstatuscode="200" expecttitle="Google"/>
+		<node check="dns" host="www.google.com"/>
+	</node>
 </nodes>
