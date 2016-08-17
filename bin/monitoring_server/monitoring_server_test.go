@@ -18,12 +18,12 @@ func TestDoSendNoMail(t *testing.T) {
 		c <- monitoring_check.NewCheckResultSuccess("ok", time.Millisecond)
 		close(c)
 		return c
-	}, func(results []monitoring_check.CheckResult) error {
+	}, func(sender string, recipient string, subject string, results []monitoring_check.CheckResult) error {
 		counter++
 		return nil
 	}, func(content string) ([]monitoring_node.Node, error) {
 		return nil, nil
-	}, "config.xml", "/tmp/lock", time.Hour, true)
+	}, "config.xml", "/tmp/lock", time.Hour, true, "a", "b", "c")
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
 	}
@@ -39,12 +39,12 @@ func TestDoSendMail(t *testing.T) {
 		c <- monitoring_check.NewCheckResultFail("ok", fmt.Errorf("foo"), time.Millisecond)
 		close(c)
 		return c
-	}, func(results []monitoring_check.CheckResult) error {
+	}, func(sender string, recipient string, subject string, results []monitoring_check.CheckResult) error {
 		counter++
 		return nil
 	}, func(content string) ([]monitoring_node.Node, error) {
 		return nil, nil
-	}, "config.xml", "/tmp/lock", time.Hour, true)
+	}, "config.xml", "/tmp/lock", time.Hour, true, "a", "b", "c")
 	if err = AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
 	}

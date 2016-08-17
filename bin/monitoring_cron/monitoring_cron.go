@@ -40,11 +40,12 @@ const (
 	PARAMETER_LOCK                 = "lock"
 	PARAMETER_SMTP_TLS             = "smtp-tls"
 	PARAMETER_SMTP_TLS_SKIP_VERIFY = "smtp-tls-skip-verify"
+	PARAMETER_SUBJECT              = "subject"
 )
 
 type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
 
-type Notify func(results []monitoring_check.CheckResult) error
+type Notify func(sender string, recipient string, subject string, results []monitoring_check.CheckResult) error
 
 type ParseConfiguration func(content []byte) ([]monitoring_node.Node, error)
 
@@ -62,6 +63,7 @@ var (
 	lockNamePtr       = flag.String(PARAMETER_LOCK, DEFAULT_LOCK, "lock file")
 	tlsPtr            = flag.Bool(PARAMETER_SMTP_TLS, false, "tls")
 	tlsSkipVerifyPtr  = flag.Bool(PARAMETER_SMTP_TLS_SKIP_VERIFY, false, "tls skip verify")
+	subjectPtr        = flag.String(PARAMETER_SUBJECT, "Monitoring Result", "subject")
 )
 
 func main() {
@@ -92,10 +94,10 @@ func main() {
 
 	runner := monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
 	mailer := mailer.New(mailConfig)
-	notifier := monitoring_notifier.New(mailer, *senderPtr, *recipientPtr)
+	notifier := monitoring_notifier.New(mailer)
 	configurationParser := monitoring_configuration_parser.New(driver)
 
-	err := do(writer, runner.Run, notifier.Notify, configurationParser.ParseConfiguration, *configPtr, *lockNamePtr)
+	err := do(writer, runner.Run, notifier.Notify, configurationParser.ParseConfiguration, *configPtr, *lockNamePtr, *senderPtr, *recipientPtr, *subjectPtr)
 	if err != nil {
 		logger.Fatal(err)
 		logger.Close()
@@ -104,7 +106,17 @@ func main() {
 	logger.Debug("done")
 }
 
-func do(writer io.Writer, run Run, notify Notify, parseConfiguration ParseConfiguration, configPath string, lockName string) error {
+func do(
+	writer io.Writer,
+	run Run,
+	notify Notify,
+	parseConfiguration ParseConfiguration,
+	configPath string,
+	lockName string,
+	sender string,
+	recipient string,
+	subject string,
+) error {
 	var err error
 	lockName, err = io_util.NormalizePath(lockName)
 	if err != nil {
@@ -149,7 +161,7 @@ func do(writer io.Writer, run Run, notify Notify, parseConfiguration ParseConfig
 	logger.Debugf("all checks executed")
 	if failedChecks > 0 {
 		fmt.Fprintf(writer, "found %d failed checks => send mail\n", failedChecks)
-		err = notify(results)
+		err = notify(sender, recipient, subject, results)
 		if err != nil {
 			return err
 		}

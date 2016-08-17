@@ -41,11 +41,12 @@ const (
 	PARAMETER_LOCK                 = "lock"
 	PARAMETER_SMTP_TLS             = "smtp-tls"
 	PARAMETER_SMTP_TLS_SKIP_VERIFY = "smtp-tls-skip-verify"
+	PARAMETER_SUBJECT              = "subject"
 )
 
 type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
 
-type Notify func(results []monitoring_check.CheckResult) error
+type Notify func(sender string, recipient string, subject string, results []monitoring_check.CheckResult) error
 
 type ParseConfiguration func(content []byte) ([]monitoring_node.Node, error)
 
@@ -67,6 +68,7 @@ var (
 	oneTimePtr        = flag.Bool(PARAMETER_ONE_TIME, false, "exit after first backup")
 	tlsPtr            = flag.Bool(PARAMETER_SMTP_TLS, false, "tls")
 	tlsSkipVerifyPtr  = flag.Bool(PARAMETER_SMTP_TLS_SKIP_VERIFY, false, "tls skip verify")
+	subjectPtr        = flag.String(PARAMETER_SUBJECT, "Monitoring Result", "subject")
 )
 
 func main() {
@@ -97,7 +99,7 @@ func main() {
 
 	runner := monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
 	mailer := mailer.New(mailConfig)
-	notifier := monitoring_notifier.New(mailer, *senderPtr, *recipientPtr)
+	notifier := monitoring_notifier.New(mailer)
 	configurationParser := monitoring_configuration_parser.New(driver)
 
 	err := do(runner.Run, notifier.Notify, func(path string) ([]monitoring_node.Node, error) {
@@ -112,7 +114,7 @@ func main() {
 			return nil, err
 		}
 		return nodes, nil
-	}, *configPtr, *lockNamePtr, *delayPtr, *oneTimePtr)
+	}, *configPtr, *lockNamePtr, *delayPtr, *oneTimePtr, *senderPtr, *recipientPtr, *subjectPtr)
 	if err != nil {
 		logger.Fatal(err)
 		logger.Close()
@@ -121,7 +123,18 @@ func main() {
 	logger.Debug("done")
 }
 
-func do(run Run, notify Notify, parseNodes ParseNodes, configPath string, lockName string, delay time.Duration, oneTime bool) error {
+func do(
+	run Run,
+	notify Notify,
+	parseNodes ParseNodes,
+	configPath string,
+	lockName string,
+	delay time.Duration,
+	oneTime bool,
+	sender string,
+	recipient string,
+	subject string,
+) error {
 	var err error
 	lockName, err = io_util.NormalizePath(lockName)
 	if err != nil {
@@ -164,7 +177,7 @@ func do(run Run, notify Notify, parseNodes ParseNodes, configPath string, lockNa
 		}
 		logger.Debugf("all checks executed, %d failed", failedChecks)
 		if failedChecks > 0 {
-			err = notify(results)
+			err = notify(sender, recipient, subject, results)
 			if err != nil {
 				return err
 			}

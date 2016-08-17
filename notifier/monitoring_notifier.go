@@ -13,38 +13,34 @@ import (
 var logger = log.DefaultLogger
 
 type notifier struct {
-	mailer    mailer.Mailer
-	sender    string
-	recipient string
+	mailer mailer.Mailer
 }
 
 type Notifier interface {
 	Notify(results []monitoring_check.CheckResult) error
 }
 
-func New(mailer mailer.Mailer, sender string, recipient string) *notifier {
+func New(mailer mailer.Mailer) *notifier {
 	n := new(notifier)
 	n.mailer = mailer
-	n.sender = sender
-	n.recipient = recipient
 	return n
 }
 
-func (n *notifier) Notify(results []monitoring_check.CheckResult) error {
+func (n *notifier) Notify(sender string, recipient string, subject string, results []monitoring_check.CheckResult) error {
 	logger.Debug("notify results")
 	mailContent := buildMailContent(results)
-	message := buildMessage(n.sender, n.recipient, mailContent)
+	message := buildMessage(sender, recipient, subject, mailContent)
 	err := n.mailer.Send(message)
 	logger.Debug("mail sent")
 	return err
 }
 
-func buildMessage(sender string, recipient string, content string) mailer.Message {
+func buildMessage(sender string, recipient string, subject, content string) mailer.Message {
 	m := message.New()
 	m.SetContent(content)
 	m.SetSender(sender)
 	m.SetRecipient(recipient)
-	m.SetSubject("Monitoring Result")
+	m.SetSubject(subject)
 	return m
 }
 
