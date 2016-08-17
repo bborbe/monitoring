@@ -1,0 +1,29 @@
+hash: f5574d6cde1db0b0c8cf27c45f1a96b3476428738f0ebc5e4712eeaeb72a9539
+updated: 2016-08-17T13:54:09.115905945+02:00
+imports:
+- name: github.com/bborbe/flagenv
+  version: a711a961081a928e1a3bfe2a047d59a69fa6b506
+- name: github.com/bborbe/http
+  version: ba3b05652664169dbef4c3c1c326db4929b0cec2
+  subpackages:
+  - client_builder
+  - redirect_follower
+- name: github.com/bborbe/io
+  version: 56d91e8345e4418981a56bc4b8466b4096138f08
+  subpackages:
+  - util
+  - buffered_writer
+- name: github.com/bborbe/lock
+  version: 468ed08fdb198bf91506d31f8813b932b2a3fd56
+- name: github.com/bborbe/log
+  version: c4d96aa2d0cc39cbc38a942d6f11046381bf2a46
+- name: github.com/bborbe/mailer
+  version: 68b3382b72ab95aff9d403e9d651cbd76fed6cc1
+  subpackages:
+  - config
+  - message
+- name: github.com/bborbe/webdriver
+  version: dfc4269cadfe0021c7084e16d023ea5a94ba73f9
+testImports:
+- name: github.com/bborbe/assert
+  version: cd6d0ec67c40ced8ca6cf72773b9e4b44420fbd2
