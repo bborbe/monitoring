@@ -20,58 +20,58 @@ var logger = log.DefaultLogger
 
 type Action func(session *webdriver.Session) error
 
-type webdriverCheck struct {
+type check struct {
 	url       string
 	actions   []Action
 	webDriver webdriver.WebDriver
 	timeout   time.Duration
 }
 
-func New(webDriver webdriver.WebDriver, url string) *webdriverCheck {
-	w := new(webdriverCheck)
-	w.url = url
-	w.timeout = DEFAULT_TIMEOUT
-	w.webDriver = webDriver
-	return w
+func New(webDriver webdriver.WebDriver, url string) *check {
+	c := new(check)
+	c.url = url
+	c.timeout = DEFAULT_TIMEOUT
+	c.webDriver = webDriver
+	return c
 }
 
-func (w *webdriverCheck) Check() monitoring_check.CheckResult {
-	logger.Debugf("webdriver check url %s", w.url)
+func (c *check) Check() monitoring_check.CheckResult {
+	logger.Debugf("webdriver check url %s", c.url)
 	start := time.Now()
-	return monitoring_check.NewCheckResult(w, w.check(), time.Now().Sub(start))
+	return monitoring_check.NewCheckResult(c, c.check(), time.Now().Sub(start))
 }
 
-func (w *webdriverCheck) Description() string {
-	return fmt.Sprintf("webdriver check on url %s", w.url)
+func (c *check) Description() string {
+	return fmt.Sprintf("webdriver check on url %s", c.url)
 }
 
-func (w *webdriverCheck) Timeout(timeout time.Duration) *webdriverCheck {
-	w.timeout = timeout
-	return w
+func (c *check) Timeout(timeout time.Duration) *check {
+	c.timeout = timeout
+	return c
 }
 
-func (w *webdriverCheck) check() error {
+func (c *check) check() error {
 	desired := webdriver.Capabilities{
 		"Platform": "Linux",
 		"phantomjs.page.customHeaders.Accept-Language": "en-US",
 	}
 	required := webdriver.Capabilities{}
 	logger.Debugf("create new session")
-	session, err := w.webDriver.NewSession(desired, required)
+	session, err := c.webDriver.NewSession(desired, required)
 	if err != nil {
 		return err
 	}
 	defer session.Delete()
 
-	if err = session.SetTimeouts("script", int(w.timeout)); err != nil {
+	if err = session.SetTimeouts("script", int(c.timeout)); err != nil {
 		return err
 	}
 
 	logger.Debugf("fetch url")
-	if err = session.Url(w.url); err != nil {
+	if err = session.Url(c.url); err != nil {
 		return err
 	}
-	for _, action := range w.actions {
+	for _, action := range c.actions {
 		if err = action(session); err != nil {
 			//printSource(session)
 			return err
@@ -85,12 +85,12 @@ func printSource(session *webdriver.Session) {
 	fmt.Printf("source:\n%s\n", source)
 }
 
-func (h *webdriverCheck) AddAction(action Action) *webdriverCheck {
-	h.actions = append(h.actions, action)
-	return h
+func (c *check) AddAction(action Action) *check {
+	c.actions = append(c.actions, action)
+	return c
 }
 
-func (h *webdriverCheck) ExpectTitle(expectedTitle string) *webdriverCheck {
+func (c *check) ExpectTitle(expectedTitle string) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("expect title '%s' - started", expectedTitle)
@@ -106,11 +106,11 @@ func (h *webdriverCheck) ExpectTitle(expectedTitle string) *webdriverCheck {
 		logger.Debugf("expect title '%s' - success", expectedTitle)
 		return nil
 	}
-	h.AddAction(action)
-	return h
+	c.AddAction(action)
+	return c
 }
 
-func (h *webdriverCheck) ExecuteScript(javascript string) *webdriverCheck {
+func (c *check) ExecuteScript(javascript string) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("execute script '%s' - started", javascript)
@@ -124,11 +124,11 @@ func (h *webdriverCheck) ExecuteScript(javascript string) *webdriverCheck {
 		logger.Debugf("execute script '%s' - success", javascript)
 		return nil
 	}
-	h.AddAction(action)
-	return h
+	c.AddAction(action)
+	return c
 }
 
-func (h *webdriverCheck) Fill(strategy webdriver.FindElementStrategy, query string, value string, duration time.Duration) *webdriverCheck {
+func (c *check) Fill(strategy webdriver.FindElementStrategy, query string, value string, duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("fill value '%s' to '%s' - started", value, query)
@@ -151,11 +151,11 @@ func (h *webdriverCheck) Fill(strategy webdriver.FindElementStrategy, query stri
 		logger.Debugf("fill value '%s' to '%s' - success", value, query)
 		return nil
 	}
-	h.AddAction(action)
-	return h
+	c.AddAction(action)
+	return c
 }
 
-func (h *webdriverCheck) Submit(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *webdriverCheck {
+func (c *check) Submit(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("submit '%s' - started", query)
@@ -178,11 +178,11 @@ func (h *webdriverCheck) Submit(strategy webdriver.FindElementStrategy, query st
 		logger.Debugf("submit '%s' - success", query)
 		return nil
 	}
-	h.AddAction(action)
-	return h
+	c.AddAction(action)
+	return c
 }
 
-func (h *webdriverCheck) Click(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *webdriverCheck {
+func (c *check) Click(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("click '%s' - started", query)
@@ -205,11 +205,11 @@ func (h *webdriverCheck) Click(strategy webdriver.FindElementStrategy, query str
 		logger.Debugf("click '%s' - success", query)
 		return nil
 	}
-	h.AddAction(action)
-	return h
+	c.AddAction(action)
+	return c
 }
 
-func (h *webdriverCheck) Exists(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *webdriverCheck {
+func (c *check) Exists(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("exists '%s' - started", query)
@@ -226,11 +226,11 @@ func (h *webdriverCheck) Exists(strategy webdriver.FindElementStrategy, query st
 		logger.Debugf("exists '%s' - success", query)
 		return nil
 	}
-	h.AddAction(action)
-	return h
+	c.AddAction(action)
+	return c
 }
 
-func (h *webdriverCheck) NotExists(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *webdriverCheck {
+func (c *check) NotExists(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("notexists '%s' - started", query)
@@ -247,11 +247,11 @@ func (h *webdriverCheck) NotExists(strategy webdriver.FindElementStrategy, query
 		logger.Debugf("notexists '%s' - success", query)
 		return nil
 	}
-	h.AddAction(action)
-	return h
+	c.AddAction(action)
+	return c
 }
 
-func (h *webdriverCheck) PrintSource() *webdriverCheck {
+func (c *check) PrintSource() *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("printsource - started")
@@ -264,11 +264,11 @@ func (h *webdriverCheck) PrintSource() *webdriverCheck {
 		logger.Debugf("printsource - success")
 		return nil
 	}
-	h.AddAction(action)
-	return h
+	c.AddAction(action)
+	return c
 }
 
-func (h *webdriverCheck) WaitForDisplayed(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *webdriverCheck {
+func (c *check) WaitForDisplayed(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("wait for displayed '%s' - started", query)
@@ -299,11 +299,11 @@ func (h *webdriverCheck) WaitForDisplayed(strategy webdriver.FindElementStrategy
 		logger.Debugf("wait for displayed '%s' - success", query)
 		return nil
 	}
-	h.AddAction(action)
-	return h
+	c.AddAction(action)
+	return c
 }
 
-func (h *webdriverCheck) WaitFor(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *webdriverCheck {
+func (c *check) WaitFor(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("waitfor '%s' - started", query)
@@ -318,11 +318,11 @@ func (h *webdriverCheck) WaitFor(strategy webdriver.FindElementStrategy, query s
 		logger.Debugf("waitfor '%s' - success", query)
 		return nil
 	}
-	h.AddAction(action)
-	return h
+	c.AddAction(action)
+	return c
 }
 
-func (h *webdriverCheck) Sleep(duration time.Duration) *webdriverCheck {
+func (c *check) Sleep(duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
 		logger.Debugf("sleep %dms - started", duration/time.Millisecond)
@@ -330,8 +330,8 @@ func (h *webdriverCheck) Sleep(duration time.Duration) *webdriverCheck {
 		logger.Debugf("sleep %dms - success", duration/time.Millisecond)
 		return nil
 	}
-	h.AddAction(action)
-	return h
+	c.AddAction(action)
+	return c
 }
 
 func findElements(session *webdriver.Session, strategy webdriver.FindElementStrategy, query string, duration time.Duration) ([]webdriver.WebElement, error) {

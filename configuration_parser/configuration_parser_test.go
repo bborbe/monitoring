@@ -139,7 +139,7 @@ func TestParseTcpCheck(t *testing.T) {
 	if err = AssertThat(len(nodes), Is(1)); err != nil {
 		t.Fatal(err)
 	}
-	if err = AssertThat(reflect.TypeOf(nodes[0].Check()).String(), Is("*tcp.tcpCheck")); err != nil {
+	if err = AssertThat(reflect.TypeOf(nodes[0].Check()).String(), Is("*tcp.check")); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -153,7 +153,7 @@ func TestParseDnsCheck(t *testing.T) {
 	if err = AssertThat(len(nodes), Is(1)); err != nil {
 		t.Fatal(err)
 	}
-	if err = AssertThat(reflect.TypeOf(nodes[0].Check()).String(), Is("*dns.dnsCheck")); err != nil {
+	if err = AssertThat(reflect.TypeOf(nodes[0].Check()).String(), Is("*dns.check")); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -167,7 +167,7 @@ func TestParseHttpCheck(t *testing.T) {
 	if err = AssertThat(len(nodes), Is(1)); err != nil {
 		t.Fatal(err)
 	}
-	if err = AssertThat(reflect.TypeOf(nodes[0].Check()).String(), Is("*http.httpCheck")); err != nil {
+	if err = AssertThat(reflect.TypeOf(nodes[0].Check()).String(), Is("*http.check")); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -223,7 +223,7 @@ func TestParseWebdriverCheck(t *testing.T) {
 	if err = AssertThat(len(nodes), Is(1)); err != nil {
 		t.Fatal(err)
 	}
-	if err = AssertThat(reflect.TypeOf(nodes[0].Check()).String(), Is("*webdriver.webdriverCheck")); err != nil {
+	if err = AssertThat(reflect.TypeOf(nodes[0].Check()).String(), Is("*webdriver.check")); err != nil {
 		t.Fatal(err)
 	}
 }

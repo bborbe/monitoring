@@ -124,6 +124,9 @@ func (c *configurationParser) createCheck(xmlNode XmlNode) (monitoring_check.Che
 		if xmlNode.Timeout > 0 {
 			check.Timeout(time.Duration(xmlNode.Timeout) * time.Second)
 		}
+		if xmlNode.Retrycount > 0 {
+			check.RetryCounter(xmlNode.Retrycount)
+		}
 		if len(xmlNode.ExpectContent) > 0 {
 			check.ExpectContent(xmlNode.ExpectContent)
 		}

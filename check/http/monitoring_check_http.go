@@ -16,21 +16,23 @@ import (
 )
 
 const (
-	DEFAULT_TIMEOUT = 30 * time.Second
-	USERAGENT       = "Monitoring"
+	DEFAULT_TIMEOUT       = 30 * time.Second
+	DEFAULT_RETRY_COUNTER = 3
+	USERAGENT             = "Monitoring"
 )
 
 type ExecuteRequest func(req *http.Request) (resp *http.Response, err error)
 
 type Expectation func(httpResponse *HttpResponse) error
 
-type httpCheck struct {
+type check struct {
 	url          string
 	username     string
 	password     string
 	passwordFile string
 	expectations []Expectation
 	timeout      time.Duration
+	retryCounter int
 }
 
 type HttpResponse struct {
@@ -40,103 +42,120 @@ type HttpResponse struct {
 
 var logger = log.DefaultLogger
 
-func New(url string) *httpCheck {
-	h := new(httpCheck)
+func New(url string) *check {
+	h := new(check)
 	h.url = url
 	h.timeout = DEFAULT_TIMEOUT
+	h.retryCounter = DEFAULT_RETRY_COUNTER
 	return h
 }
 
-func (h *httpCheck) Description() string {
-	return fmt.Sprintf("http check on url %s", h.url)
+func (c *check) Description() string {
+	return fmt.Sprintf("http check on url %s", c.url)
 }
 
-func (h *httpCheck) executeRequest() ExecuteRequest {
-	builder := http_client_builder.New().WithoutProxy().WithTimeout(h.timeout)
+func (c *check) executeRequest() ExecuteRequest {
+	builder := http_client_builder.New().WithoutProxy().WithTimeout(c.timeout)
 	redirectFollower := redirect_follower.New(builder.BuildRoundTripper().RoundTrip)
 	return redirectFollower.ExecuteRequestAndFollow
 }
 
-func (h *httpCheck) Timeout(timeout time.Duration) *httpCheck {
+func (c *check) RetryCounter(retryCounter int) *check {
+	c.retryCounter = retryCounter
+	return c
+}
+
+func (h *check) Timeout(timeout time.Duration) *check {
 	h.timeout = timeout
 	return h
 }
 
-func (h *httpCheck) Check() monitoring_check.CheckResult {
+func (c *check) Check() monitoring_check.CheckResult {
 	start := time.Now()
-	if len(h.password) == 0 && len(h.passwordFile) > 0 {
-		logger.Debugf("read password from file %s", h.passwordFile)
-		password, err := ioutil.ReadFile(h.passwordFile)
+	var err error
+	for i := 0; i < c.retryCounter; i++ {
+		err = c.check()
+		if err == nil {
+			break
+		}
+	}
+	return monitoring_check.NewCheckResult(c, err, time.Now().Sub(start))
+}
+
+func (c *check) check() error {
+	if len(c.password) == 0 && len(c.passwordFile) > 0 {
+		logger.Debugf("read password from file %s", c.passwordFile)
+		password, err := ioutil.ReadFile(c.passwordFile)
 		if err != nil {
-			logger.Debugf("read password file failed %s: %v", h.passwordFile, err)
-			return monitoring_check.NewCheckResult(h, err, time.Now().Sub(start))
+			logger.Debugf("read password file failed %s: %v", c.passwordFile, err)
+			return err
 		}
-		h.password = strings.TrimSpace(string(password))
+		c.password = strings.TrimSpace(string(password))
 	}
-	httpResponse, err := get(h.executeRequest(), h.url, h.username, h.password)
+	httpResponse, err := get(c.executeRequest(), c.url, c.username, c.password)
 	if err != nil {
-		logger.Debugf("fetch url failed %s: %v", h.url, err)
-		return monitoring_check.NewCheckResult(h, err, time.Now().Sub(start))
+		logger.Debugf("fetch url failed %s: %v", c.url, err)
+		return err
 	}
-	for _, expectation := range h.expectations {
+	for _, expectation := range c.expectations {
 		if err = expectation(httpResponse); err != nil {
-			return monitoring_check.NewCheckResult(h, err, time.Now().Sub(start))
+			return err
 		}
 	}
-	return monitoring_check.NewCheckResult(h, err, time.Now().Sub(start))
+	return nil
 }
 
-func (h *httpCheck) AddExpectation(expectation Expectation) *httpCheck {
-	h.expectations = append(h.expectations, expectation)
-	return h
+func (c *check) AddExpectation(expectation Expectation) *check {
+	c.expectations = append(c.expectations, expectation)
+	return c
 }
 
-func (h *httpCheck) ExpectTitle(expectedTitle string) *httpCheck {
+func (c *check) ExpectTitle(expectedTitle string) *check {
 	var expectation Expectation
 	expectation = func(resp *HttpResponse) error {
 		return checkTitle(expectedTitle, resp.Content)
 	}
-	h.AddExpectation(expectation)
-	return h
+	c.AddExpectation(expectation)
+	return c
 }
 
-func (h *httpCheck) ExpectStatusCode(expectedStatusCode int) *httpCheck {
+func (c *check) ExpectStatusCode(expectedStatusCode int) *check {
 	var expectation Expectation
 	expectation = func(resp *HttpResponse) error {
 		return checkStatusCode(expectedStatusCode, resp.StatusCode)
 	}
-	h.AddExpectation(expectation)
-	return h
+	c.AddExpectation(expectation)
+	return c
 }
 
-func (h *httpCheck) ExpectContent(expectedContent string) *httpCheck {
+func (c *check) ExpectContent(expectedContent string) *check {
 	var expectation Expectation
 	expectation = func(resp *HttpResponse) error {
 		return checkContent(expectedContent, resp.Content)
 	}
-	h.AddExpectation(expectation)
-	return h
+	c.AddExpectation(expectation)
+	return c
 }
 
-func (h *httpCheck) ExpectBody(expectedBody string) *httpCheck {
+func (c *check) ExpectBody(expectedBody string) *check {
 	var expectation Expectation
 	expectation = func(resp *HttpResponse) error {
 		return checkBody(expectedBody, resp.Content)
 	}
-	h.AddExpectation(expectation)
-	return h
+	c.AddExpectation(expectation)
+	return c
 }
 
-func (h *httpCheck) Auth(username string, password string) *httpCheck {
-	h.username = username
-	h.password = password
-	return h
+func (c *check) Auth(username string, password string) *check {
+	c.username = username
+	c.password = password
+	return c
 }
 
-func (h *httpCheck) AuthFile(username string, passwordFile string) *httpCheck {
-	h.username = username
-	h.passwordFile = passwordFile
-	return h
+func (c *check) AuthFile(username string, passwordFile string) *check {
+	c.username = username
+	c.passwordFile = passwordFile
+	return c
 }
 
 func checkContent(expectedContent string, content []byte) error {

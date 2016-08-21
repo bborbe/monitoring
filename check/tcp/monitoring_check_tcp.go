@@ -9,7 +9,7 @@ import (
 	monitoring_check "github.com/bborbe/monitoring/check"
 )
 
-type tcpCheck struct {
+type check struct {
 	host         string
 	port         int
 	timeout      time.Duration
@@ -23,8 +23,8 @@ const (
 	DEFAULT_RETRY_COUNTER = 3
 )
 
-func New(host string, port int) *tcpCheck {
-	h := new(tcpCheck)
+func New(host string, port int) *check {
+	h := new(check)
 	h.host = host
 	h.port = port
 	h.timeout = DEFAULT_TIMEOUT
@@ -32,30 +32,36 @@ func New(host string, port int) *tcpCheck {
 	return h
 }
 
-func (c *tcpCheck) Timeout(timeout time.Duration) *tcpCheck {
+func (c *check) Timeout(timeout time.Duration) *check {
 	c.timeout = timeout
 	return c
 }
 
-func (c *tcpCheck) RetryCounter(retryCounter int) *tcpCheck {
+func (c *check) RetryCounter(retryCounter int) *check {
 	c.retryCounter = retryCounter
 	return c
 }
 
-func (c *tcpCheck) Check() monitoring_check.CheckResult {
+func (h *check) Check() monitoring_check.CheckResult {
 	start := time.Now()
-	address := fmt.Sprintf("%s:%d", c.host, c.port)
 	var err error
-	for i := 0; i < c.retryCounter; i++ {
-		_, err = net.DialTimeout("tcp", address, c.timeout)
-		logger.Debugf("tcp check on %s: %v", address, err)
+	for i := 0; i < h.retryCounter; i++ {
+		err = h.check()
 		if err == nil {
-			return monitoring_check.NewCheckResult(c, err, time.Now().Sub(start))
+			break
 		}
 	}
-	return monitoring_check.NewCheckResult(c, err, time.Now().Sub(start))
+	return monitoring_check.NewCheckResult(h, err, time.Now().Sub(start))
 }
 
-func (c *tcpCheck) Description() string {
+func (c *check) check() error {
+	address := fmt.Sprintf("%s:%d", c.host, c.port)
+	var err error
+	_, err = net.DialTimeout("tcp", address, c.timeout)
+	logger.Debugf("tcp check on %s: %v", address, err)
+	return err
+}
+
+func (c *check) Description() string {
 	return fmt.Sprintf("tcp check on %s:%d", c.host, c.port)
 }
