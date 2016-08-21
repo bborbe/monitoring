@@ -1,9 +1,10 @@
 package dns
 
 import (
+	"testing"
+
 	. "github.com/bborbe/assert"
 	monitoring_check "github.com/bborbe/monitoring/check"
-	"testing"
 )
 
 func TestImplementsCheck(t *testing.T) {
