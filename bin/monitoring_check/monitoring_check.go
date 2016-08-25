@@ -86,7 +86,7 @@ func do(writer io.Writer, run Run, parseConfiguration ParseConfiguration, config
 	start := time.Now()
 	fmt.Fprintf(writer, "checks started\n")
 	if len(configPath) == 0 {
-		return fmt.Errorf("parameter {} missing", PARAMETER_CONFIG)
+		return fmt.Errorf("parameter %s missing", PARAMETER_CONFIG)
 	}
 	path, err := io_util.NormalizePath(configPath)
 	if err != nil {

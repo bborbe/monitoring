@@ -132,7 +132,7 @@ func do(
 
 	fmt.Fprintf(writer, "check started\n")
 	if len(configPath) == 0 {
-		return fmt.Errorf("parameter {} missing", PARAMETER_CONFIG)
+		return fmt.Errorf("parameter %s missing", PARAMETER_CONFIG)
 	}
 	path, err := io_util.NormalizePath(configPath)
 	if err != nil {

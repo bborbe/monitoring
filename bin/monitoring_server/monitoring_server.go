@@ -192,6 +192,4 @@ func do(
 		time.Sleep(delay)
 		logger.Debugf("sleep done")
 	}
-
-	return err
 }
