@@ -24,10 +24,10 @@ func TestDoSendNoMail(t *testing.T) {
 	}, func(content string) ([]monitoring_node.Node, error) {
 		return nil, nil
 	}, "config.xml", "/tmp/lock", time.Hour, true, "a", "b", "c")
-	if err = AssertThat(err, NilValue()); err != nil {
+	if err := AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
 	}
-	if err = AssertThat(counter, Is(0)); err != nil {
+	if err := AssertThat(counter, Is(0)); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -45,10 +45,10 @@ func TestDoSendMail(t *testing.T) {
 	}, func(content string) ([]monitoring_node.Node, error) {
 		return nil, nil
 	}, "config.xml", "/tmp/lock", time.Hour, true, "a", "b", "c")
-	if err = AssertThat(err, NilValue()); err != nil {
+	if err := AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
 	}
-	if err = AssertThat(counter, Is(1)); err != nil {
+	if err := AssertThat(counter, Is(1)); err != nil {
 		t.Fatal(err)
 	}
 }

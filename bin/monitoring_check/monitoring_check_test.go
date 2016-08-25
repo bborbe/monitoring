@@ -20,7 +20,7 @@ func TestDoEmpty(t *testing.T) {
 			return nil, nil
 
 		}, "")
-	if err = AssertThat(err, NotNilValue()); err != nil {
+	if err := AssertThat(err, NotNilValue()); err != nil {
 		t.Fatal(err)
 	}
 }
