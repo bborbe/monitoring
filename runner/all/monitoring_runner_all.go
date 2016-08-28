@@ -3,12 +3,10 @@ package all
 import (
 	"sync"
 
-	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_node "github.com/bborbe/monitoring/node"
+	"github.com/golang/glog"
 )
-
-var logger = log.DefaultLogger
 
 type runnerAll struct {
 	maxConcurrency int
@@ -22,7 +20,7 @@ func New(maxConcurrency int) *runnerAll {
 }
 
 func (r *runnerAll) Run(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult {
-	logger.Debug("run all checks")
+	glog.V(2).Info("run all checks")
 	return Run(r.maxConcurrency, Checks(nodes))
 }
 
@@ -47,7 +45,7 @@ func Run(maxConcurrency int, checks []monitoring_check.Check) <-chan monitoring_
 	go func() {
 		wg.Wait()
 		close(resultChan)
-		logger.Debug("all checks finished")
+		glog.V(2).Info("all checks finished")
 	}()
 
 	return resultChan
@@ -63,7 +61,7 @@ func addChecksToList(nodes []monitoring_node.Node, checks []monitoring_check.Che
 	if nodes != nil {
 		for _, n := range nodes {
 			if n.IsDisabled() {
-				logger.Debugf("node %s disabled => skip", n.Check().Description())
+				glog.V(2).Infof("node %s disabled => skip", n.Check().Description())
 				continue
 			}
 			if n.Check() != nil && !n.IsSilent() {

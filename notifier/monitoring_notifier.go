@@ -4,13 +4,11 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/bborbe/log"
 	"github.com/bborbe/mailer"
 	"github.com/bborbe/mailer/message"
 	monitoring_check "github.com/bborbe/monitoring/check"
+	"github.com/golang/glog"
 )
-
-var logger = log.DefaultLogger
 
 type notifier struct {
 	mailer mailer.Mailer
@@ -27,11 +25,11 @@ func New(mailer mailer.Mailer) *notifier {
 }
 
 func (n *notifier) Notify(sender string, recipient string, subject string, results []monitoring_check.CheckResult) error {
-	logger.Debug("notify results")
+	glog.V(2).Info("notify results")
 	mailContent := buildMailContent(results)
 	message := buildMessage(sender, recipient, subject, mailContent)
 	err := n.mailer.Send(message)
-	logger.Debug("mail sent")
+	glog.V(2).Info("mail sent")
 	return err
 }
 
@@ -52,7 +50,7 @@ func buildMailContent(results []monitoring_check.CheckResult) string {
 	for _, result := range failures {
 		buffer.WriteString(fmt.Sprintf("%s - %v\n", result.Message(), result.Error()))
 	}
-	logger.Debug("return mailcontent")
+	glog.V(2).Info("return mailcontent")
 	return buffer.String()
 }
 

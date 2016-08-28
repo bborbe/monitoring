@@ -7,16 +7,14 @@ import (
 
 	"strings"
 
-	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
 	"github.com/bborbe/webdriver"
+	"github.com/golang/glog"
 )
 
 const (
 	DEFAULT_TIMEOUT = 30 * time.Second
 )
-
-var logger = log.DefaultLogger
 
 type Action func(session *webdriver.Session) error
 
@@ -36,7 +34,7 @@ func New(webDriver webdriver.WebDriver, url string) *check {
 }
 
 func (c *check) Check() monitoring_check.CheckResult {
-	logger.Debugf("webdriver check url %s", c.url)
+	glog.V(2).Infof("webdriver check url %s", c.url)
 	start := time.Now()
 	return monitoring_check.NewCheckResult(c, c.check(), time.Now().Sub(start))
 }
@@ -56,7 +54,7 @@ func (c *check) check() error {
 		"phantomjs.page.customHeaders.Accept-Language": "en-US",
 	}
 	required := webdriver.Capabilities{}
-	logger.Debugf("create new session")
+	glog.V(2).Infof("create new session")
 	session, err := c.webDriver.NewSession(desired, required)
 	if err != nil {
 		return err
@@ -67,7 +65,7 @@ func (c *check) check() error {
 		return err
 	}
 
-	logger.Debugf("fetch url")
+	glog.V(2).Infof("fetch url")
 	if err = session.Url(c.url); err != nil {
 		return err
 	}
@@ -93,17 +91,17 @@ func (c *check) AddAction(action Action) *check {
 func (c *check) ExpectTitle(expectedTitle string) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("expect title '%s' - started", expectedTitle)
+		glog.V(2).Infof("expect title '%s' - started", expectedTitle)
 		title, err := session.Title()
 		if err != nil {
-			logger.Debugf("expect title '%s' - failed", expectedTitle)
+			glog.V(2).Infof("expect title '%s' - failed", expectedTitle)
 			return err
 		}
 		if !strings.Contains(title, expectedTitle) {
-			logger.Debugf("expect title '%s' - failed", expectedTitle)
+			glog.V(2).Infof("expect title '%s' - failed", expectedTitle)
 			return fmt.Errorf("expected title '%s' but got '%s'", expectedTitle, title)
 		}
-		logger.Debugf("expect title '%s' - success", expectedTitle)
+		glog.V(2).Infof("expect title '%s' - success", expectedTitle)
 		return nil
 	}
 	c.AddAction(action)
@@ -113,15 +111,15 @@ func (c *check) ExpectTitle(expectedTitle string) *check {
 func (c *check) ExecuteScript(javascript string) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("execute script '%s' - started", javascript)
+		glog.V(2).Infof("execute script '%s' - started", javascript)
 		args := make([]interface{}, 0)
 		result, err := session.ExecuteScript(javascript, args)
 		if err != nil {
 			return err
 		}
-		logger.Debugf("script result: %s", string(result))
+		glog.V(2).Infof("script result: %s", string(result))
 
-		logger.Debugf("execute script '%s' - success", javascript)
+		glog.V(2).Infof("execute script '%s' - success", javascript)
 		return nil
 	}
 	c.AddAction(action)
@@ -131,24 +129,24 @@ func (c *check) ExecuteScript(javascript string) *check {
 func (c *check) Fill(strategy webdriver.FindElementStrategy, query string, value string, duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("fill value '%s' to '%s' - started", value, query)
+		glog.V(2).Infof("fill value '%s' to '%s' - started", value, query)
 		var err error
 		var webElements []webdriver.WebElement
 		if webElements, err = findElements(session, strategy, query, duration); err != nil {
-			logger.Debugf("fill value '%s' to '%s' - failed", value, query)
+			glog.V(2).Infof("fill value '%s' to '%s' - failed", value, query)
 			return err
 		}
 		if len(webElements) == 0 {
-			logger.Debugf("fill value '%s' to '%s' - failed", value, query)
+			glog.V(2).Infof("fill value '%s' to '%s' - failed", value, query)
 			return fmt.Errorf("element '%s' not found", query)
 		}
 		for _, webElement := range webElements {
 			if err = webElement.SendKeys(value); err != nil {
-				logger.Debugf("fill value '%s' to '%s' - failed", value, query)
+				glog.V(2).Infof("fill value '%s' to '%s' - failed", value, query)
 				return err
 			}
 		}
-		logger.Debugf("fill value '%s' to '%s' - success", value, query)
+		glog.V(2).Infof("fill value '%s' to '%s' - success", value, query)
 		return nil
 	}
 	c.AddAction(action)
@@ -158,24 +156,24 @@ func (c *check) Fill(strategy webdriver.FindElementStrategy, query string, value
 func (c *check) Submit(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("submit '%s' - started", query)
+		glog.V(2).Infof("submit '%s' - started", query)
 		var err error
 		var webElements []webdriver.WebElement
 		if webElements, err = findElements(session, strategy, query, duration); err != nil {
-			logger.Debugf("submit '%s' - failed", query)
+			glog.V(2).Infof("submit '%s' - failed", query)
 			return err
 		}
 		if len(webElements) == 0 {
-			logger.Debugf("submit '%s' - failed", query)
+			glog.V(2).Infof("submit '%s' - failed", query)
 			return fmt.Errorf("element '%s' not found", query)
 		}
 		for _, webElement := range webElements {
 			if err = webElement.Submit(); err != nil {
-				logger.Debugf("submit '%s' - failed", query)
+				glog.V(2).Infof("submit '%s' - failed", query)
 				return err
 			}
 		}
-		logger.Debugf("submit '%s' - success", query)
+		glog.V(2).Infof("submit '%s' - success", query)
 		return nil
 	}
 	c.AddAction(action)
@@ -185,24 +183,24 @@ func (c *check) Submit(strategy webdriver.FindElementStrategy, query string, dur
 func (c *check) Click(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("click '%s' - started", query)
+		glog.V(2).Infof("click '%s' - started", query)
 		var err error
 		var webElements []webdriver.WebElement
 		if webElements, err = findElements(session, strategy, query, duration); err != nil {
-			logger.Debugf("click '%s' - failed", query)
+			glog.V(2).Infof("click '%s' - failed", query)
 			return err
 		}
 		if len(webElements) == 0 {
-			logger.Debugf("click '%s' - failed", query)
+			glog.V(2).Infof("click '%s' - failed", query)
 			return fmt.Errorf("element '%s' not found", query)
 		}
 		for _, webElement := range webElements {
 			if err = webElement.Click(); err != nil {
-				logger.Debugf("click '%s' - failed", query)
+				glog.V(2).Infof("click '%s' - failed", query)
 				return err
 			}
 		}
-		logger.Debugf("click '%s' - success", query)
+		glog.V(2).Infof("click '%s' - success", query)
 		return nil
 	}
 	c.AddAction(action)
@@ -212,18 +210,18 @@ func (c *check) Click(strategy webdriver.FindElementStrategy, query string, dura
 func (c *check) Exists(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("exists '%s' - started", query)
+		glog.V(2).Infof("exists '%s' - started", query)
 		var err error
 		var webElements []webdriver.WebElement
 		if webElements, err = findElements(session, strategy, query, duration); err != nil {
-			logger.Debugf("exists '%s' - failed", query)
+			glog.V(2).Infof("exists '%s' - failed", query)
 			return err
 		}
 		if len(webElements) == 0 {
-			logger.Debugf("exists '%s' - failed", query)
+			glog.V(2).Infof("exists '%s' - failed", query)
 			return fmt.Errorf("element '%s' not found", query)
 		}
-		logger.Debugf("exists '%s' - success", query)
+		glog.V(2).Infof("exists '%s' - success", query)
 		return nil
 	}
 	c.AddAction(action)
@@ -233,18 +231,18 @@ func (c *check) Exists(strategy webdriver.FindElementStrategy, query string, dur
 func (c *check) NotExists(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("notexists '%s' - started", query)
+		glog.V(2).Infof("notexists '%s' - started", query)
 		var err error
 		var webElements []webdriver.WebElement
 		if webElements, err = findElementsNot(session, strategy, query, duration); err != nil {
-			logger.Debugf("notexists '%s' - failed", query)
+			glog.V(2).Infof("notexists '%s' - failed", query)
 			return err
 		}
 		if len(webElements) != 0 {
-			logger.Debugf("notexists '%s' - failed", query)
+			glog.V(2).Infof("notexists '%s' - failed", query)
 			return fmt.Errorf("element '%s' found", query)
 		}
-		logger.Debugf("notexists '%s' - success", query)
+		glog.V(2).Infof("notexists '%s' - success", query)
 		return nil
 	}
 	c.AddAction(action)
@@ -254,14 +252,14 @@ func (c *check) NotExists(strategy webdriver.FindElementStrategy, query string, 
 func (c *check) PrintSource() *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("printsource - started")
+		glog.V(2).Infof("printsource - started")
 		source, err := session.Source()
 		if err != nil {
-			logger.Debugf("printsource  - failed")
+			glog.V(2).Infof("printsource  - failed")
 			return fmt.Errorf("element found")
 		}
 		fmt.Println(source)
-		logger.Debugf("printsource - success")
+		glog.V(2).Infof("printsource - success")
 		return nil
 	}
 	c.AddAction(action)
@@ -271,7 +269,7 @@ func (c *check) PrintSource() *check {
 func (c *check) WaitForDisplayed(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("wait for displayed '%s' - started", query)
+		glog.V(2).Infof("wait for displayed '%s' - started", query)
 
 		_, err := findElementsWait(func() ([]webdriver.WebElement, error) {
 			return session.FindElements(strategy, query)
@@ -292,11 +290,11 @@ func (c *check) WaitForDisplayed(strategy webdriver.FindElementStrategy, query s
 		}, duration)
 
 		if err != nil {
-			logger.Debugf("wait for displayed '%s' - failed", query)
+			glog.V(2).Infof("wait for displayed '%s' - failed", query)
 			return err
 		}
 
-		logger.Debugf("wait for displayed '%s' - success", query)
+		glog.V(2).Infof("wait for displayed '%s' - success", query)
 		return nil
 	}
 	c.AddAction(action)
@@ -306,7 +304,7 @@ func (c *check) WaitForDisplayed(strategy webdriver.FindElementStrategy, query s
 func (c *check) WaitFor(strategy webdriver.FindElementStrategy, query string, duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("waitfor '%s' - started", query)
+		glog.V(2).Infof("waitfor '%s' - started", query)
 		var err error
 		var webElements []webdriver.WebElement
 		if webElements, err = findElements(session, strategy, query, duration); err != nil {
@@ -315,7 +313,7 @@ func (c *check) WaitFor(strategy webdriver.FindElementStrategy, query string, du
 		if len(webElements) == 0 {
 			return fmt.Errorf("wait for element '%s' failed", query)
 		}
-		logger.Debugf("waitfor '%s' - success", query)
+		glog.V(2).Infof("waitfor '%s' - success", query)
 		return nil
 	}
 	c.AddAction(action)
@@ -325,9 +323,9 @@ func (c *check) WaitFor(strategy webdriver.FindElementStrategy, query string, du
 func (c *check) Sleep(duration time.Duration) *check {
 	var action Action
 	action = func(session *webdriver.Session) error {
-		logger.Debugf("sleep %dms - started", duration/time.Millisecond)
+		glog.V(2).Infof("sleep %dms - started", duration/time.Millisecond)
 		time.Sleep(duration)
-		logger.Debugf("sleep %dms - success", duration/time.Millisecond)
+		glog.V(2).Infof("sleep %dms - success", duration/time.Millisecond)
 		return nil
 	}
 	c.AddAction(action)
@@ -357,26 +355,26 @@ func findElementsNot(session *webdriver.Session, strategy webdriver.FindElementS
 }
 
 func findElementsWait(action func() ([]webdriver.WebElement, error), exitConstraint func([]webdriver.WebElement) error, duration time.Duration) ([]webdriver.WebElement, error) {
-	logger.Debugf("find elements")
+	glog.V(2).Infof("find elements")
 	var err error
 	start := time.Now()
 	var exitConstraintError error
 	for {
 		var webElements []webdriver.WebElement
-		logger.Debugf("execute action")
+		glog.V(2).Infof("execute action")
 		if webElements, err = action(); err != nil {
-			logger.Debugf("execute action failed")
+			glog.V(2).Infof("execute action failed")
 			return nil, err
 		}
-		logger.Debugf("check exit constraint")
+		glog.V(2).Infof("check exit constraint")
 		if exitConstraintError = exitConstraint(webElements); exitConstraintError == nil {
-			logger.Debugf("exit constraint succeed after %dms", time.Now().Sub(start)/time.Millisecond)
+			glog.V(2).Infof("exit constraint succeed after %dms", time.Now().Sub(start)/time.Millisecond)
 			return webElements, nil
 		}
 		if start.Add(duration).Before(time.Now()) {
 			return nil, fmt.Errorf("exit constraint not succeed after %dms. %v", duration/time.Millisecond, exitConstraintError)
 		}
-		logger.Debugf("exit constraint failed => sleep")
+		glog.V(2).Infof("exit constraint failed => sleep")
 		time.Sleep(100 * time.Millisecond)
 	}
 }

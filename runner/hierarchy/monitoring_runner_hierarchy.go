@@ -3,16 +3,14 @@ package hierarchy
 import (
 	"sync"
 
-	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_node "github.com/bborbe/monitoring/node"
+	"github.com/golang/glog"
 )
 
 type hierarchyRunner struct {
 	maxConcurrency int
 }
-
-var logger = log.DefaultLogger
 
 func New(maxConcurrency int) *hierarchyRunner {
 	h := new(hierarchyRunner)
@@ -21,7 +19,7 @@ func New(maxConcurrency int) *hierarchyRunner {
 }
 
 func (h *hierarchyRunner) Run(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult {
-	logger.Debug("run hierarchy checks")
+	glog.V(2).Info("run hierarchy checks")
 	return Run(h.maxConcurrency, nodes)
 }
 
@@ -39,7 +37,7 @@ func Run(maxConcurrency int, nodes []monitoring_node.Node) <-chan monitoring_che
 	go func() {
 		wg.Wait()
 		close(resultChan)
-		logger.Debug("all checks finished")
+		glog.V(2).Info("all checks finished")
 	}()
 
 	return resultChan
@@ -48,7 +46,7 @@ func Run(maxConcurrency int, nodes []monitoring_node.Node) <-chan monitoring_che
 func exec(nodes []monitoring_node.Node, resultChan chan<- monitoring_check.CheckResult, wg *sync.WaitGroup, throttle chan bool) {
 	for _, n := range nodes {
 		if n.IsDisabled() {
-			logger.Debugf("node %s disabled => skip", n.Check().Description())
+			glog.V(2).Infof("node %s disabled => skip", n.Check().Description())
 			continue
 		}
 		c := n.Check()

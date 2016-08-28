@@ -11,8 +11,8 @@ import (
 
 	http_client_builder "github.com/bborbe/http/client_builder"
 	"github.com/bborbe/http/redirect_follower"
-	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
+	"github.com/golang/glog"
 )
 
 const (
@@ -39,8 +39,6 @@ type HttpResponse struct {
 	Content    []byte
 	StatusCode int
 }
-
-var logger = log.DefaultLogger
 
 func New(url string) *check {
 	h := new(check)
@@ -84,17 +82,17 @@ func (c *check) Check() monitoring_check.CheckResult {
 
 func (c *check) check() error {
 	if len(c.password) == 0 && len(c.passwordFile) > 0 {
-		logger.Debugf("read password from file %s", c.passwordFile)
+		glog.V(2).Infof("read password from file %s", c.passwordFile)
 		password, err := ioutil.ReadFile(c.passwordFile)
 		if err != nil {
-			logger.Debugf("read password file failed %s: %v", c.passwordFile, err)
+			glog.V(2).Infof("read password file failed %s: %v", c.passwordFile, err)
 			return err
 		}
 		c.password = strings.TrimSpace(string(password))
 	}
 	httpResponse, err := get(c.executeRequest(), c.url, c.username, c.password)
 	if err != nil {
-		logger.Debugf("fetch url failed %s: %v", c.url, err)
+		glog.V(2).Infof("fetch url failed %s: %v", c.url, err)
 		return err
 	}
 	for _, expectation := range c.expectations {
@@ -162,9 +160,9 @@ func checkContent(expectedContent string, content []byte) error {
 	if len(expectedContent) == 0 {
 		return nil
 	}
-	logger.Tracef("content: %s", string(content))
+	glog.V(4).Infof("content: %s", string(content))
 	expression := fmt.Sprintf(`(?is).*?%s.*?`, regexp.QuoteMeta(expectedContent))
-	logger.Tracef("content regexp: %s", expression)
+	glog.V(4).Infof("content regexp: %s", expression)
 	re := regexp.MustCompile(expression)
 	if len(re.FindSubmatch(content)) > 0 {
 		return nil
@@ -176,9 +174,9 @@ func checkBody(expectedBody string, content []byte) error {
 	if len(expectedBody) == 0 {
 		return nil
 	}
-	logger.Tracef("content: %s", string(content))
+	glog.V(4).Infof("content: %s", string(content))
 	expression := fmt.Sprintf(`(?is)<html[^>]*>.*?<body[^>]*>.*?%s.*?</body>.*?</html>`, regexp.QuoteMeta(expectedBody))
-	logger.Tracef("body regexp: %s", expression)
+	glog.V(4).Infof("body regexp: %s", expression)
 	re := regexp.MustCompile(expression)
 	if len(re.FindSubmatch(content)) > 0 {
 		return nil
@@ -190,9 +188,9 @@ func checkTitle(expectedTitle string, content []byte) error {
 	if len(expectedTitle) == 0 {
 		return nil
 	}
-	logger.Tracef("content: %s", string(content))
+	glog.V(4).Infof("content: %s", string(content))
 	expression := fmt.Sprintf(`(?is)<html[^>]*>.*?<head[^>]*>.*?<title[^>]*>[^<>]*%s[^<>]*</title>.*?</head>.*?</html>`, regexp.QuoteMeta(expectedTitle))
-	logger.Tracef("title regexp: %s", expression)
+	glog.V(4).Infof("title regexp: %s", expression)
 	re := regexp.MustCompile(expression)
 	if len(re.FindSubmatch(content)) > 0 {
 		return nil
@@ -204,7 +202,7 @@ func checkStatusCode(expectedStatusCode int, statusCode int) error {
 	if expectedStatusCode <= 0 {
 		return nil
 	}
-	logger.Tracef("expectedStatusCode %d == statusCode %d", expectedStatusCode, statusCode)
+	glog.V(4).Infof("expectedStatusCode %d == statusCode %d", expectedStatusCode, statusCode)
 	if expectedStatusCode != statusCode {
 		return fmt.Errorf("wrong statuscode, expected %d got %d", expectedStatusCode, statusCode)
 	}

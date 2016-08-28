@@ -11,7 +11,6 @@ import (
 	"time"
 
 	io_util "github.com/bborbe/io/util"
-	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_configuration_parser "github.com/bborbe/monitoring/configuration_parser"
 	monitoring_node "github.com/bborbe/monitoring/node"
@@ -19,12 +18,10 @@ import (
 	monitoring_runner_all "github.com/bborbe/monitoring/runner/all"
 	monitoring_runner_hierarchy "github.com/bborbe/monitoring/runner/hierarchy"
 	"github.com/bborbe/webdriver"
+	"github.com/golang/glog"
 )
 
-var logger = log.DefaultLogger
-
 const (
-	PARAMETER_LOGLEVEL   = "loglevel"
 	PARAMETER_CONFIG     = "config"
 	PARAMETER_MODE       = "mode"
 	PARAMETER_CONCURRENT = "concurrent"
@@ -36,7 +33,6 @@ type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
 type ParseConfiguration func(content []byte) ([]monitoring_node.Node, error)
 
 var (
-	logLevelPtr       = flag.String(PARAMETER_LOGLEVEL, log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
 	modePtr           = flag.String(PARAMETER_MODE, "", "mode (all|hierachy)")
 	configPtr         = flag.String(PARAMETER_CONFIG, "", "config")
 	maxConcurrencyPtr = flag.Int(PARAMETER_CONCURRENT, runtime.NumCPU()*4, "max concurrency")
@@ -44,13 +40,11 @@ var (
 )
 
 func main() {
-	defer logger.Close()
+	defer glog.Flush()
+	glog.CopyStandardLogTo("info")
 	flag.Parse()
 
-	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
-	logger.Debugf("set log level to %s", *logLevelPtr)
-
-	logger.Debugf("max concurrency: %d", *maxConcurrencyPtr)
+	glog.V(2).Infof("max concurrency: %d", *maxConcurrencyPtr)
 
 	var driver webdriver.WebDriver
 	if *driverPtr == "chromedriver" {
@@ -64,21 +58,19 @@ func main() {
 	writer := os.Stdout
 	var runner monitoring_runner.Runner
 	if "all" == *modePtr {
-		logger.Debug("runner = all")
+		glog.V(2).Info("runner = all")
 		runner = monitoring_runner_all.New(*maxConcurrencyPtr)
 	} else {
-		logger.Debug("runner = hierarchy")
+		glog.V(2).Info("runner = hierarchy")
 		runner = monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
 	}
 	configurationParser := monitoring_configuration_parser.New(driver)
 
 	err := do(writer, runner.Run, configurationParser.ParseConfiguration, *configPtr)
 	if err != nil {
-		logger.Fatal(err)
-		logger.Close()
-		os.Exit(1)
+		glog.Exit(err)
 	}
-	logger.Debug("done")
+	glog.V(2).Info("done")
 }
 
 func do(writer io.Writer, run Run, parseConfiguration ParseConfiguration, configPath string) error {

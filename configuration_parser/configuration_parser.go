@@ -6,7 +6,6 @@ import (
 
 	"time"
 
-	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_check_dns "github.com/bborbe/monitoring/check/dns"
 	monitoring_check_http "github.com/bborbe/monitoring/check/http"
@@ -15,9 +14,8 @@ import (
 	monitoring_check_webdriver "github.com/bborbe/monitoring/check/webdriver"
 	monitoring_node "github.com/bborbe/monitoring/node"
 	"github.com/bborbe/webdriver"
+	"github.com/golang/glog"
 )
-
-var logger = log.DefaultLogger
 
 type ConfigurationParser interface {
 	ParseConfiguration(content []byte) ([]monitoring_node.Node, error)
@@ -67,7 +65,7 @@ func New(webDriver webdriver.WebDriver) *configurationParser {
 }
 
 func (c *configurationParser) ParseConfiguration(content []byte) ([]monitoring_node.Node, error) {
-	logger.Debugf("parse configuration")
+	glog.V(2).Infof("parse configuration")
 	if len(content) == 0 {
 		return nil, fmt.Errorf("can't parse empty content")
 	}

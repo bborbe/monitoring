@@ -3,14 +3,12 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
 	"runtime"
 	"time"
 
 	flag "github.com/bborbe/flagenv"
 	io_util "github.com/bborbe/io/util"
 	"github.com/bborbe/lock"
-	"github.com/bborbe/log"
 	"github.com/bborbe/mailer"
 	mail_config "github.com/bborbe/mailer/config"
 	monitoring_check "github.com/bborbe/monitoring/check"
@@ -19,14 +17,12 @@ import (
 	monitoring_notifier "github.com/bborbe/monitoring/notifier"
 	monitoring_runner_hierarchy "github.com/bborbe/monitoring/runner/hierarchy"
 	"github.com/bborbe/webdriver"
+	"github.com/golang/glog"
 )
-
-var logger = log.DefaultLogger
 
 const (
 	DEFAULT_LOCK                   = "~/.monitoring_cron.lock"
 	DEFAULT_DELAY                  = time.Minute * 5
-	PARAMETER_LOGLEVEL             = "loglevel"
 	PARAMETER_CONFIG               = "config"
 	PARAMETER_DRIVER               = "driver"
 	PARAMETER_DELAY                = "delay"
@@ -53,7 +49,6 @@ type ParseConfiguration func(content []byte) ([]monitoring_node.Node, error)
 type ParseNodes func(path string) ([]monitoring_node.Node, error)
 
 var (
-	logLevelPtr       = flag.String(PARAMETER_LOGLEVEL, log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
 	configPtr         = flag.String(PARAMETER_CONFIG, "", "config")
 	driverPtr         = flag.String(PARAMETER_DRIVER, "phantomjs", "driver phantomjs|chromedriver")
 	smtpUserPtr       = flag.String(PARAMETER_SMTP_USER, "", "string")
@@ -72,13 +67,11 @@ var (
 )
 
 func main() {
-	defer logger.Close()
-
+	defer glog.Flush()
+	glog.CopyStandardLogTo("info")
 	flag.Parse()
-	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
-	logger.Debugf("set log level to %s", *logLevelPtr)
 
-	logger.Debugf("max concurrency: %d", *maxConcurrencyPtr)
+	glog.V(2).Infof("max concurrency: %d", *maxConcurrencyPtr)
 
 	var driver webdriver.WebDriver
 	if *driverPtr == "chromedriver" {
@@ -103,12 +96,12 @@ func main() {
 	configurationParser := monitoring_configuration_parser.New(driver)
 
 	err := do(runner.Run, notifier.Notify, func(path string) ([]monitoring_node.Node, error) {
-		logger.Debugf("read config")
+		glog.V(2).Infof("read config")
 		content, err := ioutil.ReadFile(path)
 		if err != nil {
 			return nil, err
 		}
-		logger.Debugf("parse config")
+		glog.V(2).Infof("parse config")
 		nodes, err := configurationParser.ParseConfiguration(content)
 		if err != nil {
 			return nil, err
@@ -116,11 +109,9 @@ func main() {
 		return nodes, nil
 	}, *configPtr, *lockNamePtr, *delayPtr, *oneTimePtr, *senderPtr, *recipientPtr, *subjectPtr)
 	if err != nil {
-		logger.Fatal(err)
-		logger.Close()
-		os.Exit(1)
+		glog.Exit(err)
 	}
-	logger.Debug("done")
+	glog.V(2).Info("done")
 }
 
 func do(
@@ -140,10 +131,10 @@ func do(
 	if err != nil {
 		return err
 	}
-	logger.Debugf("try locking %s", lockName)
+	glog.V(2).Infof("try locking %s", lockName)
 	l := lock.NewLock(lockName)
 	if err = l.Lock(); err != nil {
-		logger.Debugf("lock %s failed: %v", lockName, err)
+		glog.V(2).Infof("lock %s failed: %v", lockName, err)
 		return err
 	}
 	defer l.Unlock()
@@ -153,19 +144,19 @@ func do(
 	}
 	path, err := io_util.NormalizePath(configPath)
 	if err != nil {
-		logger.Debugf("normalize path failed: %v", err)
+		glog.V(2).Infof("normalize path failed: %v", err)
 		return err
 	}
 
 	for {
-		logger.Debugf("check started")
+		glog.V(2).Infof("check started")
 
 		nodes, err := parseNodes(path)
 		if err != nil {
 			return fmt.Errorf("parse config failed: %v", err)
 		}
 
-		logger.Debugf("run checks")
+		glog.V(2).Infof("run checks")
 		results := make([]monitoring_check.CheckResult, 0)
 		failedChecks := 0
 		var result monitoring_check.CheckResult
@@ -175,21 +166,21 @@ func do(
 			}
 			results = append(results, result)
 		}
-		logger.Debugf("all checks executed, %d failed", failedChecks)
+		glog.V(2).Infof("all checks executed, %d failed", failedChecks)
 		if failedChecks > 0 {
 			err = notify(sender, recipient, subject, results)
 			if err != nil {
 				return err
 			}
 		}
-		logger.Debugf("check finished")
+		glog.V(2).Infof("check finished")
 
 		if oneTime {
 			return nil
 		}
 
-		logger.Debugf("sleep for %v", delay)
+		glog.V(2).Infof("sleep for %v", delay)
 		time.Sleep(delay)
-		logger.Debugf("sleep done")
+		glog.V(2).Infof("sleep done")
 	}
 }

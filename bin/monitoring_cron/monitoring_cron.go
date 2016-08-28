@@ -12,7 +12,6 @@ import (
 
 	io_util "github.com/bborbe/io/util"
 	"github.com/bborbe/lock"
-	"github.com/bborbe/log"
 	"github.com/bborbe/mailer"
 	mail_config "github.com/bborbe/mailer/config"
 	monitoring_check "github.com/bborbe/monitoring/check"
@@ -21,12 +20,10 @@ import (
 	monitoring_notifier "github.com/bborbe/monitoring/notifier"
 	monitoring_runner_hierarchy "github.com/bborbe/monitoring/runner/hierarchy"
 	"github.com/bborbe/webdriver"
+	"github.com/golang/glog"
 )
 
-var logger = log.DefaultLogger
-
 const (
-	PARAMETER_LOGLEVEL             = "loglevel"
 	PARAMETER_CONFIG               = "config"
 	PARAMETER_DRIVER               = "driver"
 	DEFAULT_LOCK                   = "~/.monitoring_cron.lock"
@@ -50,7 +47,6 @@ type Notify func(sender string, recipient string, subject string, results []moni
 type ParseConfiguration func(content []byte) ([]monitoring_node.Node, error)
 
 var (
-	logLevelPtr       = flag.String(PARAMETER_LOGLEVEL, log.LogLevelToString(log.ERROR), log.FLAG_USAGE)
 	configPtr         = flag.String(PARAMETER_CONFIG, "", "config")
 	driverPtr         = flag.String(PARAMETER_DRIVER, "phantomjs", "driver phantomjs|chromedriver")
 	smtpUserPtr       = flag.String(PARAMETER_SMTP_USER, "smtp@benjamin-borbe.de", "string")
@@ -67,12 +63,11 @@ var (
 )
 
 func main() {
-	defer logger.Close()
+	defer glog.Flush()
+	glog.CopyStandardLogTo("info")
 	flag.Parse()
-	logger.SetLevelThreshold(log.LogStringToLevel(*logLevelPtr))
-	logger.Debugf("set log level to %s", *logLevelPtr)
 
-	logger.Debugf("max concurrency: %d", *maxConcurrencyPtr)
+	glog.V(2).Infof("max concurrency: %d", *maxConcurrencyPtr)
 
 	var driver webdriver.WebDriver
 	if *driverPtr == "chromedriver" {
@@ -99,11 +94,9 @@ func main() {
 
 	err := do(writer, runner.Run, notifier.Notify, configurationParser.ParseConfiguration, *configPtr, *lockNamePtr, *senderPtr, *recipientPtr, *subjectPtr)
 	if err != nil {
-		logger.Fatal(err)
-		logger.Close()
-		os.Exit(1)
+		glog.Exit(err)
 	}
-	logger.Debug("done")
+	glog.V(2).Info("done")
 }
 
 func do(
@@ -122,10 +115,10 @@ func do(
 	if err != nil {
 		return err
 	}
-	logger.Debugf("try locking %s", lockName)
+	glog.V(2).Infof("try locking %s", lockName)
 	l := lock.NewLock(lockName)
 	if err = l.Lock(); err != nil {
-		logger.Debugf("lock %s failed: %v", lockName, err)
+		glog.V(2).Infof("lock %s failed: %v", lockName, err)
 		return err
 	}
 	defer l.Unlock()
@@ -158,7 +151,7 @@ func do(
 		}
 		results = append(results, result)
 	}
-	logger.Debugf("all checks executed")
+	glog.V(2).Infof("all checks executed")
 	if failedChecks > 0 {
 		fmt.Fprintf(writer, "found %d failed checks => send mail\n", failedChecks)
 		err = notify(sender, recipient, subject, results)

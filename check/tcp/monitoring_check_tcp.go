@@ -5,8 +5,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/bborbe/log"
 	monitoring_check "github.com/bborbe/monitoring/check"
+	"github.com/golang/glog"
 )
 
 type check struct {
@@ -15,8 +15,6 @@ type check struct {
 	timeout      time.Duration
 	retryCounter int
 }
-
-var logger = log.DefaultLogger
 
 const (
 	DEFAULT_TIMEOUT       = time.Duration(5 * time.Second)
@@ -58,7 +56,7 @@ func (c *check) check() error {
 	address := fmt.Sprintf("%s:%d", c.host, c.port)
 	var err error
 	_, err = net.DialTimeout("tcp", address, c.timeout)
-	logger.Debugf("tcp check on %s: %v", address, err)
+	glog.V(2).Infof("tcp check on %s: %v", address, err)
 	return err
 }
 
