@@ -14,7 +14,8 @@ errcheck:
 check: lint vet errcheck
 run:
 	monitoring_check \
-	-loglevel=INFO \
+	-logtostderr \
+	-v=2 \
 	-config=sample_config.xml
 format:
 	find . -name "*.go" -exec gofmt -w "{}" \;
