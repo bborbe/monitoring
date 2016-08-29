@@ -10,7 +10,8 @@
 
 ```
 monitoring_check \ 
--loglevel INFO \
+-logtostderr \
+-v=2 \
 -config sample_config.xml
 ```
 
@@ -18,7 +19,8 @@ monitoring_check \
 
 ```
 monitoring_cron \ 
--loglevel INFO \
+-logtostderr \
+-v=2 \
 -config sample_config.xml
 ```
 
