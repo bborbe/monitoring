@@ -29,8 +29,12 @@ func (n *notifier) Notify(sender string, recipient string, subject string, resul
 	mailContent := buildMailContent(results)
 	message := buildMessage(sender, recipient, subject, mailContent)
 	err := n.mailer.Send(message)
+	if err != nil {
+		glog.V(1).Infof("send mail failed: %v", err)
+		return err
+	}
 	glog.V(2).Info("mail sent")
-	return err
+	return nil
 }
 
 func buildMessage(sender string, recipient string, subject, content string) mailer.Message {

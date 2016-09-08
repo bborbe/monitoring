@@ -166,7 +166,7 @@ func do(
 			}
 			results = append(results, result)
 		}
-		glog.V(2).Infof("all checks executed, %d failed", failedChecks)
+		glog.V(1).Infof("all checks executed, %d failed", failedChecks)
 		if failedChecks > 0 {
 			err = notify(sender, recipient, subject, results)
 			if err != nil {
