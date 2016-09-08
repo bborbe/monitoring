@@ -9,11 +9,11 @@ import:
   subpackages:
   - util
 - package: github.com/bborbe/lock
-- package: github.com/golang/glog
 - package: github.com/bborbe/mailer
   subpackages:
   - config
   - message
 - package: github.com/bborbe/webdriver
+- package: github.com/golang/glog
 testImport:
 - package: github.com/bborbe/assert
