@@ -126,6 +126,8 @@ func do(
 	recipient string,
 	subject string,
 ) error {
+	glog.V(1).Infof("monitoring server started")
+
 	var err error
 	lockName, err = io_util.NormalizePath(lockName)
 	if err != nil {
