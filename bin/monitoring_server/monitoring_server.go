@@ -139,7 +139,11 @@ func do(
 		glog.V(2).Infof("lock %s failed: %v", lockName, err)
 		return err
 	}
-	defer l.Unlock()
+	defer func() {
+		if err := l.Unlock(); err != nil {
+			glog.Warningf("unlock failed: %v", err)
+		}
+	}()
 
 	if len(configPath) == 0 {
 		return fmt.Errorf("parameter %s missing", PARAMETER_CONFIG)

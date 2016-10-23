@@ -121,7 +121,11 @@ func do(
 		glog.V(2).Infof("lock %s failed: %v", lockName, err)
 		return err
 	}
-	defer l.Unlock()
+	defer func() {
+		if err := l.Unlock(); err != nil {
+			glog.Warningf("unlock failed: %v", err)
+		}
+	}()
 
 	fmt.Fprintf(writer, "check started\n")
 	if len(configPath) == 0 {
