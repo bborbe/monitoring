@@ -15,5 +15,6 @@ import:
   - message
 - package: github.com/bborbe/webdriver
 - package: github.com/golang/glog
+- package: github.com/bborbe/cron
 testImport:
 - package: github.com/bborbe/assert

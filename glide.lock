@@ -1,21 +1,23 @@
-hash: bb3f2d4063e400e1b9def8cc2c39cbf1ad743b80b70644404951dec9a873c466
-updated: 2016-09-08T22:19:34.61808348+02:00
+hash: c077cf3aa756ebd0a292a2aa971df2499ec104c0889d18838d167a278a93d310
+updated: 2016-11-23T16:14:30.000704471+01:00
 imports:
+- name: github.com/bborbe/cron
+  version: 7cda28ee402a1a7a1214a7c6e44baabce8622133
 - name: github.com/bborbe/flagenv
   version: 96aab95bb1341e7a7ccf9160e49792e2ad3b0e08
 - name: github.com/bborbe/http
-  version: 356ba8175de4264aedb8337322827961b7c3e927
+  version: 4294467f3ee8720ff3fd0d0b5d3424010f09cccd
   subpackages:
   - client_builder
   - redirect_follower
 - name: github.com/bborbe/io
-  version: c2c48bf5bd136037d775f6fabe5caaba93b341b5
+  version: a11fbd04dece7d16d80e69884526dafdea697648
   subpackages:
   - util
 - name: github.com/bborbe/lock
   version: 60ec8797970f7e68875b5ae0889e36ebda5403de
 - name: github.com/bborbe/mailer
-  version: b02011748458f8d7411e6a2d11f13ba503111b9a
+  version: 711d067c50554e55ad59c1f2da0fa9d356a710b5
   subpackages:
   - config
   - message
