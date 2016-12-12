@@ -51,7 +51,7 @@ var (
 	driverPtr         = flag.String(PARAMETER_DRIVER, "phantomjs", "driver phantomjs|chromedriver")
 	smtpUserPtr       = flag.String(PARAMETER_SMTP_USER, "smtp@benjamin-borbe.de", "string")
 	smtpPasswordPtr   = flag.String(PARAMETER_SMTP_PASSWORD, "-", "string")
-	smtpHostPtr       = flag.String(PARAMETER_SMTP_HOST, "iredmail.mailfolder.org", "string")
+	smtpHostPtr       = flag.String(PARAMETER_SMTP_HOST, "mail.benjamin-borbe.de", "string")
 	smtpPortPtr       = flag.Int(PARAMETER_SMTP_PORT, 465, "int")
 	senderPtr         = flag.String(PARAMETER_SMTP_SENDER, "smtp@benjamin-borbe.de", "string")
 	recipientPtr      = flag.String(PARAMETER_SMTP_RECIPIENT, "bborbe@rocketnews.de", "string")
