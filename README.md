@@ -77,7 +77,7 @@ Disable check
 
 ## Continuous integration
 
-[Jenkins](https://www.benjamin-borbe.de/jenkins/job/Go-Monitoring/)
+[Jenkins](https://jenkins.benjamin-borbe.de/job/Go-Monitoring/)
 
 ## Copyright and license
 
