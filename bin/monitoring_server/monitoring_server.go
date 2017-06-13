@@ -186,10 +186,14 @@ func do(
 		return nil
 	}
 
-	cron := cron.New(
-		oneTime,
-		delay,
-		action,
-	)
-	return cron.Run(context.Background())
+	var c cron.Cron
+	if oneTime {
+		c = cron.NewOneTimeCron(action)
+	} else {
+		c = cron.NewWaitCron(
+			delay,
+			action,
+		)
+	}
+	return c.Run(context.Background())
 }

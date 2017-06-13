@@ -1,30 +1,30 @@
-hash: c077cf3aa756ebd0a292a2aa971df2499ec104c0889d18838d167a278a93d310
-updated: 2016-12-14T21:15:04.880019603+01:00
+hash: 74830747632cf6e5be9066a7c9f6173edf79a6f0c774b3d662d25575abce051e
+updated: 2017-06-13T13:16:10.546270364+02:00
 imports:
 - name: github.com/bborbe/cron
-  version: 9e12eac67f92fb2ba864412d3ccc1724be5977ec
+  version: 807a2c6a298ae10a1c35f7f26815284599c6a622
 - name: github.com/bborbe/flagenv
-  version: 96aab95bb1341e7a7ccf9160e49792e2ad3b0e08
+  version: 4bf10dbe62f41ce40353a70225a84decfd16d3ac
 - name: github.com/bborbe/http
   version: 0af97ef0fa27c72d7ad65a5e3a15ec1aebcfe695
   subpackages:
   - client_builder
   - redirect_follower
 - name: github.com/bborbe/io
-  version: a11fbd04dece7d16d80e69884526dafdea697648
+  version: 8c22cf733cf166b247318b0786eec0c7cad9208a
   subpackages:
   - util
 - name: github.com/bborbe/lock
-  version: 60ec8797970f7e68875b5ae0889e36ebda5403de
+  version: ac57be166a1c39f4555dc7f865b35b84d7807549
 - name: github.com/bborbe/mailer
-  version: 8e8f7b54dfa9265547f50aacdef92450d9a6cee1
+  version: 2eec2b4318c26450cafa0db17bb371aa46d4bd74
   subpackages:
   - config
   - message
 - name: github.com/bborbe/webdriver
-  version: b92714fce67349b5ddeb42da8c9a6b0710b0ff96
+  version: 31ef1ef0dbbcd641d150f9c56b599cb46972d4c8
 - name: github.com/golang/glog
   version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
 testImports:
 - name: github.com/bborbe/assert
-  version: d2b3a7c4c731ac8cc63c6f5a1ea7d401e7547d42
+  version: 2448f69a8cb98ee9e5744f678477959100ceb9d4

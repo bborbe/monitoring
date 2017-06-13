@@ -1,5 +1,6 @@
 package: github.com/bborbe/monitoring
 import:
+- package: github.com/bborbe/cron
 - package: github.com/bborbe/flagenv
 - package: github.com/bborbe/http
   subpackages:
@@ -15,6 +16,5 @@ import:
   - message
 - package: github.com/bborbe/webdriver
 - package: github.com/golang/glog
-- package: github.com/bborbe/cron
 testImport:
 - package: github.com/bborbe/assert
