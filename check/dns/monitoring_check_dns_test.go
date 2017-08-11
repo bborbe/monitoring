@@ -54,24 +54,18 @@ func TestCheckFailure(t *testing.T) {
 	if testing.Short() {
 		return
 	}
-
-	var err error
 	c := New("notexistsing")
 	result := c.Check()
-	err = AssertThat(result, NotNilValue())
-	if err != nil {
+	if err := AssertThat(result, NotNilValue()); err != nil {
 		t.Fatal(err)
 	}
-	err = AssertThat(result.Success(), Is(false))
-	if err != nil {
+	if err := AssertThat(result.Success(), Is(false)); err != nil {
 		t.Fatal(err)
 	}
-	err = AssertThat(result.Message(), Is("dns check notexistsing"))
-	if err != nil {
+	if err := AssertThat(result.Message(), Is("dns check notexistsing")); err != nil {
 		t.Fatal(err)
 	}
-	err = AssertThat(result.Error(), NotNilValue())
-	if err != nil {
+	if err := AssertThat(result.Error(), NotNilValue()); err != nil {
 		t.Fatal(err)
 	}
 }

@@ -71,3 +71,17 @@ func TestDescription(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestExtractTitleFound(t *testing.T) {
+	title := extractTitle([]byte("<html id=\"a\"><head id=\"b\"><title id=\"c\">test</title></head></html>"))
+	if err := AssertThat(string(title), Is("test")); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestExtractTitleNotFound(t *testing.T) {
+	title := extractTitle([]byte("<html id=\"a\"><head id=\"b\"></head></html>"))
+	if err := AssertThat(string(title), Is("")); err != nil {
+		t.Fatal(err)
+	}
+}

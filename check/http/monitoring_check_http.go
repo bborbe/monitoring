@@ -189,13 +189,22 @@ func checkTitle(expectedTitle string, content []byte) error {
 		return nil
 	}
 	glog.V(4).Infof("content: %s", string(content))
-	expression := fmt.Sprintf(`(?is)<html[^>]*>.*?<head[^>]*>.*?<title[^>]*>[^<>]*%s[^<>]*</title>.*?</head>.*?</html>`, regexp.QuoteMeta(expectedTitle))
-	glog.V(4).Infof("title regexp: %s", expression)
-	re := regexp.MustCompile(expression)
-	if len(re.FindSubmatch(content)) > 0 {
+	title := extractTitle(content)
+	if strings.Index(title, expectedTitle) != -1 {
+		glog.V(4).Infof("title match")
 		return nil
 	}
-	return fmt.Errorf("title %s not found", expectedTitle)
+	return fmt.Errorf("expected title %s but found %s", expectedTitle, title)
+}
+
+func extractTitle(content []byte) string {
+	re := regexp.MustCompile(`(?is)<html[^>]*>.*?<head[^>]*>.*?<title[^>]*>([^<>]*)</title>.*?</head>.*?</html>`)
+	matches := re.FindSubmatch(content)
+	//fmt.Printf("%v", matches)
+	if len(matches) > 1 {
+		return string(matches[1])
+	}
+	return ""
 }
 
 func checkStatusCode(expectedStatusCode int, statusCode int) error {
