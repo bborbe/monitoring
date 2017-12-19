@@ -6,6 +6,8 @@ import (
 	"reflect"
 
 	. "github.com/bborbe/assert"
+	"time"
+	"fmt"
 )
 
 func TestImplementsConfigurationParser(t *testing.T) {
@@ -224,6 +226,38 @@ func TestParseWebdriverCheck(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := AssertThat(reflect.TypeOf(nodes[0].Check()).String(), Is("*webdriver.check")); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestParseOneNodeSilentUntilTrue(t *testing.T) {
+	c := New(nil)
+	nodes, err := c.ParseConfiguration([]byte(fmt.Sprintf(`<nodes><node check="tcp" silentuntil="%d-12-24T20:15:59"></node></nodes>`, currentYear()+2)))
+	if err := AssertThat(err, NilValue()); err != nil {
+		t.Fatal(err)
+	}
+	if err := AssertThat(len(nodes), Is(1)); err != nil {
+		t.Fatal(err)
+	}
+	if err := AssertThat(nodes[0].IsSilent(), Is(true)); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func currentYear() int {
+	return time.Now().Year()
+}
+
+func TestParseOneNodeSilentUntilFalse(t *testing.T) {
+	c := New(nil)
+	nodes, err := c.ParseConfiguration([]byte(fmt.Sprintf(`<nodes><node check="tcp" silentuntil="%d-12-24T20:15:59"></node></nodes>`, currentYear()-2)))
+	if err := AssertThat(err, NilValue()); err != nil {
+		t.Fatal(err)
+	}
+	if err := AssertThat(len(nodes), Is(1)); err != nil {
+		t.Fatal(err)
+	}
+	if err := AssertThat(nodes[0].IsSilent(), Is(false)); err != nil {
 		t.Fatal(err)
 	}
 }

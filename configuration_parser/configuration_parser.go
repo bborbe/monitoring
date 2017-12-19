@@ -33,6 +33,7 @@ type XmlNode struct {
 	NodeList         []XmlNode   `xml:"node"`
 	ActionList       []XmlAction `xml:"action"`
 	Silent           bool        `xml:"silent,attr"`
+	SilentUntil      string      `xml:"silentuntil,attr"`
 	Disabled         bool        `xml:"disabled,attr"`
 	Check            string      `xml:"check,attr"`
 	Port             int         `xml:"port,attr"`
@@ -98,8 +99,14 @@ func (c *configurationParser) convertXmlNodeToNode(xmlNode XmlNode) (monitoring_
 	if err != nil {
 		return nil, err
 	}
-	result := monitoring_node.New(check, nodes...).Silent(xmlNode.Silent).Disabled(xmlNode.Disabled)
-	return result, nil
+	silent := xmlNode.Silent
+	silentUntil, err := time.Parse("2006-01-02T15:04:05", xmlNode.SilentUntil)
+	if err != nil {
+		glog.V(2).Infof("parse silentUntil %s failed: %v", xmlNode.SilentUntil, err)
+	} else {
+		silent = silentUntil.After(time.Now())
+	}
+	return monitoring_node.New(check, nodes...).Silent(silent).Disabled(xmlNode.Disabled), nil
 }
 
 func (c *configurationParser) createCheck(xmlNode XmlNode) (monitoring_check.Check, error) {
