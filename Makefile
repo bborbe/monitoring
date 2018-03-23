@@ -78,4 +78,5 @@ rundocker:
 	-logtostderr \
 	-v=0
 
-
+version:
+	@echo $(VERSION)
