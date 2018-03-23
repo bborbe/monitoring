@@ -9,10 +9,13 @@ install:
 	GOBIN=$(GOPATH)/bin GO15VENDOREXPERIMENT=1 go install bin/monitoring_cron/*.go
 	GOBIN=$(GOPATH)/bin GO15VENDOREXPERIMENT=1 go install bin/monitoring_server/*.go
 
-test:
+glide:
+	go get github.com/Masterminds/glide
+
+test: glide
 	GO15VENDOREXPERIMENT=1 go test -cover `glide novendor`
 
-unittest:
+unittest: glide
 	GO15VENDOREXPERIMENT=1 go test -short -cover `glide novendor`
 
 vet:
