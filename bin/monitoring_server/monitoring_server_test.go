@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"time"
 
+	"context"
+
 	. "github.com/bborbe/assert"
 	monitoring_check "github.com/bborbe/monitoring/check"
 	monitoring_node "github.com/bborbe/monitoring/node"
-	"context"
 )
 
 func TestDoSendNoMail(t *testing.T) {

@@ -30,9 +30,12 @@ run:
 	-v=2 \
 	-config=sample_config.xml
 
-format:
-	find . -name "*.go" -exec gofmt -w "{}" \;
-	goimports -w=true .
+goimports:
+	go get golang.org/x/tools/cmd/goimports
+
+format: goimports
+	find . -type f -name '*.go' -not -path './vendor/*' -exec gofmt -w "{}" +
+	find . -type f -name '*.go' -not -path './vendor/*' -exec goimports -w "{}" +
 
 prepare:
 	go get -u golang.org/x/tools/cmd/goimports

@@ -5,9 +5,10 @@ import (
 
 	"reflect"
 
-	. "github.com/bborbe/assert"
-	"time"
 	"fmt"
+	"time"
+
+	. "github.com/bborbe/assert"
 )
 
 func TestImplementsConfigurationParser(t *testing.T) {
