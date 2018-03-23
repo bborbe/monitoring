@@ -43,7 +43,7 @@ podTemplate(
 				pollSCM('H/5 * * * *'),
 			]),
 			parameters([
-				string(name: 'Version', defaultValue: 'latest', description: 'Version to build'),
+				string(name: 'Version', defaultValue: '', description: 'Version to build'),
 			]),
 		])
 		try {
