@@ -1,6 +1,8 @@
-VERSION ?= latest
 REGISTRY ?= docker.io
-BRANCH ?= master
+IMAGE ?= bborbe/monitoring
+ifeq ($(VERSION),)
+	VERSION := $(shell git fetch --tags; git describe --tags `git rev-list --tags --max-count=1`)
+endif
 
 all: test install run
 
@@ -48,24 +50,25 @@ prepare:
 	go get -u github.com/Masterminds/glide
 	go get -u github.com/golang/lint/golint
 	go get -u github.com/kisielk/errcheck
+	go get -u github.com/bborbe/docker_utils/bin/docker_remote_tag_exists
 
 clean:
-	docker rmi $(REGISTRY)/bborbe/monitoring-build:$(VERSION)
-	docker rmi $(REGISTRY)/bborbe/monitoring:$(VERSION)
+	docker rmi $(REGISTRY)/$(IMAGE)-build:$(VERSION)
+	docker rmi $(REGISTRY)/$(IMAGE):$(VERSION)
 
 buildgo:
-	CGO_ENABLED=0 GOOS=linux go build -ldflags "-s" -a -installsuffix cgo -o monitoring_server ./go/src/github.com/bborbe/monitoring/bin/monitoring_server
+	CGO_ENABLED=0 GOOS=linux go build -ldflags "-s" -a -installsuffix cgo -o monitoring_server ./go/src/github.com/$(IMAGE)/bin/monitoring_server
 
 build:
-	docker build --build-arg VERSION=$(VERSION) --no-cache --rm=true -t $(REGISTRY)/bborbe/monitoring-build:$(VERSION) -f ./Dockerfile.build .
-	docker run -t $(REGISTRY)/bborbe/monitoring-build:$(VERSION) /bin/true
-	docker cp `docker ps -q -n=1 -f ancestor=$(REGISTRY)/bborbe/monitoring-build:$(VERSION) -f status=exited`:/monitoring_server .
-	docker rm `docker ps -q -n=1 -f ancestor=$(REGISTRY)/bborbe/monitoring-build:$(VERSION) -f status=exited`
-	docker build --no-cache --rm=true --tag=$(REGISTRY)/bborbe/monitoring:$(VERSION) -f Dockerfile.static .
+	docker build --build-arg VERSION=$(VERSION) --no-cache --rm=true -t $(REGISTRY)/$(IMAGE)-build:$(VERSION) -f ./Dockerfile.build .
+	docker run -t $(REGISTRY)/$(IMAGE)-build:$(VERSION) /bin/true
+	docker cp `docker ps -q -n=1 -f ancestor=$(REGISTRY)/$(IMAGE)-build:$(VERSION) -f status=exited`:/monitoring_server .
+	docker rm `docker ps -q -n=1 -f ancestor=$(REGISTRY)/$(IMAGE)-build:$(VERSION) -f status=exited`
+	docker build --no-cache --rm=true --tag=$(REGISTRY)/$(IMAGE):$(VERSION) -f Dockerfile.static .
 	rm monitoring_server
 
 upload:
-	docker push $(REGISTRY)/bborbe/monitoring:$(VERSION)
+	docker push $(REGISTRY)/$(IMAGE):$(VERSION)
 
 rundocker:
 	docker run \
@@ -73,8 +76,26 @@ rundocker:
 	--env PORT=8080 \
 	--env CONFIG=/data/config.xml \
 	--volume `pwd`/example:/data \
-	$(REGISTRY)/bborbe/monitoring:$(VERSION) \
+	$(REGISTRY)/$(IMAGE):$(VERSION) \
 	-logtostderr \
 	-v=0
 
+version:
+	@echo $(VERSION)
 
+docker_remote_tag_exists:
+	go get github.com/bborbe/docker_utils/bin/docker_remote_tag_exists
+
+trigger: docker_remote_tag_exists
+	@exists=`docker_remote_tag_exists \
+		-registry=${REGISTRY} \
+		-repository="${IMAGE}" \
+		-credentialsfromfile \
+		-tag="${VERSION}" \
+		-alsologtostderr \
+		-v=0`; \
+	trigger="build"; \
+	if [ "$${exists}" = "true" ]; then \
+		trigger="skip"; \
+	fi; \
+	echo $${trigger}

@@ -42,6 +42,9 @@ podTemplate(
 				cron('H 2 * * *'),
 				pollSCM('H/5 * * * *'),
 			]),
+			parameters([
+				string(name: 'Version', defaultValue: '', description: 'Version to build'),
+			]),
 		])
 		try {
 			container('build-golang') {
@@ -70,6 +73,12 @@ podTemplate(
 						sh "cd /go/src/github.com/bborbe/monitoring && make test"
 					}
 				}
+				stage('Golang Trigger') {
+					timeout(time: 5, unit: 'MINUTES') {
+						env.TRIGGER = sh (script: "VERSION=${params.Version} make trigger", returnStdout: true).trim()
+						echo "trigger = ${env.TRIGGER}"
+					}
+				}
 			}
 			container('build-docker') {
 				stage('Docker Checkout') {
@@ -87,26 +96,29 @@ podTemplate(
 				stage('Docker Deps') {
 					timeout(time: 5, unit: 'MINUTES') {
 						sh """
-						apk add --update ca-certificates make bash && rm -rf /var/cache/apk/*
+						apk add --update ca-certificates make bash git && rm -rf /var/cache/apk/*
 						"""
 					}
-
 				}
 				stage('Docker Build') {
-					timeout(time: 15, unit: 'MINUTES') {
-						sh "make build"
+					if (env.TRIGGER == 'build' || env.BRANCH_NAME != 'master') {
+						timeout(time: 15, unit: 'MINUTES') {
+							sh "VERSION=${params.Version} make build"
+						}
 					}
 				}
 				stage('Docker Upload') {
-					if (env.BRANCH_NAME == 'master') {
+					if (env.TRIGGER == 'build' && env.BRANCH_NAME == 'master') {
 						timeout(time: 15, unit: 'MINUTES') {
-							sh "make upload"
+							sh "VERSION=${params.Version} make upload"
 						}
 					}
 				}
 				stage('Docker Clean') {
-					timeout(time: 5, unit: 'MINUTES') {
-						sh "make clean"
+					if (env.TRIGGER == 'build' || env.BRANCH_NAME != 'master') {
+						timeout(time: 5, unit: 'MINUTES') {
+							sh "VERSION=${params.Version} make clean"
+						}
 					}
 				}
 			}
