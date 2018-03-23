@@ -1,5 +1,2 @@
-*~
-.DS_Store
-/vendor
 /phantomJsdriver.log
 /phantomJsOutput.log
