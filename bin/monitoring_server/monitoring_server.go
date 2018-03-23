@@ -85,6 +85,62 @@ func main() {
 	driver.Start()
 	defer driver.Stop()
 
+	runner := monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
+	mailer := createMailer()
+	notifier := monitoring_notifier.New(mailer)
+	configurationParser := monitoring_configuration_parser.New(driver)
+
+	s := &server{
+		runner: runner.Run,
+		notify: notifier.Notify,
+		parseNodes: func(path string) ([]monitoring_node.Node, error) {
+			glog.V(2).Infof("read config")
+			content, err := ioutil.ReadFile(path)
+			if err != nil {
+				return nil, err
+			}
+			glog.V(2).Infof("parse config")
+			nodes, err := configurationParser.ParseConfiguration(content)
+			if err != nil {
+				return nil, err
+			}
+			return nodes, nil
+		},
+		configPath: *configPtr,
+		lockName:   *lockNamePtr,
+		delay:      *cronDelayPtr,
+		expression: *cronExpressionPtr,
+		oneTime:    *cronOneTimePtr,
+		sender:     *senderPtr,
+		recipient:  *recipientPtr,
+		subject:    *subjectPtr,
+	}
+
+	if err := s.validate(); err != nil {
+		glog.Exit(err)
+	}
+
+	if err := s.run(context.Background()); err != nil {
+		glog.Exit(err)
+	}
+	glog.V(2).Info("done")
+}
+
+type server struct {
+	runner     Run
+	notify     Notify
+	parseNodes ParseNodes
+	configPath string
+	lockName   string
+	delay      time.Duration
+	expression string
+	oneTime    bool
+	sender     string
+	recipient  string
+	subject    string
+}
+
+func createMailer() mailer.Mailer {
 	mailConfig := mail_config.New()
 	mailConfig.SetSmtpUser(*smtpUserPtr)
 	mailConfig.SetSmtpPassword(*smtpPasswordPtr)
@@ -92,55 +148,21 @@ func main() {
 	mailConfig.SetSmtpPort(*smtpPortPtr)
 	mailConfig.SetTls(*tlsPtr)
 	mailConfig.SetTlsSkipVerify(*tlsSkipVerifyPtr)
-
-	runner := monitoring_runner_hierarchy.New(*maxConcurrencyPtr)
-	mailer := mailer.New(mailConfig)
-	notifier := monitoring_notifier.New(mailer)
-	configurationParser := monitoring_configuration_parser.New(driver)
-
-	err := do(runner.Run, notifier.Notify, func(path string) ([]monitoring_node.Node, error) {
-		glog.V(2).Infof("read config")
-		content, err := ioutil.ReadFile(path)
-		if err != nil {
-			return nil, err
-		}
-		glog.V(2).Infof("parse config")
-		nodes, err := configurationParser.ParseConfiguration(content)
-		if err != nil {
-			return nil, err
-		}
-		return nodes, nil
-	}, *configPtr, *lockNamePtr, *cronDelayPtr, *cronExpressionPtr, *cronOneTimePtr, *senderPtr, *recipientPtr, *subjectPtr)
-	if err != nil {
-		glog.Exit(err)
-	}
-	glog.V(2).Info("done")
+	return mailer.New(mailConfig)
 }
 
-func do(
-	run Run,
-	notify Notify,
-	parseNodes ParseNodes,
-	configPath string,
-	lockName string,
-	delay time.Duration,
-	expression string,
-	oneTime bool,
-	sender string,
-	recipient string,
-	subject string,
-) error {
+func (s *server) run(ctx context.Context) error {
 	glog.V(1).Infof("monitoring server started")
 
 	var err error
-	lockName, err = io_util.NormalizePath(lockName)
+	s.lockName, err = io_util.NormalizePath(s.lockName)
 	if err != nil {
 		return err
 	}
-	glog.V(2).Infof("try locking %s", lockName)
-	l := lock.NewLock(lockName)
+	glog.V(2).Infof("try locking %s", s.lockName)
+	l := lock.NewLock(s.lockName)
 	if err = l.Lock(); err != nil {
-		glog.V(2).Infof("lock %s failed: %v", lockName, err)
+		glog.V(2).Infof("lock %s failed: %v", s.lockName, err)
 		return err
 	}
 	defer func() {
@@ -149,45 +171,47 @@ func do(
 		}
 	}()
 
-	if len(configPath) == 0 {
+	return cron.NewCronJob(s.oneTime, s.expression, s.delay, s.action).Run(ctx)
+}
+
+func (s *server) validate() error {
+	if len(s.configPath) == 0 {
 		return fmt.Errorf("parameter %s missing", PARAMETER_CONFIG)
 	}
-	path, err := io_util.NormalizePath(configPath)
+
+	return nil
+}
+
+func (s *server) action(ctx context.Context) error {
+	glog.V(2).Infof("check started")
+	path, err := io_util.NormalizePath(s.configPath)
 	if err != nil {
 		glog.V(2).Infof("normalize path failed: %v", err)
 		return err
 	}
 
-	action := func(ctx context.Context) error {
-		glog.V(2).Infof("check started")
-
-		nodes, err := parseNodes(path)
-		if err != nil {
-			return fmt.Errorf("parse config failed: %v", err)
-		}
-
-		glog.V(2).Infof("run checks")
-		results := make([]monitoring_check.CheckResult, 0)
-		var failedChecks []string
-		var result monitoring_check.CheckResult
-		for result = range run(nodes) {
-			if !result.Success() {
-				failedChecks = append(failedChecks, result.Message())
-			}
-			results = append(results, result)
-		}
-		glog.V(1).Infof("all checks executed, %d failed: %v", len(failedChecks), failedChecks)
-		if len(failedChecks) > 0 {
-			err = notify(sender, recipient, subject, results)
-			if err != nil {
-				return err
-			}
-		}
-		glog.V(2).Infof("check finished")
-		return nil
+	nodes, err := s.parseNodes(path)
+	if err != nil {
+		return fmt.Errorf("parse config failed: %v", err)
 	}
 
-	c := cron.NewCronJob(oneTime, expression, delay, action)
-	return c.Run(context.Background())
+	glog.V(2).Infof("run checks")
+	results := make([]monitoring_check.CheckResult, 0)
+	var failedChecks []string
+	var result monitoring_check.CheckResult
+	for result = range s.runner(nodes) {
+		if !result.Success() {
+			failedChecks = append(failedChecks, result.Message())
+		}
+		results = append(results, result)
+	}
+	glog.V(1).Infof("all checks executed, %d failed: %v", len(failedChecks), failedChecks)
+	if len(failedChecks) > 0 {
+		err = s.notify(s.sender, s.recipient, s.subject, results)
+		if err != nil {
+			return err
+		}
+	}
+	glog.V(2).Infof("check finished")
+	return nil
 }
-
