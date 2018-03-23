@@ -23,7 +23,7 @@ func TestDoSendNoMail(t *testing.T) {
 		return nil
 	}, func(content string) ([]monitoring_node.Node, error) {
 		return nil, nil
-	}, "config.xml", "/tmp/lock", time.Hour, true, "a", "b", "c")
+	}, "config.xml", "/tmp/lock", time.Hour, "",true, "a", "b", "c")
 	if err := AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +44,7 @@ func TestDoSendMail(t *testing.T) {
 		return nil
 	}, func(content string) ([]monitoring_node.Node, error) {
 		return nil, nil
-	}, "config.xml", "/tmp/lock", time.Hour, true, "a", "b", "c")
+	}, "config.xml", "/tmp/lock", time.Hour, "",true, "a", "b", "c")
 	if err := AssertThat(err, NilValue()); err != nil {
 		t.Fatal(err)
 	}
