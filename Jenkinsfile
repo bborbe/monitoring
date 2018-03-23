@@ -83,6 +83,14 @@ podTemplate(
 						])
 					}
 				}
+				stage('Docker Deps') {
+					timeout(time: 5, unit: 'MINUTES') {
+						sh """
+						apk add make
+						"""
+					}
+
+				}
 				stage('Docker Build') {
 					timeout(time: 15, unit: 'MINUTES') {
 						sh "make build"
