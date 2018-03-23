@@ -90,7 +90,7 @@ podTemplate(
 				stage('Docker Deps') {
 					timeout(time: 5, unit: 'MINUTES') {
 						sh """
-						apk add --update ca-certificates make bash && rm -rf /var/cache/apk/*
+						apk add --update ca-certificates make bash git && rm -rf /var/cache/apk/*
 						"""
 					}
 
