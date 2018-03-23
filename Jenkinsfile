@@ -16,7 +16,7 @@ podTemplate(
 		),
 		containerTemplate(
 			name: 'build-docker',
-			image: 'docker',
+			image: 'docker:17.09.1-ce',
 			ttyEnabled: true,
 			command: 'cat',
 			privileged: true,
