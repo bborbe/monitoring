@@ -5,8 +5,8 @@ podTemplate(
 	label: label,
 	containers: [
 		containerTemplate(
-			name: 'build',
-			image: 'docker.io/golang:1.10.0',
+			name: 'build-golang',
+			image: 'docker.io/golang:1.10',
 			ttyEnabled: true,
 			command: 'cat',
 			resourceRequestCpu: '500m',
@@ -14,8 +14,22 @@ podTemplate(
 			resourceLimitCpu: '2000m',
 			resourceLimitMemory: '500Mi',
 		),
+		containerTemplate(
+			name: 'build-docker',
+			image: 'docker:17.09.1-ce',
+			ttyEnabled: true,
+			command: 'cat',
+			privileged: true,
+			resourceRequestCpu: '500m',
+			resourceRequestMemory: '500Mi',
+			resourceLimitCpu: '2000m',
+			resourceLimitMemory: '500Mi',
+		),
 	],
-	volumes: [],
+	volumes: [
+		secretVolume(mountPath: '/home/jenkins/.docker', secretName: 'docker'),
+		hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
+	],
 	inheritFrom: '',
 	namespace: 'jenkins',
 	serviceAccount: '',
@@ -30,19 +44,69 @@ podTemplate(
 			]),
 		])
 		try {
-			container('build') {
-				stage('Checkout') {
+			container('build-golang') {
+				stage('Golang Checkout') {
 					timeout(time: 5, unit: 'MINUTES') {
-						checkout scm
+						checkout([
+							$class: 'GitSCM',
+							branches: scm.branches,
+							doGenerateSubmoduleConfigurations: scm.doGenerateSubmoduleConfigurations,
+							extensions: scm.extensions + [[$class: 'CloneOption', noTags: false, reference: '', shallow: true]],
+							submoduleCfg: [],
+							userRemoteConfigs: scm.userRemoteConfigs
+						])
+					}
+				}
+				stage('Golang Link') {
+					timeout(time: 5, unit: 'MINUTES') {
 						sh """
 						mkdir -p /go/src/github.com/bborbe
 						ln -s `pwd` /go/src/github.com/bborbe/monitoring
 						"""
 					}
 				}
-				stage('Test') {
+				stage('Golang Test') {
 					timeout(time: 15, unit: 'MINUTES') {
 						sh "cd /go/src/github.com/bborbe/monitoring && make test"
+					}
+				}
+			}
+			container('build-docker') {
+				stage('Docker Checkout') {
+					timeout(time: 5, unit: 'MINUTES') {
+						checkout([
+							$class: 'GitSCM',
+							branches: scm.branches,
+							doGenerateSubmoduleConfigurations: scm.doGenerateSubmoduleConfigurations,
+							extensions: scm.extensions + [[$class: 'CloneOption', noTags: false, reference: '', shallow: true]],
+							submoduleCfg: [],
+							userRemoteConfigs: scm.userRemoteConfigs
+						])
+					}
+				}
+				stage('Docker Deps') {
+					timeout(time: 5, unit: 'MINUTES') {
+						sh """
+						apk add --update ca-certificates make bash && rm -rf /var/cache/apk/*
+						"""
+					}
+
+				}
+				stage('Docker Build') {
+					timeout(time: 15, unit: 'MINUTES') {
+						sh "make build"
+					}
+				}
+				stage('Docker Upload') {
+					if (env.BRANCH_NAME == 'master') {
+						timeout(time: 15, unit: 'MINUTES') {
+							sh "make upload"
+						}
+					}
+				}
+				stage('Docker Clean') {
+					timeout(time: 5, unit: 'MINUTES') {
+						sh "make clean"
 					}
 				}
 			}
