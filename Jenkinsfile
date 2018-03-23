@@ -73,6 +73,12 @@ podTemplate(
 						sh "cd /go/src/github.com/bborbe/monitoring && make test"
 					}
 				}
+				stage('Golang Trigger') {
+					timeout(time: 5, unit: 'MINUTES') {
+						env.TRIGGER = sh (script: "VERSION=${params.Version} make trigger", returnStdout: true).trim()
+						echo "trigger = ${env.TRIGGER}"
+					}
+				}
 			}
 			container('build-docker') {
 				stage('Docker Checkout') {
@@ -94,12 +100,6 @@ podTemplate(
 						"""
 					}
 				}
-				stage('Docker Trigger') {
-						timeout(time: 5, unit: 'MINUTES') {
-							env.TRIGGER = sh (script: "VERSION=${params.Version} make trigger", returnStdout: true).trim()
-							echo "trigger = ${env.TRIGGER}"
-						}
-					}
 				stage('Docker Build') {
 					if (env.TRIGGER == 'build' || env.BRANCH_NAME != 'master') {
 						timeout(time: 15, unit: 'MINUTES') {
