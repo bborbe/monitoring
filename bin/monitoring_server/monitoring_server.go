@@ -41,13 +41,12 @@ const (
 	PARAMETER_SMTP_TLS             = "smtp-tls"
 	PARAMETER_SMTP_TLS_SKIP_VERIFY = "smtp-tls-skip-verify"
 	PARAMETER_SUBJECT              = "subject"
+	parameterCronExpression        = "expression"
 )
 
 type Run func(nodes []monitoring_node.Node) <-chan monitoring_check.CheckResult
 
 type Notify func(sender string, recipient string, subject string, results []monitoring_check.CheckResult) error
-
-type ParseConfiguration func(content []byte) ([]monitoring_node.Node, error)
 
 type ParseNodes func(path string) ([]monitoring_node.Node, error)
 
@@ -62,8 +61,9 @@ var (
 	recipientPtr      = flag.String(PARAMETER_SMTP_RECIPIENT, "bborbe@rocketnews.de", "string")
 	maxConcurrencyPtr = flag.Int(PARAMETER_CONCURRENT, runtime.NumCPU(), "max concurrency")
 	lockNamePtr       = flag.String(PARAMETER_LOCK, DEFAULT_LOCK, "lock file")
-	delayPtr          = flag.Duration(PARAMETER_DELAY, DEFAULT_DELAY, "delay")
-	oneTimePtr        = flag.Bool(PARAMETER_ONE_TIME, false, "exit after first backup")
+	cronDelayPtr      = flag.Duration(PARAMETER_DELAY, DEFAULT_DELAY, "delay")
+	cronExpressionPtr = flag.String(parameterCronExpression, "", "cron expression '* * * * * ?'")
+	cronOneTimePtr    = flag.Bool(PARAMETER_ONE_TIME, false, "exit after first backup")
 	tlsPtr            = flag.Bool(PARAMETER_SMTP_TLS, false, "tls")
 	tlsSkipVerifyPtr  = flag.Bool(PARAMETER_SMTP_TLS_SKIP_VERIFY, false, "tls skip verify")
 	subjectPtr        = flag.String(PARAMETER_SUBJECT, "Monitoring Result", "subject")
@@ -110,7 +110,7 @@ func main() {
 			return nil, err
 		}
 		return nodes, nil
-	}, *configPtr, *lockNamePtr, *delayPtr, *oneTimePtr, *senderPtr, *recipientPtr, *subjectPtr)
+	}, *configPtr, *lockNamePtr, *cronDelayPtr, *cronExpressionPtr, *cronOneTimePtr, *senderPtr, *recipientPtr, *subjectPtr)
 	if err != nil {
 		glog.Exit(err)
 	}
@@ -124,6 +124,7 @@ func do(
 	configPath string,
 	lockName string,
 	delay time.Duration,
+	expression string,
 	oneTime bool,
 	sender string,
 	recipient string,
@@ -167,16 +168,16 @@ func do(
 
 		glog.V(2).Infof("run checks")
 		results := make([]monitoring_check.CheckResult, 0)
-		failedChecks := 0
+		var failedChecks []string
 		var result monitoring_check.CheckResult
 		for result = range run(nodes) {
 			if !result.Success() {
-				failedChecks++
+				failedChecks = append(failedChecks, result.Message())
 			}
 			results = append(results, result)
 		}
-		glog.V(1).Infof("all checks executed, %d failed", failedChecks)
-		if failedChecks > 0 {
+		glog.V(1).Infof("all checks executed, %d failed: %v", len(failedChecks), failedChecks)
+		if len(failedChecks) > 0 {
 			err = notify(sender, recipient, subject, results)
 			if err != nil {
 				return err
@@ -186,14 +187,7 @@ func do(
 		return nil
 	}
 
-	var c cron.Cron
-	if oneTime {
-		c = cron.NewOneTimeCron(action)
-	} else {
-		c = cron.NewWaitCron(
-			delay,
-			action,
-		)
-	}
+	c := cron.NewCronJob(oneTime, expression, delay, action)
 	return c.Run(context.Background())
 }
+
