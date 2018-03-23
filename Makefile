@@ -1,3 +1,6 @@
+VERSION ?= latest
+REGISTRY ?= docker.io
+BRANCH ?= master
 
 all: test install run
 
@@ -42,7 +45,33 @@ prepare:
 	go get -u github.com/Masterminds/glide
 	go get -u github.com/golang/lint/golint
 	go get -u github.com/kisielk/errcheck
-	glide install
 
-update:
-	glide up
+clean:
+	docker rmi $(REGISTRY)/bborbe/monitoring-build:$(VERSION)
+	docker rmi $(REGISTRY)/bborbe/monitoring:$(VERSION)
+
+buildgo:
+	CGO_ENABLED=0 GOOS=linux go build -ldflags "-s" -a -installsuffix cgo -o monitoring_server ./go/src/github.com/bborbe/monitoring/bin/monitoring_server
+
+build:
+	docker build --build-arg VERSION=$(VERSION) --no-cache --rm=true -t $(REGISTRY)/bborbe/monitoring-build:$(VERSION) -f ./Dockerfile.build .
+	docker run -t $(REGISTRY)/bborbe/monitoring-build:$(VERSION) /bin/true
+	docker cp `docker ps -q -n=1 -f ancestor=$(REGISTRY)/bborbe/monitoring-build:$(VERSION) -f status=exited`:/monitoring_server .
+	docker rm `docker ps -q -n=1 -f ancestor=$(REGISTRY)/bborbe/monitoring-build:$(VERSION) -f status=exited`
+	docker build --no-cache --rm=true --tag=$(REGISTRY)/bborbe/monitoring:$(VERSION) -f Dockerfile.static .
+	rm monitoring_server
+
+upload:
+	docker push $(REGISTRY)/bborbe/monitoring:$(VERSION)
+
+rundocker:
+	docker run \
+	--publish 8080:8080 \
+	--env PORT=8080 \
+	--env CONFIG=/data/config.xml \
+	--volume `pwd`/example:/data \
+	$(REGISTRY)/bborbe/monitoring:$(VERSION) \
+	-logtostderr \
+	-v=0
+
+
