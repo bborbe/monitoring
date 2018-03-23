@@ -27,6 +27,7 @@ podTemplate(
 		),
 	],
 	volumes: [
+		secretVolume(mountPath: '/home/jenkins/.docker', secretName: 'docker'),
 		hostPathVolume(hostPath: '/var/run/docker.sock', mountPath: '/var/run/docker.sock'),
 	],
 	inheritFrom: '',
