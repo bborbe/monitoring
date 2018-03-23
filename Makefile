@@ -1,6 +1,7 @@
-VERSION ?= latest
 REGISTRY ?= docker.io
-BRANCH ?= master
+ifeq ($(VERSION),)
+	VERSION = $(shell git fetch --tags; git describe --tags `git rev-list --tags --max-count=1`)
+endif
 
 all: test install run
 

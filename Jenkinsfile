@@ -42,6 +42,9 @@ podTemplate(
 				cron('H 2 * * *'),
 				pollSCM('H/5 * * * *'),
 			]),
+			parameters([
+				string(name: 'Version', defaultValue: 'latest', description: 'Version to build'),
+			]),
 		])
 		try {
 			container('build-golang') {
@@ -94,19 +97,19 @@ podTemplate(
 				}
 				stage('Docker Build') {
 					timeout(time: 15, unit: 'MINUTES') {
-						sh "make build"
+						sh "VERSION=${params.Version} make build"
 					}
 				}
 				stage('Docker Upload') {
 					if (env.BRANCH_NAME == 'master') {
 						timeout(time: 15, unit: 'MINUTES') {
-							sh "make upload"
+							sh "VERSION=${params.Version} make upload"
 						}
 					}
 				}
 				stage('Docker Clean') {
 					timeout(time: 5, unit: 'MINUTES') {
-						sh "make clean"
+						sh "VERSION=${params.Version} make clean"
 					}
 				}
 			}
