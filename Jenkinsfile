@@ -93,23 +93,32 @@ podTemplate(
 						apk add --update ca-certificates make bash git && rm -rf /var/cache/apk/*
 						"""
 					}
-
 				}
+				stage('Docker Trigger') {
+						timeout(time: 5, unit: 'MINUTES') {
+							env.TRIGGER = sh (script: "VERSION=${params.Version} make trigger", returnStdout: true).trim()
+							echo "trigger = ${env.TRIGGER}"
+						}
+					}
 				stage('Docker Build') {
-					timeout(time: 15, unit: 'MINUTES') {
-						sh "VERSION=${params.Version} make build"
+					if (env.TRIGGER == 'build' || env.BRANCH_NAME != 'master') {
+						timeout(time: 15, unit: 'MINUTES') {
+							sh "VERSION=${params.Version} make build"
+						}
 					}
 				}
 				stage('Docker Upload') {
-					if (env.BRANCH_NAME == 'master') {
+					if (env.TRIGGER == 'build' && env.BRANCH_NAME == 'master') {
 						timeout(time: 15, unit: 'MINUTES') {
 							sh "VERSION=${params.Version} make upload"
 						}
 					}
 				}
 				stage('Docker Clean') {
-					timeout(time: 5, unit: 'MINUTES') {
-						sh "VERSION=${params.Version} make clean"
+					if (env.TRIGGER == 'build' || env.BRANCH_NAME != 'master') {
+						timeout(time: 5, unit: 'MINUTES') {
+							sh "VERSION=${params.Version} make clean"
+						}
 					}
 				}
 			}
