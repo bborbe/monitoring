@@ -6,7 +6,7 @@ podTemplate(
 	containers: [
 		containerTemplate(
 			name: 'build-golang',
-			image: 'docker.io/golang:1.10',
+			image: 'docker.io/bborbe/build-golang:latest',
 			ttyEnabled: true,
 			command: 'cat',
 			resourceRequestCpu: '500m',
@@ -16,7 +16,7 @@ podTemplate(
 		),
 		containerTemplate(
 			name: 'build-docker',
-			image: 'docker:17.09.1-ce',
+			image: 'docker.io/bborbe/build-docker:latest',
 			ttyEnabled: true,
 			command: 'cat',
 			privileged: true,
@@ -73,12 +73,6 @@ podTemplate(
 						sh "cd /go/src/github.com/bborbe/monitoring && make test"
 					}
 				}
-				stage('Golang Trigger') {
-					timeout(time: 5, unit: 'MINUTES') {
-						env.TRIGGER = sh (script: "VERSION=${params.Version} make trigger", returnStdout: true).trim()
-						echo "trigger = ${env.TRIGGER}"
-					}
-				}
 			}
 			container('build-docker') {
 				stage('Docker Checkout') {
@@ -98,6 +92,12 @@ podTemplate(
 						sh """
 						apk add --update ca-certificates make bash git && rm -rf /var/cache/apk/*
 						"""
+					}
+				}
+				stage('Docker Trigger') {
+					timeout(time: 5, unit: 'MINUTES') {
+						env.TRIGGER = sh (script: "VERSION=${params.Version} make trigger", returnStdout: true).trim()
+						echo "trigger = ${env.TRIGGER}"
 					}
 				}
 				stage('Docker Build') {
