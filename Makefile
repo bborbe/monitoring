@@ -84,7 +84,7 @@ version:
 	@echo $(VERSION)
 
 docker_remote_tag_exists:
-	go get github.com/bborbe/docker_utils/bin/docker_remote_tag_exists
+	@go get github.com/bborbe/docker_utils/bin/docker_remote_tag_exists
 
 trigger: docker_remote_tag_exists
 	@exists=`docker_remote_tag_exists \
