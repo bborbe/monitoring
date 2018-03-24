@@ -6,7 +6,7 @@ podTemplate(
 	containers: [
 		containerTemplate(
 			name: 'build-golang',
-			image: 'docker.io/bborbe/build-golang:latest',
+			image: 'docker.io/bborbe/build-golang:1.0.0',
 			ttyEnabled: true,
 			command: 'cat',
 			resourceRequestCpu: '500m',
@@ -16,7 +16,7 @@ podTemplate(
 		),
 		containerTemplate(
 			name: 'build-docker',
-			image: 'docker.io/bborbe/build-docker:latest',
+			image: 'docker.io/bborbe/build-docker:1.0.0',
 			ttyEnabled: true,
 			command: 'cat',
 			privileged: true,
