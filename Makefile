@@ -50,7 +50,7 @@ prepare:
 	go get -u github.com/Masterminds/glide
 	go get -u github.com/golang/lint/golint
 	go get -u github.com/kisielk/errcheck
-	go get -u github.com/bborbe/docker_utils/bin/docker_remote_tag_exists
+	go get -u github.com/bborbe/docker-utils/cmd/docker-remote-tag-exists
 
 clean:
 	docker rmi $(REGISTRY)/$(IMAGE)-build:$(VERSION)
@@ -84,7 +84,7 @@ version:
 	@echo $(VERSION)
 
 docker_remote_tag_exists:
-	@go get github.com/bborbe/docker_utils/bin/docker_remote_tag_exists
+	@go get github.com/bborbe/docker-utils/cmd/docker-remote-tag-exists
 
 trigger: docker_remote_tag_exists
 	@exists=`docker_remote_tag_exists \
