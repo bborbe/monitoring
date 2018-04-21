@@ -14,9 +14,6 @@ install:
 test:
 	go test -cover -race $(shell go list ./... | grep -v /vendor/)
 
-unittest: glide
-	GO15VENDOREXPERIMENT=1 go test -short -cover `glide novendor`
-
 vet:
 	go tool vet .
 	go tool vet --shadow .
@@ -44,10 +41,10 @@ format: goimports
 
 prepare:
 	go get -u golang.org/x/tools/cmd/goimports
-	go get -u github.com/Masterminds/glide
 	go get -u github.com/golang/lint/golint
 	go get -u github.com/kisielk/errcheck
 	go get -u github.com/bborbe/docker-utils/cmd/docker-remote-tag-exists
+	go get -u github.com/golang/dep/cmd/dep
 
 clean:
 	docker rmi $(REGISTRY)/$(IMAGE)-build:$(VERSION)
