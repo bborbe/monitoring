@@ -2,14 +2,14 @@
 
 ## Install
 
-`go get github.com/bborbe/monitoring/bin/monitoring_check`
+`go get github.com/bborbe/monitoring/cmd/monitoring-check`
 
-`go get github.com/bborbe/monitoring/bin/monitoring_cron`
+`go get github.com/bborbe/monitoring/cmd/monitoring-cron`
 
 ## Check
 
 ```
-monitoring_check \ 
+monitoring-check \ 
 -logtostderr \
 -v=2 \
 -config sample_config.xml
@@ -18,7 +18,7 @@ monitoring_check \
 ## Cron
 
 ```
-monitoring_cron \ 
+monitoring-cron \ 
 -logtostderr \
 -v=2 \
 -config sample_config.xml

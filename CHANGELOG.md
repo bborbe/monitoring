@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.0.0
+
+- Refactor, rename and cleanup
+
 ## 1.2.0
 
 - Add expression parameter to monitoring_server

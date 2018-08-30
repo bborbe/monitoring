@@ -3,74 +3,107 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:7beb7f8ad48938dce4eb42c33204e7de1a2a7fbeed2f04cce8be4566876330ea"
   name = "github.com/bborbe/assert"
   packages = ["."]
-  revision = "765570a0aaf5913880d33fee2dd7e4c52b294021"
+  pruneopts = "UT"
+  revision = "d32f97ac97a00f24c6605e9183402c9fb89d5d2f"
 
 [[projects]]
   branch = "master"
+  digest = "1:fcfc610a597f9bbd34233b92284159355ff7b2f76269f48941a00b64f6930f0f"
   name = "github.com/bborbe/cron"
   packages = ["."]
-  revision = "c6a3d608aa5caa735b0b788fc1b26e04266e403a"
+  pruneopts = "UT"
+  revision = "86fa05aa99dff533abc6b190217eacd9d2003992"
 
 [[projects]]
   branch = "master"
+  digest = "1:c0afab427b66d53db8eb26fd404820361cbea6ee2e9d5d941798d2a4abe5c784"
   name = "github.com/bborbe/flagenv"
   packages = ["."]
-  revision = "4bf10dbe62f41ce40353a70225a84decfd16d3ac"
+  pruneopts = "UT"
+  revision = "4365c83a7a9e30e5c59da76106711a5c1555fce6"
 
 [[projects]]
   branch = "master"
+  digest = "1:3eef5fcd6f3de8a8a9ad683db2db32e6134e6e4233acbf5f4f9fed69c131197b"
   name = "github.com/bborbe/http"
   packages = [
     "client_builder",
-    "redirect_follower"
+    "redirect_follower",
   ]
-  revision = "b783a5e87f98911552ef543db3624f3ce52d79c1"
+  pruneopts = "UT"
+  revision = "efee63a8d109311e9e85d69c3d49e3f99fb70996"
 
 [[projects]]
   branch = "master"
+  digest = "1:d0c31751ab3739f43bfa07b2de690b022b6ac50632fc34d699dab785e6921193"
   name = "github.com/bborbe/io"
   packages = ["util"]
-  revision = "8c22cf733cf166b247318b0786eec0c7cad9208a"
+  pruneopts = "UT"
+  revision = "54b762caaee8af23d13c8b5a58fdfdb481ce5816"
 
 [[projects]]
   branch = "master"
+  digest = "1:00906dfe514de79e29c4430b58d9eb4829b7d41d4c29a48613cd0400b4e2b6d2"
   name = "github.com/bborbe/lock"
   packages = ["."]
-  revision = "ac57be166a1c39f4555dc7f865b35b84d7807549"
+  pruneopts = "UT"
+  revision = "66c70a7a837ced3b9d214dd9d325ab27533416eb"
 
 [[projects]]
   branch = "master"
+  digest = "1:17db03b7a175012147c700a33ea6a4aecb1eb9065fde155e9cdb96dfda1860ef"
   name = "github.com/bborbe/mailer"
   packages = [
     ".",
     "config",
-    "message"
+    "message",
   ]
-  revision = "2eec2b4318c26450cafa0db17bb371aa46d4bd74"
+  pruneopts = "UT"
+  revision = "f2a2fcceb11823c783cef949739a700236614fb1"
 
 [[projects]]
   branch = "master"
+  digest = "1:8901d99040f6ef1f719253420a94f4ea4d7dfef3423f0c509832050d7660c7db"
   name = "github.com/bborbe/webdriver"
   packages = ["."]
-  revision = "27986cdb5b7e974ab1842c5246a651c1a56acd09"
+  pruneopts = "UT"
+  revision = "298661ded4568702208d8d53cf63c28e8e9a96c3"
 
 [[projects]]
   branch = "master"
+  digest = "1:1ba1d79f2810270045c328ae5d674321db34e3aae468eb4233883b473c5c0467"
   name = "github.com/golang/glog"
   packages = ["."]
+  pruneopts = "UT"
   revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
+  digest = "1:ed615c5430ecabbb0fb7629a182da65ecee6523900ac1ac932520860878ffcad"
   name = "github.com/robfig/cron"
   packages = ["."]
-  revision = "b024fc5ea0e34bc3f83d9941c8d60b0622bfaca4"
-  version = "v1"
+  pruneopts = "UT"
+  revision = "b41be1df696709bb6395fe435af20370037c0b4c"
+  version = "v1.1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "cbb1e486c97eed4f02060c8dfe58a316e8b52f80ca71e4f05fa1eb08f8f0da42"
+  input-imports = [
+    "github.com/bborbe/assert",
+    "github.com/bborbe/cron",
+    "github.com/bborbe/flagenv",
+    "github.com/bborbe/http/client_builder",
+    "github.com/bborbe/http/redirect_follower",
+    "github.com/bborbe/io/util",
+    "github.com/bborbe/lock",
+    "github.com/bborbe/mailer",
+    "github.com/bborbe/mailer/config",
+    "github.com/bborbe/mailer/message",
+    "github.com/bborbe/webdriver",
+    "github.com/golang/glog",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
